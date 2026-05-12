@@ -110,6 +110,21 @@
         }
         closeBtn.addEventListener('click', closeMenu);
     });
+
+    // ── F11/F13: re-envia preferências de lembretes ao SW a cada page load ──
+    // O SW pode ser terminado pelo browser; re-estabelece os timers quando a página abre.
+    function syncLembretesComSW() {
+        if (!navigator.serviceWorker || !navigator.serviceWorker.controller) return;
+        try {
+            var agua = JSON.parse(localStorage.getItem('gymbros_lembrete_agua') || 'null');
+            var sono = JSON.parse(localStorage.getItem('gymbros_lembrete_sono') || 'null');
+            if (agua) navigator.serviceWorker.controller.postMessage({ type: 'SCHEDULE_AGUA', payload: agua });
+            if (sono) navigator.serviceWorker.controller.postMessage({ type: 'SCHEDULE_SONO', payload: sono });
+        } catch (e) {}
+    }
+    if (navigator.serviceWorker) {
+        navigator.serviceWorker.ready.then(syncLembretesComSW);
+    }
 })();
 </script>
 <% if (typeof user !== 'undefined' && user) { %>

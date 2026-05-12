@@ -223,6 +223,18 @@
 .cfg-pref-info strong { font-size: .88rem; color: #f0f0f0; }
 .cfg-pref-info span   { font-size: .74rem; color: #666; }
 
+/* Sub-row com select/input que aparece quando o toggle está ativo */
+.cfg-pref-sub {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: .5rem 0 .75rem;
+    border-bottom: 1px solid #222;
+}
+.cfg-pref-sub.cfg-pref-sub--visible { display: flex; }
+.cfg-pref-sub label { font-size: .82rem; color: #888; }
+
 /* toggle switch */
 .cfg-toggle {
     width: 44px;
@@ -288,6 +300,8 @@ body.light-mode .cfg-select         { background: #ededea; border-color: #d0cdc8
 body.light-mode .cfg-field input:focus,
 body.light-mode .cfg-select:focus   { border-color: #C98B1D; }
 body.light-mode .cfg-pref-row       { border-color: #e0ded9; }
+body.light-mode .cfg-pref-sub       { border-color: #e0ded9; }
+body.light-mode .cfg-pref-sub label { color: #7e7c7a; }
 body.light-mode .cfg-pref-info strong { color: #1c1a18; }
 body.light-mode .cfg-pref-info span  { color: #888; }
 body.light-mode .cfg-toggle         { background: #dedad6; border-color: #ccc; }

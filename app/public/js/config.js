@@ -223,3 +223,87 @@ if (notifToggle) {
         sync();
     });
 }
+
+// ─── F11 / F13 — Lembretes de água e sono ────────────────────────────────────
+(function () {
+    const LS_AGUA = 'gymbros_lembrete_agua';
+    const LS_SONO = 'gymbros_lembrete_sono';
+
+    function swPostMessage(msg) {
+        if (!navigator.serviceWorker || !navigator.serviceWorker.controller) return;
+        navigator.serviceWorker.controller.postMessage(msg);
+    }
+
+    async function pedirPermissao() {
+        if (!('Notification' in window)) return false;
+        if (Notification.permission === 'granted') return true;
+        if (Notification.permission === 'denied') return false;
+        const result = await Notification.requestPermission();
+        return result === 'granted';
+    }
+
+    function loadPrefs() {
+        return {
+            agua: JSON.parse(localStorage.getItem(LS_AGUA) || '{"ativo":false,"intervaloH":2}'),
+            sono: JSON.parse(localStorage.getItem(LS_SONO) || '{"ativo":false,"horario":"22:30"}'),
+        };
+    }
+
+    function saveAndSync(prefs) {
+        localStorage.setItem(LS_AGUA, JSON.stringify(prefs.agua));
+        localStorage.setItem(LS_SONO, JSON.stringify(prefs.sono));
+        swPostMessage({ type: 'SCHEDULE_AGUA', payload: prefs.agua });
+        swPostMessage({ type: 'SCHEDULE_SONO', payload: prefs.sono });
+    }
+
+    // ── UI wiring ──────────────────────────────────────────────────────────
+    const toggleAgua   = document.getElementById('pref-agua');
+    const toggleSono   = document.getElementById('pref-sono');
+    const selectAgua   = document.getElementById('agua-intervalo');
+    const inputSono    = document.getElementById('sono-horario');
+    const subAgua      = document.getElementById('agua-sub');
+    const subSono      = document.getElementById('sono-sub');
+    const btnSalvar    = document.getElementById('btnSalvarLembretes');
+    const feedbackEl   = document.getElementById('lembretesFeedback');
+
+    if (!toggleAgua || !toggleSono) return;
+
+    const prefs = loadPrefs();
+
+    function syncUI() {
+        toggleAgua.classList.toggle('on', prefs.agua.ativo);
+        toggleSono.classList.toggle('on', prefs.sono.ativo);
+        subAgua.classList.toggle('cfg-pref-sub--visible', prefs.agua.ativo);
+        subSono.classList.toggle('cfg-pref-sub--visible', prefs.sono.ativo);
+        selectAgua.value = String(prefs.agua.intervaloH || 2);
+        inputSono.value  = prefs.sono.horario || '22:30';
+    }
+    syncUI();
+
+    toggleAgua.addEventListener('click', () => {
+        prefs.agua.ativo = !prefs.agua.ativo;
+        syncUI();
+    });
+
+    toggleSono.addEventListener('click', () => {
+        prefs.sono.ativo = !prefs.sono.ativo;
+        syncUI();
+    });
+
+    btnSalvar.addEventListener('click', async () => {
+        prefs.agua.intervaloH = parseInt(selectAgua.value, 10) || 2;
+        prefs.sono.horario    = inputSono.value || '22:30';
+
+        const temAtivo = prefs.agua.ativo || prefs.sono.ativo;
+        if (temAtivo) {
+            const ok = await pedirPermissao();
+            if (!ok) {
+                showMsg(feedbackEl, 'Permissão de notificação negada. Habilite nas configurações do navegador.', false);
+                return;
+            }
+        }
+
+        saveAndSync(prefs);
+        showMsg(feedbackEl, 'Lembretes salvos!', true);
+    });
+})();

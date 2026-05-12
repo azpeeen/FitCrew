@@ -210,6 +210,60 @@
                 <p class="cfg-feedback" id="notifFeedback"></p>
             </section>
 
+            <!-- ── CARD LEMBRETES ───────────────────────────── -->
+            <section class="cfg-card" id="cfg-lembretes">
+                <header class="cfg-card-header">
+                    <span class="cfg-card-icon"><i class="fas fa-bell"></i></span>
+                    <h2>Lembretes</h2>
+                </header>
+
+                <p class="cfg-card-desc">Notificações push agendadas no seu dispositivo. Requer permissão de notificação ativada.</p>
+
+                <section class="cfg-pref-list">
+
+                    <!-- Água -->
+                    <section class="cfg-pref-row">
+                        <section class="cfg-pref-info">
+                            <strong>💧 Lembrete de água</strong>
+                            <span>Notificação periódica para se hidratar</span>
+                        </section>
+                        <button class="cfg-toggle" id="pref-agua" aria-label="Ativar lembrete de água">
+                            <span class="cfg-toggle-knob"></span>
+                        </button>
+                    </section>
+                    <section class="cfg-pref-sub" id="agua-sub">
+                        <label for="agua-intervalo">Intervalo</label>
+                        <select class="cfg-select" id="agua-intervalo">
+                            <option value="1">A cada 1 hora</option>
+                            <option value="2">A cada 2 horas (padrão)</option>
+                            <option value="3">A cada 3 horas</option>
+                            <option value="4">A cada 4 horas</option>
+                        </select>
+                    </section>
+
+                    <!-- Sono -->
+                    <section class="cfg-pref-row">
+                        <section class="cfg-pref-info">
+                            <strong>😴 Lembrete de sono</strong>
+                            <span>Notificação no horário de dormir</span>
+                        </section>
+                        <button class="cfg-toggle" id="pref-sono" aria-label="Ativar lembrete de sono">
+                            <span class="cfg-toggle-knob"></span>
+                        </button>
+                    </section>
+                    <section class="cfg-pref-sub" id="sono-sub">
+                        <label for="sono-horario">Horário</label>
+                        <input type="time" class="cfg-select" id="sono-horario" value="22:30">
+                    </section>
+
+                </section>
+
+                <button type="button" class="cfg-btn cfg-btn-gold" id="btnSalvarLembretes">
+                    <i class="fas fa-save"></i> <span class="cfg-btn-text">Salvar lembretes</span>
+                </button>
+                <p class="cfg-feedback" id="lembretesFeedback"></p>
+            </section>
+
         </section><!-- /cfg-grid -->
 
     </section>
