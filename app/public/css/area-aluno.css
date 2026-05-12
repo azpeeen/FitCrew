@@ -486,14 +486,19 @@ body {
 .sidebar-overlay {
     display: none;
     position: fixed;
-    top: 72px;
+    top: 0;
     left: 0;
     right: 0;
     bottom: 0;
     background: rgba(0,0,0,0.5);
-    z-index: 998;
+    z-index: 9998;
 }
 .sidebar-overlay.open { display: block; }
+
+/* Botão X do drawer mobile — oculto fora do mobile */
+.aluno-sidebar-close {
+    display: none;
+}
 
 @media (max-width: 768px) {
     .menu-icon { display: flex; visibility: visible; pointer-events: auto; }
@@ -504,21 +509,43 @@ body {
     }
     .aluno-sidebar {
         position: fixed;
-        top: 72px;
+        top: 0;
         left: -100%;
         width: 80%;
         max-width: 300px;
-        height: calc(100vh - 72px);
-        max-height: calc(100vh - 72px);
-        z-index: 999;
+        height: 100vh;
+        max-height: 100vh;
+        z-index: 9999;
         transition: left 0.3s ease;
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
-        border-radius: 0;
+        border-radius: 0 15px 15px 0;
         margin-bottom: 0;
+        padding-top: 56px;
         padding-bottom: 48px;
     }
     .aluno-sidebar.open { left: 0; }
+    /* Botão X — visível só no mobile */
+    .aluno-sidebar-close {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        top: 14px;
+        right: 14px;
+        background: transparent;
+        border: none;
+        color: #fff;
+        font-size: 1.4rem;
+        cursor: pointer;
+        padding: 4px 6px;
+        border-radius: 6px;
+        line-height: 1;
+        transition: background 0.2s;
+        z-index: 1;
+    }
+    .aluno-sidebar-close:hover { background: rgba(255,255,255,0.1); }
+    .aluno-sidebar-close i { color: #fff; }
     .aluno-main {
         margin-left: 0 !important;
         width: 100% !important;
@@ -527,6 +554,10 @@ body {
     .aluno-dashboard {
         flex-direction: column;
         padding: 0;
+    }
+    .aluno-sidebar .aluno-profile .avatar img {
+        width: 120px;
+        height: 120px;
     }
 }
 
@@ -708,6 +739,9 @@ body.light-mode .aluno-sidebar {
     background: #E8E6E3;
     box-shadow: 0 6px 20px rgba(0,0,0,0.08);
 }
+body.light-mode .aluno-sidebar-close,
+body.light-mode .aluno-sidebar-close i { color: #1C1A18; }
+body.light-mode .aluno-sidebar-close:hover { background: rgba(0,0,0,0.08); }
 
 body.light-mode .aluno-profile h2 { color: #C98B1D; }
 body.light-mode .aluno-profile p  { color: #7E7C7A; }

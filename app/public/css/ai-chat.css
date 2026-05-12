@@ -359,12 +359,13 @@ body.light-mode .plan-btn-alter:hover      { background: rgba(201,139,29,0.08); 
     overflow: hidden;
 }
 
-/* SIDEBAR DE CONVERSAS (12c) */
+/* SIDEBAR DE CONVERSAS — estilo igual ao .aluno-sidebar */
 .conv-sidebar {
     width: 220px;
     flex-shrink: 0;
-    background: #1a1a1a;
-    border-radius: 12px;
+    background: #1f1f1f;
+    border-radius: 15px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -381,10 +382,10 @@ body.light-mode .plan-btn-alter:hover      { background: rgba(201,139,29,0.08); 
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.7rem 0.9rem;
-    border-bottom: 1px solid #333;
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid #2e2e2e;
     font-weight: bold;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     color: #FFD700;
     flex-shrink: 0;
 }
@@ -411,40 +412,61 @@ body.light-mode .plan-btn-alter:hover      { background: rgba(201,139,29,0.08); 
 .conv-list {
     flex: 1;
     overflow-y: auto;
-    padding: 0.4rem;
+    padding: 0.5rem 0.6rem;
     display: flex;
     flex-direction: column;
-    gap: 0.2rem;
+    gap: 0.3rem;
     scrollbar-width: thin;
-    scrollbar-color: #444 #1a1a1a;
+    scrollbar-color: #FFD700 #1f1f1f;
 }
 
 .conv-loading, .conv-empty {
-    font-size: 0.8rem;
+    font-size: 0.82rem;
     color: #666;
     text-align: center;
     padding: 0.75rem 0.5rem;
 }
 
+/* Items igual ao .aluno-menu li a */
 .conv-item {
-    padding: 0.5rem 0.65rem;
-    border-radius: 7px;
-    cursor: pointer;
-    font-size: 0.78rem;
-    color: #bbb;
-    background: transparent;
-    border: 1px solid transparent;
-    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: bold;
+    font-size: 0.88rem;
+    color: #fff;
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    transition: all 0.3s;
     text-align: left;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     width: 100%;
+    background: transparent;
+    border: none;
+    cursor: pointer;
 }
 
-.conv-item:hover           { background: #2a2a2a; color: #fff; }
-.conv-item.active          { background: #252525; border-color: #FFD700; color: #FFD700; font-weight: bold; }
-.conv-item.active:hover    { background: #2e2e2e; }
+.conv-item:hover {
+    background: #FFD700;
+    color: #1f1f1f;
+    transform: scale(1.03);
+}
+
+.conv-item.active {
+    background: rgba(255, 215, 0, 0.12);
+    color: #FFD700;
+    border-left: 3px solid #FFD700;
+    padding-left: calc(0.75rem - 3px);
+}
+
+.conv-item.active:hover {
+    background: #FFD700;
+    color: #1f1f1f;
+    border-left-color: transparent;
+    padding-left: 0.75rem;
+}
 
 /* CABEÇALHO DO CHAT (12e) */
 .chat-header {
@@ -486,6 +508,10 @@ body.light-mode .plan-btn-alter:hover      { background: rgba(201,139,29,0.08); 
 .fullscreen-btn:hover {
     color: #FFD700;
     background: rgba(255,215,0,0.08);
+}
+
+.conv-toggle-label {
+    display: none;
 }
 
 /* BOTÃO DE MIC (12d) */
@@ -548,13 +574,13 @@ body.light-mode .fullscreen-btn:hover        { color: #C98B1D; background: rgba(
 body.light-mode .mic-btn                     { background: #DEDAD6; border-color: #C9C7C4; color: #7E7C7A; }
 body.light-mode .mic-btn:hover               { color: #C98B1D; border-color: #C98B1D; background: #E8E6E3; }
 
-/* Overlay escuro para o drawer mobile da conv-sidebar */
+/* Overlay escuro para o drawer mobile da conv-sidebar — acima do header (z 1000) */
 .conv-overlay {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.55);
-    z-index: 199;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 1050;
 }
 .conv-overlay.open { display: block; }
 
@@ -572,7 +598,7 @@ body.light-mode .mic-btn:hover               { color: #C98B1D; border-color: #C9
         left: 0;
         bottom: 0;
         width: 260px;
-        z-index: 200;
+        z-index: 1100;
         border-radius: 0 14px 14px 0;
         transform: translateX(-100%);
         transition: transform 0.28s ease;
@@ -596,9 +622,36 @@ body.light-mode .mic-btn:hover               { color: #C98B1D; border-color: #C9
     .chat-container { width: 100%; min-width: 0; }
 
     /* Misc ajustes */
-    .conv-item         { font-size: 0.72rem; padding: 0.4rem 0.5rem; }
+    .conv-item         { font-size: 1rem; padding: 14px 16px; }
+    .conv-item.active  { padding-left: 13px; }
+    .conv-item.active:hover { padding-left: 16px; }
     .chat-header-title { font-size: 0.85rem; }
     .mic-btn           { padding: 0.6rem 0.75rem; }
+
+    /* Botão "Chats" — proeminente no mobile */
+    .conv-toggle-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        background: transparent;
+        border: 1.5px solid #FFD700;
+        color: #FFD700;
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 700;
+    }
+    .conv-toggle-btn i { color: #FFD700; font-size: 1rem; }
+    .conv-toggle-btn:hover {
+        background: rgba(255, 215, 0, 0.15);
+    }
+    .conv-toggle-label {
+        display: inline;
+        color: #FFD700;
+        font-size: 0.9rem;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+    }
 
     /* Fullscreen mobile — 100vw × 100vh sem nada por cima */
     body.fullscreen-mode .aluno-dashboard {

@@ -91,6 +91,27 @@
         }
     })();
     </script>
+<script>
+(function () {
+    document.addEventListener('DOMContentLoaded', function () {
+        var sidebar = document.querySelector('.aluno-sidebar');
+        var overlay = document.getElementById('sidebarOverlay');
+        if (!sidebar || !overlay) return;
+        // Injeta botão X no drawer mobile
+        var closeBtn = document.createElement('button');
+        closeBtn.className = 'aluno-sidebar-close';
+        closeBtn.setAttribute('aria-label', 'Fechar menu');
+        closeBtn.innerHTML = '<i class="fas fa-times"></i>';
+        sidebar.insertBefore(closeBtn, sidebar.firstChild);
+        function closeMenu() {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('open');
+            document.body.style.overflow = '';
+        }
+        closeBtn.addEventListener('click', closeMenu);
+    });
+})();
+</script>
 <% if (typeof user !== 'undefined' && user) { %>
 <style>
 @keyframes toastIn { from { opacity:0; transform:translateY(12px) scale(.96); } to { opacity:1; transform:none; } }
