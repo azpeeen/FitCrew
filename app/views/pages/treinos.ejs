@@ -69,7 +69,8 @@
                 <% iaPlanos.forEach((plano, idx) => { %>
                 <% const letra = String.fromCharCode(65 + idx); %>
                 <button class="ia-tab-btn <%= idx === 0 ? 'active' : '' %>" data-tab="<%= idx %>">
-                    Treino <%= letra %>
+                    <span class="ia-tab-nome">Treino <%= letra %></span>
+                    <span class="ia-tab-del" onclick="deletarPlanoIA(event,<%= plano.id %>,this)" title="Deletar treino"><i class="fas fa-trash-alt"></i></span>
                 </button>
                 <% }) %>
             </section>
@@ -101,7 +102,7 @@
                         <% }) %>
                     </ul>
                     <section class="ia-plano-actions">
-                        <button class="btn-iniciar-treino" disabled><i class="fas fa-play"></i> Iniciar Treino</button>
+                        <button class="btn-iniciar-treino" onclick="location.href='/treinos/execucao?plano_id=<%= plano.id %>'"><i class="fas fa-play"></i> Iniciar Treino</button>
                         <a href="/ai/chat" class="btn-pedir-ia"><i class="fas fa-robot"></i> Pedir novo treino à IA</a>
                     </section>
                 </section>
@@ -320,6 +321,19 @@
     </section>
 </section>
 
+<!-- MODAL CONFIRMAR DELEÇÃO -->
+<section class="modal-overlay" id="confirmModal">
+    <section class="confirm-modal-box">
+        <section class="confirm-modal-icon"><i class="fas fa-trash-alt"></i></section>
+        <h3 class="confirm-modal-title">Deletar treino?</h3>
+        <p class="confirm-modal-desc">Esta ação não pode ser desfeita.</p>
+        <section class="confirm-modal-btns">
+            <button class="confirm-btn-cancel" id="confirmBtnCancel">Cancelar</button>
+            <button class="confirm-btn-delete" id="confirmBtnDelete">Deletar</button>
+        </section>
+    </section>
+</section>
+
 <%- include('../partials/footer') %>
 <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
@@ -387,6 +401,11 @@
 })();
 </script>
 
+<style>
+.ia-tab-btn { display: inline-flex; align-items: center; gap: 0.45rem; }
+.ia-tab-del { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 4px; font-size: 0.7rem; color: #aaa; transition: color 0.15s, background 0.15s; }
+.ia-tab-del:hover { color: #e74c3c; background: rgba(231,76,60,0.12); }
+</style>
 <script>
 document.querySelectorAll('.ia-tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -396,6 +415,56 @@ document.querySelectorAll('.ia-tab-btn').forEach(btn => {
         document.querySelector(`.ia-tab-content[data-tab="${btn.dataset.tab}"]`).classList.add('active');
     });
 });
+
+let _confirmResolve = null;
+const confirmModal = document.getElementById('confirmModal');
+document.getElementById('confirmBtnDelete').addEventListener('click', () => {
+    confirmModal.classList.remove('open');
+    if (_confirmResolve) { _confirmResolve(true); _confirmResolve = null; }
+});
+document.getElementById('confirmBtnCancel').addEventListener('click', () => {
+    confirmModal.classList.remove('open');
+    if (_confirmResolve) { _confirmResolve(false); _confirmResolve = null; }
+});
+confirmModal.addEventListener('click', e => {
+    if (e.target === confirmModal) {
+        confirmModal.classList.remove('open');
+        if (_confirmResolve) { _confirmResolve(false); _confirmResolve = null; }
+    }
+});
+function confirmarDelecao() {
+    return new Promise(resolve => { _confirmResolve = resolve; confirmModal.classList.add('open'); });
+}
+
+async function deletarPlanoIA(e, planoId, el) {
+    e.stopPropagation();
+    if (!await confirmarDelecao()) return;
+    fetch(`/treinos/plano/${planoId}`, { method: 'DELETE' })
+        .then(r => r.json())
+        .then(data => {
+            if (!data.ok) { alert(data.error || 'Erro ao deletar.'); return; }
+            const tabBtn     = el.closest('.ia-tab-btn');
+            const tabIdx     = tabBtn.dataset.tab;
+            const tabContent = document.querySelector(`.ia-tab-content[data-tab="${tabIdx}"]`);
+            tabBtn.remove();
+            if (tabContent) tabContent.remove();
+            const firstBtn = document.querySelector('.ia-tab-btn');
+            if (firstBtn) {
+                firstBtn.classList.add('active');
+                const firstContent = document.querySelector(`.ia-tab-content[data-tab="${firstBtn.dataset.tab}"]`);
+                if (firstContent) firstContent.classList.add('active');
+            } else {
+                document.querySelector('.ia-plano-section').outerHTML =
+                    `<section class="ia-plano-vazio">
+                        <i class="fas fa-robot"></i>
+                        <h3>Nenhum plano de treino gerado ainda</h3>
+                        <p>Converse com o GymBot para criar seu plano personalizado.</p>
+                        <a href="/ai/chat" class="btn-pedir-ia"><i class="fas fa-robot"></i> Gerar treino com IA</a>
+                    </section>`;
+            }
+        })
+        .catch(() => alert('Erro ao deletar treino.'));
+}
 </script>
 <script>
 const _uid        = (window.GYMBROS_USER_ID || 'guest').replace(/\D/g, '');

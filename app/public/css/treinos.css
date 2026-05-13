@@ -455,6 +455,94 @@
     transform: scale(1.02);
 }
 
+/* ==============================
+   MODAL CONFIRMAR DELEÇÃO
+   ============================== */
+.confirm-modal-box {
+    background: #1f1f1f;
+    border-radius: 16px;
+    padding: 2rem 1.8rem 1.8rem;
+    width: 100%;
+    max-width: 340px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+    animation: modalIn 0.22s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.confirm-modal-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: rgba(231,76,60,0.12);
+    color: #e74c3c;
+    font-size: 1.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.2rem;
+}
+
+.confirm-modal-title {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #fff;
+    margin: 0;
+}
+
+.confirm-modal-desc {
+    font-size: 0.88rem;
+    color: #777;
+    margin: 0 0 0.3rem;
+}
+
+.confirm-modal-btns {
+    display: flex;
+    gap: 0.7rem;
+    width: 100%;
+    margin-top: 0.2rem;
+}
+
+.confirm-btn-cancel {
+    flex: 1;
+    background: transparent;
+    border: 1.5px solid #3a3a3a;
+    color: #aaa;
+    border-radius: 10px;
+    padding: 0.65rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+}
+
+.confirm-btn-cancel:hover { border-color: #666; color: #fff; }
+
+.confirm-btn-delete {
+    flex: 1;
+    background: #e74c3c;
+    border: none;
+    color: #fff;
+    border-radius: 10px;
+    padding: 0.65rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+}
+
+.confirm-btn-delete:hover  { background: #c0392b; }
+.confirm-btn-delete:active { transform: scale(0.97); }
+
+body.light-mode .confirm-modal-box   { background: #E8E6E3; }
+body.light-mode .confirm-modal-title { color: #1C1A18; }
+body.light-mode .confirm-modal-desc  { color: #7E7C7A; }
+body.light-mode .confirm-btn-cancel  { border-color: #C9C7C4; color: #4E4C4A; }
+body.light-mode .confirm-btn-cancel:hover { border-color: #7E7C7A; color: #1C1A18; }
+
 /* Responsivo */
 @media (max-width: 768px) {
     .treinos-grid { grid-template-columns: 1fr; }
@@ -652,8 +740,13 @@ body.light-mode .stat-box i               { color: #C98B1D; }
     padding: 0.6rem 1.4rem;
     font-size: 0.9rem;
     font-weight: bold;
-    cursor: not-allowed;
-    opacity: 0.55;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+}
+
+.btn-iniciar-treino:hover {
+    background: #e6c200;
+    transform: scale(1.04);
 }
 
 .btn-pedir-ia {

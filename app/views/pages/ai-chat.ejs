@@ -292,8 +292,12 @@ async function loadConversations() {
             return;
         }
         conversations.forEach(conv => {
-            const btn  = document.createElement('button');
+            const wrapper = document.createElement('section');
+            wrapper.style.cssText = 'display:flex;align-items:stretch;';
+
+            const btn = document.createElement('button');
             btn.classList.add('conv-item');
+            btn.style.cssText = 'flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;';
             if (conv.ativa) btn.classList.add('active');
             const date    = new Date(conv.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
             const preview = conv.context_summary
@@ -302,7 +306,33 @@ async function loadConversations() {
             btn.textContent = `${date} — ${preview}`;
             btn.title       = conv.context_summary || `Conversa de ${date}`;
             btn.onclick     = () => { if (isMobile()) closeMobileSidebar(); activateConversation(conv.id, !!conv.ativa); };
-            convList.appendChild(btn);
+
+            const delBtn = document.createElement('button');
+            delBtn.title = 'Deletar conversa';
+            delBtn.innerHTML = '<i class="fas fa-trash"></i>';
+            delBtn.style.cssText = 'flex-shrink:0;background:none;border:none;color:#555;cursor:pointer;padding:0 0.55rem;border-radius:0 6px 6px 0;transition:color 0.15s,background 0.15s;';
+            delBtn.onmouseenter = () => { delBtn.style.color = '#e74c3c'; delBtn.style.background = 'rgba(231,76,60,0.1)'; };
+            delBtn.onmouseleave = () => { delBtn.style.color = '#555';    delBtn.style.background = ''; };
+            delBtn.onclick = async e => {
+                e.stopPropagation();
+                if (!confirm('Tem certeza que quer deletar esta conversa?')) return;
+                try {
+                    const r    = await fetch(`/ai/conversations/${conv.id}`, { method: 'DELETE' });
+                    const data = await r.json();
+                    if (data.error) { alert(data.error); return; }
+                    wrapper.remove();
+                    if (data.wasActive) {
+                        await fetch('/ai/conversations/new', { method: 'POST' });
+                        chatHistory.innerHTML = '';
+                        appendMessage(`Olá, ${currentUserName}! 💪 Sou o GymBot, seu personal trainer virtual. Como posso te ajudar hoje?`, 'bot');
+                        await loadConversations();
+                    }
+                } catch { alert('Erro ao deletar conversa.'); }
+            };
+
+            wrapper.appendChild(btn);
+            wrapper.appendChild(delBtn);
+            convList.appendChild(wrapper);
         });
     } catch {
         convList.innerHTML = '<p class="conv-empty">Erro ao carregar</p>';

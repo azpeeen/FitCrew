@@ -89,7 +89,10 @@ async function getExercisesCache() {
         return _exerciseCache;
     }
     const [rows] = await db.execute(
-        'SELECT id, name, body_part FROM exercises ORDER BY name'
+        `SELECT e.id, e.name, e.body_part
+         FROM exercises e
+         INNER JOIN exercise_media em ON em.exercise_id = e.id
+         ORDER BY e.name`
     );
     _exerciseCache   = rows.map(r => ({ id: r.id, name: r.name, body_part: r.body_part }));
     _exerciseCacheAt = Date.now();
@@ -173,6 +176,44 @@ async function loadImcProfile(userId) {
 }
 
 async function buildSystemPrompt(user, exerciseBlock, existingPlanNames = [], contextSummary = null) {
+    // Carrega planos e dietas salvos para enriquecer o contexto da IA
+    let workoutPlans = [], dietPlans = [];
+    try {
+        const [wRows] = await db.execute(
+            'SELECT nome, descricao, exercicios_json FROM workout_plans WHERE user_id = ? ORDER BY created_at ASC',
+            [user.id]
+        );
+        workoutPlans = wRows;
+    } catch {}
+    try {
+        const [dRows] = await db.execute(
+            'SELECT nome, objetivo_calorico, proteina_diaria_g FROM diet_plans WHERE user_id = ? ORDER BY created_at ASC',
+            [user.id]
+        );
+        dietPlans = dRows;
+    } catch {}
+
+    let savedCtx = '';
+    if (workoutPlans.length > 0) {
+        const lista = workoutPlans.map(r => {
+            const exs = typeof r.exercicios_json === 'string'
+                ? JSON.parse(r.exercicios_json) : (r.exercicios_json || []);
+            return `- ${r.nome}${r.descricao ? ': ' + r.descricao : ''} (${exs.length} exercícios)`;
+        }).join('\n');
+        savedCtx += `Treinos salvos do usuário:\n${lista}`;
+    }
+    if (dietPlans.length > 0) {
+        const lista = dietPlans.map(r =>
+            `- ${r.nome} (${r.objetivo_calorico || 0} kcal/dia, ${r.proteina_diaria_g || 0}g proteína)`
+        ).join('\n');
+        if (savedCtx) savedCtx += '\n\n';
+        savedCtx += `Dietas salvas do usuário:\n${lista}`;
+    }
+    if (savedCtx) {
+        savedCtx += '\n\nAo gerar novo treino ou dieta, considere o que já existe e continue a sequência (Treino A, B, C…).';
+    }
+    const planNomes = workoutPlans.map(r => r.nome);
+
     const imc = user.imc;
     const aval = user.avaliacaoCorporal;
 
@@ -213,8 +254,9 @@ Nomenclatura obrigatória dos planos: nomeie sempre como "Treino A — [tipo]", 
         if (exerciseBlock) {
             prompt += `\n\nExercícios disponíveis por grupamento muscular (use APENAS estes, com o nome exato no campo exercise_query):\n${exerciseBlock}\n\nNo campo exercise_query use EXATAMENTE o nome desta lista. Nunca invente nomes fora desta lista.`;
         }
-        if (existingPlanNames.length > 0) {
-            prompt += `\n\nPlanos de treino já salvos do usuário: ${existingPlanNames.join(', ')}. Use a próxima letra disponível na sequência alfabética.`;
+        if (savedCtx) prompt += `\n\n${savedCtx}`;
+        if (planNomes.length > 0) {
+            prompt += `\n\nPlanos de treino já salvos: ${planNomes.join(', ')}. Use a próxima letra disponível na sequência alfabética.`;
         }
         return prompt;
     }
@@ -286,8 +328,9 @@ Nomenclatura obrigatória dos planos: nomeie sempre como "Treino A — [tipo]", 
     if (exerciseBlock) {
         prompt += `\n\nExercícios disponíveis por grupamento muscular (use APENAS estes, com o nome exato no campo exercise_query):\n${exerciseBlock}\n\nNo campo exercise_query use EXATAMENTE o nome desta lista. Nunca invente nomes fora desta lista.`;
     }
-    if (existingPlanNames.length > 0) {
-        prompt += `\n\nPlanos de treino já salvos do usuário: ${existingPlanNames.join(', ')}. Use a próxima letra disponível na sequência alfabética.`;
+    if (savedCtx) prompt += `\n\n${savedCtx}`;
+    if (planNomes.length > 0) {
+        prompt += `\n\nPlanos de treino já salvos: ${planNomes.join(', ')}. Use a próxima letra disponível na sequência alfabética.`;
     }
 
     return prompt;
@@ -518,17 +561,11 @@ router.post('/message', requireIA, async (req, res) => {
             exerciseBlock = buildExerciseBlock(allEx, bodyParts);
         }
 
-        const [planRows] = await db.execute(
-            'SELECT nome FROM workout_plans WHERE user_id = ? ORDER BY created_at ASC',
-            [userId]
-        );
-        const existingPlanNames = planRows.map(r => r.nome);
-
         const completion = await groq.chat.completions.create({
             model:      'llama-3.3-70b-versatile',
             max_tokens: 4000,
             messages: [
-                { role: 'system', content: await buildSystemPrompt(req.session.user, exerciseBlock, existingPlanNames, contextSummary) },
+                { role: 'system', content: await buildSystemPrompt(req.session.user, exerciseBlock, [], contextSummary) },
                 ...historico.map(m => ({
                     role: m.role,
                     content: typeof m.content === 'string' && m.content.startsWith('{')
@@ -729,6 +766,27 @@ router.post('/conversations/new', requireIA, async (req, res) => {
     } catch (err) {
         console.error('[ai/conversations/new]', err.message);
         return res.status(500).json({ error: 'Erro ao criar conversa.' });
+    }
+});
+
+// DELETE /ai/conversations/:id — deleta sessão e suas mensagens
+router.delete('/conversations/:id', requireIA, async (req, res) => {
+    if (!req.session.user) return res.status(401).json({ error: 'Não autorizado.' });
+    const userId    = req.session.user.id;
+    const sessionId = parseInt(req.params.id);
+    try {
+        const [sessions] = await db.execute(
+            'SELECT id, ativa FROM ai_session WHERE id = ? AND user_id = ?',
+            [sessionId, userId]
+        );
+        if (!sessions.length) return res.status(404).json({ error: 'Conversa não encontrada.' });
+        const wasActive = !!sessions[0].ativa;
+        await db.execute('DELETE FROM ai_message WHERE session_id = ?', [sessionId]);
+        await db.execute('DELETE FROM ai_session WHERE id = ?', [sessionId]);
+        return res.json({ ok: true, wasActive });
+    } catch (err) {
+        console.error('[ai/conversations/:id/delete]', err.message);
+        return res.status(500).json({ error: 'Erro ao deletar conversa.' });
     }
 });
 

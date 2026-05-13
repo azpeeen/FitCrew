@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<%- include('../partials/seo') %>
+<link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+<link rel="stylesheet" href="/css/execucao-treino.css">
+</head>
+<body class="exec-page">
+
+<section class="exec-container">
+
+    <!-- ── HEADER ───────────────────────────────────────── -->
+    <header class="exec-header">
+        <button class="exec-back" onclick="history.back()" aria-label="Voltar">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        <section class="exec-header-title" id="headerTitle"><%= plano.nome %></section>
+        <section class="exec-header-counter" id="headerCounter">1/<%= plano.exercicios_json.length %></section>
+        <section class="exec-chrono" id="chrono">00:00</section>
+    </header>
+
+    <!-- ── VIEW: EXERCÍCIO ──────────────────────────────── -->
+    <section class="exec-view active" id="viewExercicio">
+
+        <h2 class="exec-ex-nome" id="exNome"></h2>
+
+        <section class="exec-gif-wrap" id="gifWrap"></section>
+
+        <section class="exec-pills">
+            <span class="exec-pill" id="pillSeries"></span>
+            <span class="exec-pill" id="pillDescanso"></span>
+        </section>
+
+        <section class="exec-series-dots" id="seriesDots"></section>
+
+        <section class="exec-reps-carga">
+            <section class="exec-reps" id="exReps"></section>
+            <section class="exec-carga-sug" id="exCargaSug"></section>
+        </section>
+
+        <section class="exec-trio">
+            <button class="exec-trio-btn" id="btnExecucao">
+                <i class="fas fa-list-ol"></i>
+                Execução
+            </button>
+            <button class="exec-trio-btn" id="btnMusculos">
+                <i class="fas fa-person"></i>
+                Músculos
+            </button>
+            <button class="exec-trio-btn" id="btnAmpliar">
+                <i class="fas fa-expand"></i>
+                Ampliar
+            </button>
+        </section>
+
+        <section class="exec-carga-row">
+            <label class="exec-carga-label" for="cargaInput">Carga usada:</label>
+            <input class="exec-carga-input" id="cargaInput" type="text" placeholder="ex: 20kg">
+            <button class="exec-carga-save" id="btnSalvarCarga">Salvar</button>
+        </section>
+
+    </section>
+
+    <!-- ── VIEW: LISTA ──────────────────────────────────── -->
+    <section class="exec-view" id="viewLista">
+        <section class="exec-lista" id="listaExercicios"></section>
+        <button class="exec-lista-continue" id="btnContinuarLista">Continuar Treino</button>
+    </section>
+
+    <!-- ── VIEW: CONCLUSÃO ──────────────────────────────── -->
+    <section class="exec-view" id="viewConclusao">
+        <section class="exec-conclusao" id="conclusaoContent"></section>
+    </section>
+
+    <!-- ── NAV INFERIOR ─────────────────────────────────── -->
+    <nav class="exec-nav">
+        <button class="exec-nav-btn" id="btnPrev" title="Exercício anterior">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+
+        <button class="exec-btn-realizado" id="btnRealizado">
+            <svg class="exec-countdown-svg" viewBox="0 0 80 80" aria-hidden="true">
+                <circle class="exec-countdown-track" cx="40" cy="40" r="37"/>
+                <circle class="exec-countdown-ring"  cx="40" cy="40" r="37" id="countdownRing"/>
+            </svg>
+            <section class="exec-realizado-label" id="realizadoLabel">
+                <i class="fas fa-check"></i><br>Realizado
+            </section>
+        </button>
+
+        <button class="exec-nav-btn" id="btnNext" title="Próximo exercício">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+
+        <button class="exec-nav-btn" id="btnLista" title="Ver lista">
+            <i class="fas fa-list"></i>
+        </button>
+
+        <button class="exec-btn-fim" id="btnFim">FIM</button>
+    </nav>
+
+</section>
+
+<!-- ── MODAL: EXECUÇÃO (instruções) ─────────────────────── -->
+<section class="exec-modal-overlay" id="modalExecucao">
+    <section class="exec-modal-sheet" role="dialog">
+        <section class="exec-modal-handle"></section>
+        <section class="exec-modal-title"><i class="fas fa-list-ol"></i> Como executar</section>
+        <section class="exec-modal-instrucoes" id="modalInstrucoes"></section>
+    </section>
+</section>
+
+<!-- ── MODAL: MÚSCULOS ──────────────────────────────────── -->
+<section class="exec-modal-overlay" id="modalMusculos">
+    <section class="exec-modal-sheet" role="dialog">
+        <section class="exec-modal-handle"></section>
+        <section class="exec-modal-title"><i class="fas fa-person"></i> Músculos trabalhados</section>
+        <section id="modalMusculosContent"></section>
+    </section>
+</section>
+
+<!-- ── FULLSCREEN GIF ───────────────────────────────────── -->
+<section class="exec-gif-fullscreen" id="gifFullscreen">
+    <button class="exec-gif-fs-close" id="btnFecharFS" aria-label="Fechar">
+        <i class="fas fa-times"></i>
+    </button>
+    <img id="gifFullscreenImg" src="" alt="">
+</section>
+
+<!-- ── MODAL: RETOMADA ──────────────────────────────────── -->
+<% if (sessaoExistente) { %>
+<section class="exec-retomada-overlay" id="modalRetomada">
+    <section class="exec-retomada-box">
+        <section style="font-size:2rem">⏸️</section>
+        <h3>Treino em andamento</h3>
+        <p>Você já iniciou esse treino hoje. Deseja continuar de onde parou?</p>
+        <section class="exec-retomada-btns">
+            <button class="exec-retomada-sim" id="btnRetomadaSim">Sim, continuar</button>
+            <button class="exec-retomada-nao" id="btnRetomadaNao">Não, recomeçar</button>
+        </section>
+    </section>
+</section>
+<% } %>
+
+<link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
+
+<script>
+// ── Dados do servidor ─────────────────────────────────────
+const PLANO           = <%- JSON.stringify(plano) %>;
+const SESSAO_EXIST    = <%- JSON.stringify(sessaoExistente) %>;
+const EXERCICIOS      = PLANO.exercicios_json || [];
+const TOTAL           = EXERCICIOS.length;
+const PLAN_ID         = PLANO.id;
+
+// ── Estado ────────────────────────────────────────────────
+let sessaoId        = null;
+let exIdx           = 0;
+let seriesDone      = EXERCICIOS.map(ex => new Array(Number(ex.series) || 3).fill(false));
+let cargas          = EXERCICIOS.map(ex => ex.carga_sugerida || '');
+let countdownId     = null;
+let countdownActive = false;
+let cronStart       = null;
+let cronId          = null;
+let viewMode        = 'exercicio'; // 'exercicio' | 'lista' | 'conclusao'
+
+// Restaura estado da sessão existente se retomada
+if (SESSAO_EXIST) {
+    sessaoId = SESSAO_EXIST.id;
+    const statusMap = {};
+    (SESSAO_EXIST.exercicios_status || []).forEach(e => {
+        if (e) statusMap[e.exercise_query] = e;
+    });
+    EXERCICIOS.forEach((ex, i) => {
+        const st = statusMap[ex.exercise_query];
+        if (st && st.concluido) {
+            seriesDone[i] = seriesDone[i].map(() => true);
+        } else if (st && st.series_realizadas) {
+            for (let s = 0; s < st.series_realizadas; s++) seriesDone[i][s] = true;
+        }
+        if (st && st.carga_usada) cargas[i] = st.carga_usada;
+    });
+    // pular para o primeiro exercício não concluído
+    const firstPending = seriesDone.findIndex(dots => !dots.every(Boolean));
+    exIdx = firstPending >= 0 ? firstPending : 0;
+}
+
+// ── Helpers ───────────────────────────────────────────────
+function isExDone(i) {
+    return seriesDone[i] && seriesDone[i].every(Boolean);
+}
+
+function allDone() {
+    return seriesDone.every((dots, i) => isExDone(i));
+}
+
+function apiFetch(url, body) {
+    return fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    }).catch(() => {});
+}
+
+// ── Iniciar sessão ────────────────────────────────────────
+async function iniciarSessao(forceNew = false) {
+    if (sessaoId && !forceNew) return;
+    try {
+        const r = await fetch('/treinos/sessao/iniciar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ workout_plan_id: PLAN_ID }),
+        });
+        const data = await r.json();
+        if (data.sessao_id) sessaoId = data.sessao_id;
+    } catch {}
+}
+
+// ── Cronômetro ────────────────────────────────────────────
+function startCron() {
+    if (cronId) return;
+    cronStart = Date.now();
+    cronId = setInterval(() => {
+        const secs = Math.floor((Date.now() - cronStart) / 1000);
+        const m = String(Math.floor(secs / 60)).padStart(2, '0');
+        const s = String(secs % 60).padStart(2, '0');
+        document.getElementById('chrono').textContent = `${m}:${s}`;
+    }, 1000);
+}
+
+function getElapsedSecs() {
+    return cronStart ? Math.floor((Date.now() - cronStart) / 1000) : 0;
+}
+
+// ── Renderizar exercício ──────────────────────────────────
+function renderEx(idx) {
+    exIdx = idx;
+    const ex = EXERCICIOS[idx];
+    viewMode = 'exercicio';
+    showView('viewExercicio');
+
+    document.getElementById('headerCounter').textContent = `${idx + 1}/${TOTAL}`;
+    document.getElementById('exNome').textContent = ex.nome_pt || ex.exercise_query || '';
+
+    // GIF
+    const gifWrap = document.getElementById('gifWrap');
+    if (ex.gif_url) {
+        gifWrap.innerHTML = `<img src="${ex.gif_url}" alt="${ex.nome_pt || ''}">`;
+    } else {
+        gifWrap.innerHTML = `<section class="exec-gif-placeholder"><span>🏋️</span><span>GIF em breve</span></section>`;
+    }
+
+    // Pills
+    const nSeries = Number(ex.series) || 3;
+    document.getElementById('pillSeries').textContent = `${nSeries} séries`;
+    document.getElementById('pillDescanso').textContent = `${ex.descanso_segundos || 60}s descanso`;
+
+    // Bolinhas
+    renderDots(idx);
+
+    // Reps / carga
+    document.getElementById('exReps').textContent = ex.repeticoes ? `${ex.repeticoes} repetições` : '';
+    document.getElementById('exCargaSug').textContent = ex.carga_sugerida ? `Sugerido: ${ex.carga_sugerida}` : '';
+
+    // Input de carga
+    document.getElementById('cargaInput').value = cargas[idx] || '';
+
+    // Botão realizado
+    const btn = document.getElementById('btnRealizado');
+    if (isExDone(idx)) {
+        btn.className = 'exec-btn-realizado concluido';
+        document.getElementById('realizadoLabel').innerHTML = '<i class="fas fa-check-double"></i><br>Feito';
+    } else {
+        btn.className = 'exec-btn-realizado';
+        document.getElementById('realizadoLabel').innerHTML = '<i class="fas fa-check"></i><br>Realizado';
+    }
+
+    // Nav
+    document.getElementById('btnPrev').disabled = idx === 0;
+    document.getElementById('btnNext').disabled = idx === TOTAL - 1;
+}
+
+function renderDots(idx) {
+    const ex     = EXERCICIOS[idx];
+    const nSeries = Number(ex.series) || 3;
+    const dots   = seriesDone[idx];
+    const doneSeries = dots.filter(Boolean).length;
+    const html   = Array.from({ length: nSeries }, (_, s) => {
+        let cls = 'exec-dot';
+        if (dots[s]) cls += ' done';
+        else if (s === doneSeries) cls += ' current';
+        return `<section class="${cls}" data-serie="${s}">${s + 1}</section>`;
+    }).join('');
+    document.getElementById('seriesDots').innerHTML = html;
+    document.querySelectorAll('.exec-dot').forEach(dot => {
+        dot.addEventListener('click', () => {
+            const s = parseInt(dot.dataset.serie, 10);
+            if (!seriesDone[idx][s]) marcarSerie(idx, s);
+        });
+    });
+}
+
+// ── Marcar série ──────────────────────────────────────────
+function marcarSerie(idx, serieIdx) {
+    if (countdownActive) return;
+
+    // Optimistic: marca a bolinha
+    seriesDone[idx][serieIdx] = true;
+    renderDots(idx);
+
+    const nSeries   = Number(EXERCICIOS[idx].series) || 3;
+    const doneSeries = seriesDone[idx].filter(Boolean).length;
+    const descanso   = Number(EXERCICIOS[idx].descanso_segundos) || 60;
+
+    if (doneSeries >= nSeries) {
+        // Exercício completo
+        document.getElementById('btnRealizado').className = 'exec-btn-realizado concluido';
+        document.getElementById('realizadoLabel').innerHTML = '<i class="fas fa-check-double"></i><br>Feito';
+        persistExercicio(idx);
+        return;
+    }
+
+    // Inicia countdown de descanso
+    startCountdown(descanso, idx, doneSeries);
+}
+
+function startCountdown(seconds, idx, doneSeries) {
+    countdownActive = true;
+    const btn   = document.getElementById('btnRealizado');
+    const label = document.getElementById('realizadoLabel');
+    const ring  = document.getElementById('countdownRing');
+    const circum = 232; // 2π × 37
+
+    btn.className = 'exec-btn-realizado counting';
+    ring.style.strokeDashoffset = '0';
+
+    let remaining = seconds;
+    label.innerHTML = `<span style="font-size:1.3rem;font-weight:900;color:#4caf50">${remaining}</span>`;
+
+    countdownId = setInterval(() => {
+        remaining--;
+        const progress = ((seconds - remaining) / seconds) * circum;
+        ring.style.strokeDashoffset = String(progress);
+
+        if (remaining <= 0) {
+            clearInterval(countdownId);
+            countdownActive = false;
+            btn.className = 'exec-btn-realizado';
+            label.innerHTML = '<i class="fas fa-check"></i><br>Realizado';
+            ring.style.strokeDashoffset = String(circum);
+            return;
+        }
+        label.innerHTML = `<span style="font-size:1.3rem;font-weight:900;color:#4caf50">${remaining}</span>`;
+    }, 1000);
+}
+
+function persistExercicio(idx) {
+    if (!sessaoId) return;
+    const ex = EXERCICIOS[idx];
+    apiFetch('/treinos/sessao/exercicio/concluir', {
+        sessao_id:        sessaoId,
+        exercise_query:   ex.exercise_query,
+        series_realizadas: Number(ex.series) || 3,
+        carga_usada:      cargas[idx] || null,
+    });
+}
+
+// ── Views ─────────────────────────────────────────────────
+function showView(id) {
+    ['viewExercicio', 'viewLista', 'viewConclusao'].forEach(v => {
+        const el = document.getElementById(v);
+        el.classList.toggle('active', el.id === id);
+    });
+    const navEl = document.querySelector('.exec-nav');
+    navEl.style.display = id === 'viewConclusao' ? 'none' : '';
+}
+
+// ── Lista ─────────────────────────────────────────────────
+function renderLista() {
+    viewMode = 'lista';
+    showView('viewLista');
+    const lista = document.getElementById('listaExercicios');
+    lista.innerHTML = EXERCICIOS.map((ex, i) => {
+        let cls = 'exec-lista-item';
+        if (i === exIdx)    cls += ' current';
+        if (isExDone(i))    cls += ' done';
+        return `<section class="${cls}" data-idx="${i}">
+            <section class="exec-lista-check">${isExDone(i) ? '<i class="fas fa-check"></i>' : (i + 1)}</section>
+            <section class="exec-lista-info">
+                <section class="exec-lista-nome">${ex.nome_pt || ex.exercise_query || ''}</section>
+                <section class="exec-lista-detalhe">${ex.series || 3}×${ex.repeticoes || '?'} · ${ex.descanso_segundos || 60}s</section>
+            </section>
+        </section>`;
+    }).join('');
+
+    lista.querySelectorAll('.exec-lista-item').forEach(el => {
+        el.addEventListener('click', () => {
+            renderEx(parseInt(el.dataset.idx, 10));
+        });
+    });
+}
+
+// ── Conclusão ─────────────────────────────────────────────
+async function mostrarConclusao() {
+    viewMode = 'conclusao';
+    showView('viewConclusao');
+    if (cronId) { clearInterval(cronId); cronId = null; }
+
+    const secs    = getElapsedSecs();
+    const min     = Math.floor(secs / 60);
+    const cardasFeitas = seriesDone.filter((d, i) => isExDone(i)).length;
+    const cargasEntradas = cargas.filter((c, i) => c && c !== (EXERCICIOS[i].carga_sugerida || '')).map((c, i) => ({ nome: EXERCICIOS[i].nome_pt || EXERCICIOS[i].exercise_query, carga: c })).filter(x => x.carga);
+
+    let cargasHtml = '';
+    if (cargasEntradas.length) {
+        cargasHtml = `<section class="exec-conclusao-cargas">
+            <h4>Cargas registradas</h4>
+            ${cargasEntradas.map(c => `<section class="exec-conclusao-carga-item"><span>${c.nome}</span><span>${c.carga}</span></section>`).join('')}
+        </section>`;
+    }
+
+    document.getElementById('conclusaoContent').innerHTML = `
+        <section class="exec-conclusao-icon">🏆</section>
+        <h2>Treino Concluído!</h2>
+        <p class="exec-conclusao-sub">${PLANO.nome}</p>
+        <section class="exec-conclusao-stats">
+            <section class="exec-stat-box">
+                <span class="exec-stat-val">${min}min</span>
+                <span class="exec-stat-label">Duração</span>
+            </section>
+            <section class="exec-stat-box">
+                <span class="exec-stat-val">${cardasFeitas}</span>
+                <span class="exec-stat-label">Exercícios</span>
+            </section>
+            <section class="exec-stat-box">
+                <span class="exec-stat-val">${seriesDone.reduce((a, d) => a + d.filter(Boolean).length, 0)}</span>
+                <span class="exec-stat-label">Séries</span>
+            </section>
+        </section>
+        ${cargasHtml}
+        <button class="exec-conclusao-btn" onclick="location.href='/evolucao'">
+            <i class="fas fa-chart-line"></i> Ver evolução
+        </button>
+        <button class="exec-conclusao-btn" style="background:#2a2a2a;color:#aaa;margin-top:-0.4rem" onclick="location.href='/treinos'">
+            Voltar aos treinos
+        </button>
+    `;
+
+    // Persiste finalização
+    if (sessaoId) {
+        try {
+            await fetch('/treinos/sessao/finalizar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sessao_id: sessaoId }),
+            });
+        } catch {}
+    }
+}
+
+// ── Event listeners ───────────────────────────────────────
+document.getElementById('btnPrev').addEventListener('click', () => {
+    if (exIdx > 0) renderEx(exIdx - 1);
+});
+
+document.getElementById('btnNext').addEventListener('click', () => {
+    if (exIdx < TOTAL - 1) renderEx(exIdx + 1);
+});
+
+document.getElementById('btnRealizado').addEventListener('click', () => {
+    if (countdownActive || isExDone(exIdx)) return;
+    const dots      = seriesDone[exIdx];
+    const nextSerie = dots.indexOf(false);
+    if (nextSerie >= 0) marcarSerie(exIdx, nextSerie);
+});
+
+document.getElementById('btnLista').addEventListener('click', () => {
+    if (viewMode === 'lista') renderEx(exIdx);
+    else renderLista();
+});
+
+document.getElementById('btnContinuarLista').addEventListener('click', () => {
+    renderEx(exIdx);
+});
+
+document.getElementById('btnFim').addEventListener('click', async () => {
+    if (countdownId) { clearInterval(countdownId); countdownActive = false; }
+    // Persiste todos os exercícios feitos mas não sincronizados
+    for (let i = 0; i < EXERCICIOS.length; i++) {
+        if (seriesDone[i].some(Boolean) && sessaoId) {
+            await apiFetch('/treinos/sessao/exercicio/concluir', {
+                sessao_id:        sessaoId,
+                exercise_query:   EXERCICIOS[i].exercise_query,
+                series_realizadas: seriesDone[i].filter(Boolean).length,
+                carga_usada:      cargas[i] || null,
+            });
+        }
+    }
+    mostrarConclusao();
+});
+
+document.getElementById('btnSalvarCarga').addEventListener('click', () => {
+    const val = document.getElementById('cargaInput').value.trim();
+    cargas[exIdx] = val;
+    document.getElementById('exCargaSug').textContent = val ? `Registrado: ${val}` : (EXERCICIOS[exIdx].carga_sugerida ? `Sugerido: ${EXERCICIOS[exIdx].carga_sugerida}` : '');
+});
+
+// ── Tradução de músculos ──────────────────────────────────
+const MUSCLE_PT = {
+    lats: 'Latíssimo do Dorso', pectorals: 'Peitoral', biceps: 'Bíceps',
+    triceps: 'Tríceps', quads: 'Quadríceps', hamstrings: 'Isquiotibiais',
+    glutes: 'Glúteos', delts: 'Deltóide', abs: 'Abdômen', calves: 'Panturrilha',
+    back: 'Costas', chest: 'Peito', shoulders: 'Ombros',
+    'upper arms': 'Braços', 'upper legs': 'Pernas', waist: 'Abdômen',
+    forearms: 'Antebraços', traps: 'Trapézio', spine: 'Coluna',
+    'lower back': 'Lombar', neck: 'Pescoço', cardiovascular: 'Cardiovascular',
+};
+function translateMuscle(s) {
+    if (!s) return s;
+    const k = s.toLowerCase().trim();
+    return MUSCLE_PT[k] || (k.charAt(0).toUpperCase() + k.slice(1));
+}
+
+// Trio: Execução
+document.getElementById('btnExecucao').addEventListener('click', async () => {
+    const ex = EXERCICIOS[exIdx];
+    const container = document.getElementById('modalInstrucoes');
+    document.getElementById('modalExecucao').classList.add('open');
+
+    const instrucoes = Array.isArray(ex.instructions) ? ex.instructions.filter(Boolean) : [];
+    if (instrucoes.length) {
+        container.innerHTML = `<section class="exec-modal-instrucoes"><ol>${instrucoes.map(s => `<li>${s}</li>`).join('')}</ol></section>`;
+        return;
+    }
+
+    // Fallback: busca na ExerciseDB OSS
+    container.innerHTML = `<section class="exec-modal-loading"><i class="fas fa-circle-notch fa-spin"></i> Buscando instruções…</section>`;
+    try {
+        const query = encodeURIComponent((ex.exercise_query || ex.nome_pt || '').toLowerCase());
+        const r = await fetch(`https://oss.exercisedb.dev/api/v1/exercises/name/${query}`);
+        if (r.ok) {
+            const data = await r.json();
+            const found = Array.isArray(data) ? data[0] : (data?.data?.[0]);
+            const steps = found?.instructions || [];
+            if (steps.length) {
+                container.innerHTML = `<section class="exec-modal-instrucoes"><ol>${steps.map(s => `<li>${s}</li>`).join('')}</ol></section>`;
+                ex.instructions = steps; // cache
+                return;
+            }
+        }
+    } catch {}
+    container.innerHTML = `<section class="exec-modal-instrucoes"><ol><li>Execute o movimento com controle e boa postura.</li><li>Mantenha a respiração ritmada durante toda a execução.</li><li>Evite compensações e mantenha a forma correta em todas as séries.</li></ol></section>`;
+});
+
+// Trio: Músculos
+document.getElementById('btnMusculos').addEventListener('click', () => {
+    const ex = EXERCICIOS[exIdx];
+    const primary  = ex.target_muscle || '';
+    const bodyPart = ex.body_part || '';
+    let html = '';
+
+    if (primary) {
+        html += `<p style="font-size:0.78rem;color:#666;margin:0 0 0.35rem">Músculo alvo</p>
+            <section class="exec-modal-musculos-tags">
+                <span class="exec-muscle-tag primary">${translateMuscle(primary)}</span>
+            </section>`;
+    }
+    if (bodyPart) {
+        html += `<p style="font-size:0.78rem;color:#666;margin:0.75rem 0 0.35rem">Região</p>
+            <section class="exec-modal-musculos-tags">
+                <span class="exec-muscle-tag">${translateMuscle(bodyPart)}</span>
+            </section>`;
+    }
+
+    // Fallback: usa nome_pt + equipamento do plano
+    if (!primary && !bodyPart) {
+        const nomePt    = ex.nome_pt || '';
+        const equip     = ex.equipment || '';
+        html = `<p style="font-size:0.78rem;color:#666;margin:0 0 0.35rem">Exercício</p>
+            <section class="exec-modal-musculos-tags">
+                <span class="exec-muscle-tag primary">${nomePt || ex.exercise_query || '—'}</span>
+            </section>`;
+        if (equip) {
+            html += `<p style="font-size:0.78rem;color:#666;margin:0.75rem 0 0.35rem">Equipamento</p>
+                <section class="exec-modal-musculos-tags">
+                    <span class="exec-muscle-tag">${equip}</span>
+                </section>`;
+        }
+    }
+
+    document.getElementById('modalMusculosContent').innerHTML = html;
+    document.getElementById('modalMusculos').classList.add('open');
+});
+
+// Trio: Ampliar
+document.getElementById('btnAmpliar').addEventListener('click', () => {
+    const ex = EXERCICIOS[exIdx];
+    if (!ex.gif_url) return;
+    document.getElementById('gifFullscreenImg').src = ex.gif_url;
+    document.getElementById('gifFullscreen').classList.add('open');
+});
+
+document.getElementById('btnFecharFS').addEventListener('click', () => {
+    document.getElementById('gifFullscreen').classList.remove('open');
+});
+
+// Fechar modais ao clicar fora
+['modalExecucao', 'modalMusculos'].forEach(id => {
+    const el = document.getElementById(id);
+    el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open'); });
+});
+
+// ── Modal retomada ────────────────────────────────────────
+<% if (sessaoExistente) { %>
+document.getElementById('btnRetomadaSim').addEventListener('click', () => {
+    document.getElementById('modalRetomada').remove();
+    startCron();
+});
+document.getElementById('btnRetomadaNao').addEventListener('click', async () => {
+    document.getElementById('modalRetomada').remove();
+    // Abandonar sessão anterior
+    if (sessaoId) {
+        try {
+            await fetch('/treinos/sessao/abandonar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sessao_id: sessaoId }),
+            });
+        } catch {}
+    }
+    sessaoId = null;
+    seriesDone = EXERCICIOS.map(ex => new Array(Number(ex.series) || 3).fill(false));
+    cargas = EXERCICIOS.map(ex => ex.carga_sugerida || '');
+    exIdx = 0;
+    renderEx(0);
+    await iniciarSessao();
+    startCron();
+});
+<% } %>
+
+// ── Init ──────────────────────────────────────────────────
+(async () => {
+    renderEx(exIdx);
+    <% if (!sessaoExistente) { %>
+    await iniciarSessao();
+    startCron();
+    <% } %>
+})();
+</script>
+</body>
+</html>

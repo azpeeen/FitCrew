@@ -43,6 +43,41 @@ function safeJson(str, fallback) {
     }
 })();
 
+// Cria tabelas de sessão de execução de treino
+(async () => {
+    try {
+        await db.execute(`
+            CREATE TABLE IF NOT EXISTS treino_sessao (
+                id              INT UNSIGNED NOT NULL AUTO_INCREMENT,
+                user_id         INT UNSIGNED NOT NULL,
+                workout_plan_id INT UNSIGNED NOT NULL,
+                iniciado_em     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                finalizado_em   TIMESTAMP NULL,
+                status          ENUM('em_andamento','completo','abandonado') NOT NULL DEFAULT 'em_andamento',
+                PRIMARY KEY (id),
+                INDEX idx_ts_user_status (user_id, status),
+                CONSTRAINT fk_ts_user FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE,
+                CONSTRAINT fk_ts_plan FOREIGN KEY (workout_plan_id) REFERENCES workout_plans(id) ON DELETE CASCADE
+            ) ENGINE=InnoDB
+        `);
+        await db.execute(`
+            CREATE TABLE IF NOT EXISTS treino_sessao_exercicio (
+                id                INT UNSIGNED NOT NULL AUTO_INCREMENT,
+                sessao_id         INT UNSIGNED NOT NULL,
+                exercise_query    VARCHAR(255) NOT NULL,
+                series_realizadas TINYINT UNSIGNED NOT NULL DEFAULT 0,
+                carga_usada       VARCHAR(50) NULL,
+                concluido         TINYINT(1) NOT NULL DEFAULT 0,
+                PRIMARY KEY (id),
+                UNIQUE KEY uq_sessao_ex (sessao_id, exercise_query),
+                CONSTRAINT fk_tse_sessao FOREIGN KEY (sessao_id) REFERENCES treino_sessao(id) ON DELETE CASCADE
+            ) ENGINE=InnoDB
+        `);
+    } catch (err) {
+        console.error('[router] initSessaoTables:', err.message);
+    }
+})();
+
 // ── Multer: upload de foto de perfil ──────────────────────────────────────────
 const photoStorage = new CloudinaryStorage({
     cloudinary,
@@ -537,6 +572,24 @@ router.get('/treinos', requirePlano, async (req, res) => {
     });
 });
 
+// DELETE /treinos/plano/:id — remove plano de treino da IA
+router.delete('/treinos/plano/:id', requireAuth, async (req, res) => {
+    const userId  = req.session.user.id;
+    const planoId = parseInt(req.params.id, 10);
+    if (!planoId) return res.status(400).json({ ok: false });
+    try {
+        const [result] = await db.execute(
+            'DELETE FROM workout_plans WHERE id = ? AND user_id = ?',
+            [planoId, userId]
+        );
+        if (!result.affectedRows) return res.status(404).json({ ok: false, error: 'Plano não encontrado.' });
+        return res.json({ ok: true });
+    } catch (err) {
+        console.error('[treinos/plano/delete]', err.message);
+        return res.status(500).json({ ok: false, error: 'Erro ao deletar.' });
+    }
+});
+
 // POST /treinos/checkin — registra presença manual (máx 1 por dia)
 router.post('/treinos/checkin', requireAuth, async (req, res) => {
     const userId = req.session.user.id;
@@ -609,6 +662,256 @@ router.get('/treinos/checkin/status', requireAuth, async (req, res) => {
     } catch (err) {
         console.error('[checkin/status]', err.message);
         return res.status(500).json({ erro: 'Erro ao buscar status.' });
+    }
+});
+
+// ── Execução de Treino (F15) ──────────────────────────────────────────────────
+
+// GET /treinos/execucao — página fullscreen de execução
+router.get('/treinos/execucao', requirePlano, async (req, res) => {
+    const userId  = req.session.user.id;
+    const planoId = parseInt(req.query.plano_id, 10);
+    if (!planoId) return res.redirect('/treinos');
+
+    let plano;
+    try {
+        const [rows] = await db.execute(
+            'SELECT * FROM workout_plans WHERE id = ? AND user_id = ?',
+            [planoId, userId]
+        );
+        if (!rows.length) return res.redirect('/treinos');
+        plano = rows[0];
+        plano.exercicios_json = typeof plano.exercicios_json === 'string'
+            ? JSON.parse(plano.exercicios_json)
+            : (plano.exercicios_json || []);
+    } catch (err) {
+        console.error('[execucao]', err.message);
+        return res.redirect('/treinos');
+    }
+
+    // Enriquecer exercícios com GIF, músculos e instruções
+    try {
+        const [exRows] = await db.execute(`
+            SELECT e.name, e.target_muscle, e.body_part, e.instructions_json,
+                   em.cloudinary_gif_url
+            FROM exercises e
+            LEFT JOIN exercise_media em ON em.exercise_id = e.id
+        `);
+        const exList = exRows.map(r => ({
+            name:          r.name,
+            gif_url:       r.cloudinary_gif_url || null,
+            target_muscle: r.target_muscle || null,
+            body_part:     r.body_part || null,
+            instructions:  safeJson(r.instructions_json, []),
+        }));
+        const fuse = new Fuse(exList, { keys: ['name'], threshold: 0.4 });
+
+        for (const ex of plano.exercicios_json) {
+            const q     = (ex.exercise_query || '').toLowerCase().trim();
+            const exact = exList.find(r => r.name.toLowerCase() === q);
+            const match = exact || (fuse.search(ex.exercise_query || '')[0]?.item);
+            ex.gif_url       = match?.gif_url       ?? null;
+            ex.target_muscle = match?.target_muscle ?? null;
+            ex.body_part     = match?.body_part     ?? null;
+            ex.instructions  = match?.instructions  ?? [];
+        }
+    } catch (err) {
+        console.error('[execucao/enrich]', err.message);
+    }
+
+    // Verificar sessão em andamento hoje
+    let sessaoExistente = null;
+    try {
+        const [sRows] = await db.execute(`
+            SELECT ts.id, ts.iniciado_em,
+                   COALESCE(
+                     (SELECT JSON_ARRAYAGG(
+                        JSON_OBJECT('exercise_query', tse.exercise_query,
+                                    'series_realizadas', tse.series_realizadas,
+                                    'carga_usada', tse.carga_usada,
+                                    'concluido', tse.concluido))
+                      FROM treino_sessao_exercicio tse WHERE tse.sessao_id = ts.id
+                     ), JSON_ARRAY()
+                   ) AS exercicios_status
+            FROM treino_sessao ts
+            WHERE ts.user_id = ? AND ts.workout_plan_id = ?
+              AND ts.status = 'em_andamento' AND DATE(ts.iniciado_em) = CURDATE()
+            LIMIT 1
+        `, [userId, planoId]);
+        if (sRows.length) {
+            sessaoExistente = sRows[0];
+            sessaoExistente.exercicios_status = typeof sessaoExistente.exercicios_status === 'string'
+                ? JSON.parse(sessaoExistente.exercicios_status)
+                : (sessaoExistente.exercicios_status || []);
+        }
+    } catch (err) {
+        console.error('[execucao/sessao]', err.message);
+    }
+
+    res.render('pages/execucao-treino', {
+        user:            req.session.user,
+        plano,
+        sessaoExistente,
+        seo: {
+            title:       `${plano.nome} — GymBros`,
+            canonical:   `/treinos/execucao?plano_id=${planoId}`,
+            robots:      'noindex, nofollow',
+            description: 'Modo de execução de treino.',
+        },
+    });
+});
+
+// POST /treinos/sessao/iniciar
+router.post('/treinos/sessao/iniciar', requireAuth, async (req, res) => {
+    const userId = req.session.user.id;
+    const { workout_plan_id } = req.body;
+    if (!workout_plan_id) return res.status(400).json({ erro: 'workout_plan_id obrigatório.' });
+    try {
+        const [planRows] = await db.execute(
+            'SELECT id, exercicios_json FROM workout_plans WHERE id = ? AND user_id = ?',
+            [workout_plan_id, userId]
+        );
+        if (!planRows.length) return res.status(404).json({ erro: 'Plano não encontrado.' });
+
+        const [existing] = await db.execute(`
+            SELECT id FROM treino_sessao
+            WHERE user_id = ? AND workout_plan_id = ?
+              AND status = 'em_andamento' AND DATE(iniciado_em) = CURDATE()
+            LIMIT 1
+        `, [userId, workout_plan_id]);
+
+        if (existing.length) {
+            const [exRows] = await db.execute(
+                'SELECT * FROM treino_sessao_exercicio WHERE sessao_id = ?',
+                [existing[0].id]
+            );
+            return res.json({ sessao_id: existing[0].id, exercicios: exRows, retomada: true });
+        }
+
+        const [result] = await db.execute(
+            'INSERT INTO treino_sessao (user_id, workout_plan_id) VALUES (?, ?)',
+            [userId, workout_plan_id]
+        );
+        const sessaoId   = result.insertId;
+        const exercicios = safeJson(planRows[0].exercicios_json, []);
+        for (const ex of exercicios) {
+            if (ex.exercise_query) {
+                await db.execute(
+                    'INSERT IGNORE INTO treino_sessao_exercicio (sessao_id, exercise_query) VALUES (?, ?)',
+                    [sessaoId, ex.exercise_query]
+                );
+            }
+        }
+        const [exRows] = await db.execute(
+            'SELECT * FROM treino_sessao_exercicio WHERE sessao_id = ?',
+            [sessaoId]
+        );
+        return res.json({ sessao_id: sessaoId, exercicios: exRows, retomada: false });
+    } catch (err) {
+        console.error('[sessao/iniciar]', err.message);
+        return res.status(500).json({ erro: 'Erro ao iniciar sessão.' });
+    }
+});
+
+// POST /treinos/sessao/exercicio/concluir
+router.post('/treinos/sessao/exercicio/concluir', requireAuth, async (req, res) => {
+    const userId = req.session.user.id;
+    const { sessao_id, exercise_query, series_realizadas, carga_usada } = req.body;
+    if (!sessao_id || !exercise_query) return res.status(400).json({ erro: 'Campos obrigatórios ausentes.' });
+    try {
+        const [sRows] = await db.execute(
+            "SELECT id FROM treino_sessao WHERE id = ? AND user_id = ? AND status = 'em_andamento'",
+            [sessao_id, userId]
+        );
+        if (!sRows.length) return res.status(404).json({ erro: 'Sessão não encontrada.' });
+
+        await db.execute(`
+            INSERT INTO treino_sessao_exercicio (sessao_id, exercise_query, series_realizadas, carga_usada, concluido)
+            VALUES (?, ?, ?, ?, 1)
+            ON DUPLICATE KEY UPDATE
+                series_realizadas = VALUES(series_realizadas),
+                carga_usada       = VALUES(carga_usada),
+                concluido         = 1
+        `, [sessao_id, exercise_query, series_realizadas || 0, carga_usada || null]);
+
+        return res.json({ ok: true });
+    } catch (err) {
+        console.error('[sessao/exercicio/concluir]', err.message);
+        return res.status(500).json({ erro: 'Erro ao concluir exercício.' });
+    }
+});
+
+// POST /treinos/sessao/abandonar
+router.post('/treinos/sessao/abandonar', requireAuth, async (req, res) => {
+    const userId = req.session.user.id;
+    const { sessao_id } = req.body;
+    if (!sessao_id) return res.status(400).json({ erro: 'sessao_id obrigatório.' });
+    try {
+        await db.execute(
+            "UPDATE treino_sessao SET status = 'abandonado', finalizado_em = NOW() WHERE id = ? AND user_id = ?",
+            [sessao_id, userId]
+        );
+        return res.json({ ok: true });
+    } catch (err) {
+        console.error('[sessao/abandonar]', err.message);
+        return res.status(500).json({ erro: 'Erro ao abandonar sessão.' });
+    }
+});
+
+// POST /treinos/sessao/finalizar
+router.post('/treinos/sessao/finalizar', requireAuth, async (req, res) => {
+    const userId = req.session.user.id;
+    const { sessao_id } = req.body;
+    if (!sessao_id) return res.status(400).json({ erro: 'sessao_id obrigatório.' });
+    try {
+        const [sRows] = await db.execute(
+            "SELECT id FROM treino_sessao WHERE id = ? AND user_id = ? AND status = 'em_andamento'",
+            [sessao_id, userId]
+        );
+        if (!sRows.length) return res.status(404).json({ erro: 'Sessão não encontrada ou já finalizada.' });
+
+        await db.execute(
+            "UPDATE treino_sessao SET status = 'completo', finalizado_em = NOW() WHERE id = ?",
+            [sessao_id]
+        );
+
+        const [chkExisting] = await db.execute(
+            'SELECT id FROM treino_checkins WHERE user_id = ? AND DATE(created_at) = CURDATE() LIMIT 1',
+            [userId]
+        );
+        if (!chkExisting.length) {
+            await db.execute('INSERT INTO treino_checkins (user_id) VALUES (?)', [userId]);
+        }
+
+        return res.json({ ok: true });
+    } catch (err) {
+        console.error('[sessao/finalizar]', err.message);
+        return res.status(500).json({ erro: 'Erro ao finalizar sessão.' });
+    }
+});
+
+// GET /treinos/sessao/historico
+router.get('/treinos/sessao/historico', requireAuth, async (req, res) => {
+    const userId = req.session.user.id;
+    try {
+        const [rows] = await db.execute(`
+            SELECT ts.id, ts.iniciado_em, ts.finalizado_em,
+                   wp.nome AS plano_nome,
+                   TIMESTAMPDIFF(MINUTE, ts.iniciado_em, ts.finalizado_em) AS duracao_min,
+                   COUNT(tse.id) AS total_exercicios,
+                   SUM(tse.concluido) AS exercicios_concluidos
+            FROM treino_sessao ts
+            JOIN workout_plans wp ON wp.id = ts.workout_plan_id
+            LEFT JOIN treino_sessao_exercicio tse ON tse.sessao_id = ts.id
+            WHERE ts.user_id = ? AND ts.status = 'completo'
+            GROUP BY ts.id, ts.iniciado_em, ts.finalizado_em, wp.nome
+            ORDER BY ts.finalizado_em DESC
+            LIMIT 10
+        `, [userId]);
+        return res.json({ ok: true, historico: rows });
+    } catch (err) {
+        console.error('[sessao/historico]', err.message);
+        return res.status(500).json({ erro: 'Erro ao buscar histórico.' });
     }
 });
 
