@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gymbros-v3';
+const CACHE_NAME = 'gymbros-v4';
 
 // ── F11 / F13 — Lembretes de água e sono ─────────────────────────────────────
 let _aguaTimer = null;
