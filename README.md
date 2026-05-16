@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="./app/public/images/logo-form.png" alt="GymBros Logo" width="320"/>
+  <img src="./app/public/images/logo-readme.png" alt="GymBros Logo" width="320"/>
 
   <h1>GymBros</h1>
 
