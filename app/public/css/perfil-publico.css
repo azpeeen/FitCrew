@@ -67,6 +67,12 @@ body {
     line-height: 1.1;
 }
 
+.pp-username {
+    font-size: 0.9rem;
+    color: #888;
+    margin: -4px 0 8px;
+}
+
 .pp-bio {
     font-size: 0.9rem;
     color: #bbb;

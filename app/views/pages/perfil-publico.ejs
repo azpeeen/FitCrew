@@ -55,6 +55,7 @@
             </section>
             <section class="pp-hero-info">
                 <h2 class="pp-nome"><%= perfil.nome %></h2>
+                <% if (perfil.username) { %><p class="pp-username">@<%= perfil.username %></p><% } %>
                 <% if (perfil.bio) { %>
                 <p class="pp-bio"><%= perfil.bio %></p>
                 <% } %>
