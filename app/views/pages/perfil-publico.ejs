@@ -34,7 +34,7 @@
         <!-- Cabeçalho com botão editar -->
         <section class="pp-own-header">
             <h1 class="pp-own-title"><i class="fas fa-user-circle"></i> Meu Perfil</h1>
-            <a href="/config" class="btn-pedir-ia" style="text-decoration:none;">
+            <a href="/perfil/editar" class="btn-pedir-ia" style="text-decoration:none;">
                 <i class="fas fa-edit"></i> Editar perfil
             </a>
         </section>
@@ -236,15 +236,23 @@
 <% if (isProprioPerfilId && user) { %>
 <script>
 (function () {
-    var btn     = document.getElementById('menuToggle');
-    var sidebar = document.querySelector('.aluno-sidebar');
-    var overlay = document.getElementById('sidebarOverlay');
-    if (!btn || !sidebar || !overlay) return;
-    function openMenu()  { sidebar.classList.add('open'); overlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
-    function closeMenu() { sidebar.classList.remove('open'); overlay.classList.remove('open'); document.body.style.overflow = ''; }
-    btn.addEventListener('click', openMenu);
-    overlay.addEventListener('click', closeMenu);
-    sidebar.querySelectorAll('a').forEach(function (a) { a.addEventListener('click', closeMenu); });
+    document.addEventListener('DOMContentLoaded', function () {
+        var btn     = document.getElementById('menuToggle');
+        var sidebar = document.querySelector('.aluno-sidebar');
+        var overlay = document.getElementById('sidebarOverlay');
+        if (!sidebar || !overlay) return;
+        var closeBtn = document.createElement('button');
+        closeBtn.className = 'aluno-sidebar-close';
+        closeBtn.setAttribute('aria-label', 'Fechar menu');
+        closeBtn.innerHTML = '<i class="fas fa-times"></i>';
+        sidebar.insertBefore(closeBtn, sidebar.firstChild);
+        function openMenu()  { sidebar.classList.add('open'); overlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
+        function closeMenu() { sidebar.classList.remove('open'); overlay.classList.remove('open'); document.body.style.overflow = ''; }
+        if (btn) btn.addEventListener('click', openMenu);
+        overlay.addEventListener('click', closeMenu);
+        closeBtn.addEventListener('click', closeMenu);
+        sidebar.querySelectorAll('a').forEach(function (a) { a.addEventListener('click', closeMenu); });
+    });
 })();
 </script>
 <% } %>

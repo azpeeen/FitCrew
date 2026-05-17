@@ -271,17 +271,21 @@ router.get('/', (req, res) => res.render('pages/index', { seo: {
     ogDescription: 'Planos de treino e dieta personalizados por IA. Comece agora.',
 }}));
 
-router.get('/login', (req, res) => res.render('pages/login', { seo: {
-    title:         'Login — GymBros',
-    description:   'Acesse sua conta GymBros para ver seus treinos, acompanhar sua evolução e usar o personal trainer IA GymBot.',
-    keywords:      'login gymbros, entrar gymbros, acesso aluno',
-    canonical:     '/login',
-    robots:        'noindex, follow',
-    ogTitle:       'Entrar no GymBros',
-    ogDescription: 'Acesse sua conta e continue seu treino.',
-}}));
+router.get('/login', (req, res) => {
+    if (req.session.user) return res.redirect('/area-aluno');
+    res.render('pages/login', { seo: {
+        title:         'Login — GymBros',
+        description:   'Acesse sua conta GymBros para ver seus treinos, acompanhar sua evolução e usar o personal trainer IA GymBot.',
+        keywords:      'login gymbros, entrar gymbros, acesso aluno',
+        canonical:     '/login',
+        robots:        'noindex, follow',
+        ogTitle:       'Entrar no GymBros',
+        ogDescription: 'Acesse sua conta e continue seu treino.',
+    }});
+});
 
 router.get('/register', (req, res) => {
+    if (req.session.user) return res.redirect('/area-aluno');
     res.render('pages/register', { user: req.session.user || null, seo: {
         title:         'Cadastro — GymBros',
         description:   'Crie sua conta GymBros gratuitamente e acesse treinos personalizados, planos de dieta e o personal trainer IA GymBot.',
@@ -1700,19 +1704,24 @@ router.get('/admin-usuarios', (req, res) => {
     res.render('pages/admin-usuarios', { user: req.session.user });
 });
 
-// Logout
-router.get('/logout', (req, res) => {
+// Logout — POST evita logout acidental por crawler/prefetch
+router.post('/logout', (req, res) => {
     const uid = (req.session.user?.cpf || '').replace(/\D/g, '');
     req.session.destroy(err => {
         if (err) console.error(err);
-        // Serve a tiny HTML page that clears user-namespaced localStorage keys then redirects
+        res.clearCookie('connect.sid');
         res.send(`<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body><script>
 try {
     ['gymbros_treinos_${uid}','gymbros_evolucao_${uid}','gymbros_imc_profile_${uid}'].forEach(k => localStorage.removeItem(k));
 } catch(e){}
-location.href='/login';
+location.href='/';
 </script></body></html>`);
     });
+});
+
+// Redireciona GET /logout para home (crawlers, bookmarks antigos)
+router.get('/logout', (req, res) => {
+    res.redirect('/');
 });
 
 // ====================

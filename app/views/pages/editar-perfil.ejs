@@ -14,7 +14,7 @@
 <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
 </head>
 <body>
-<%- include('../partials/header') %>
+<%- include('../partials/header-aluno') %>
 
 <section class="aluno-dashboard">
     <section class="sidebar-overlay" id="sidebarOverlay"></section>
@@ -184,18 +184,6 @@ function updateMedalhas() {
 checkboxes.forEach(function (cb) { cb.addEventListener('change', updateMedalhas); });
 updateMedalhas();
 
-// Sidebar mobile
-(function () {
-    var btn     = document.getElementById('menuToggle');
-    var sidebar = document.querySelector('.aluno-sidebar');
-    var overlay = document.getElementById('sidebarOverlay');
-    if (!btn || !sidebar || !overlay) return;
-    function openMenu()  { sidebar.classList.add('open'); overlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
-    function closeMenu() { sidebar.classList.remove('open'); overlay.classList.remove('open'); document.body.style.overflow = ''; }
-    btn.addEventListener('click', openMenu);
-    overlay.addEventListener('click', closeMenu);
-    sidebar.querySelectorAll('a').forEach(function (a) { a.addEventListener('click', closeMenu); });
-})();
 </script>
 </body>
 </html>

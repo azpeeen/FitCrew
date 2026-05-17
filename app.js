@@ -33,8 +33,8 @@ app.set('trust proxy', 1);
 const sessionStore = new MySQLStore({
     createDatabaseTable:     false,
     clearExpired:            true,
-    checkExpirationInterval: 900000,
-    expiration:              86400000,
+    checkExpirationInterval: 1000 * 60 * 60,        // limpar expiradas a cada 1h
+    expiration:              1000 * 60 * 60 * 24 * 30, // 30 dias
     connectionLimit:         1,
 }, db);
 
@@ -44,10 +44,10 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: {
+        maxAge:   1000 * 60 * 60 * 24 * 30, // 30 dias
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
+        secure:   process.env.NODE_ENV === 'production',
         sameSite: 'lax',
-        // sem maxAge — sessão dura até fechar o browser
     },
 }));
 
@@ -59,6 +59,12 @@ app.use(i18n.init);
 // Injeta baseUrl em todas as views (canonical + OG)
 app.use((req, res, next) => {
     res.locals.baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+    next();
+});
+
+// Expõe sessão do usuário em todas as views
+app.use((req, res, next) => {
+    res.locals.user = req.session.user || null;
     next();
 });
 

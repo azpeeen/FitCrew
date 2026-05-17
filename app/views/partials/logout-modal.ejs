@@ -1,0 +1,46 @@
+<style>
+.logout-modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:99999; align-items:center; justify-content:center; }
+.logout-modal-overlay.open { display:flex; }
+.logout-modal-box { background:#1f1f1f; border-radius:16px; padding:36px 32px; max-width:380px; width:90%; text-align:center; border:1px solid #2a2a2a; box-shadow:0 20px 60px rgba(0,0,0,0.6); animation:modalPop 0.25s cubic-bezier(0.175,0.885,0.32,1.275); }
+@keyframes modalPop { from { transform:scale(0.85); opacity:0; } to { transform:scale(1); opacity:1; } }
+.logout-modal-icon { width:56px; height:56px; border-radius:50%; background:rgba(231,76,60,0.15); display:flex; align-items:center; justify-content:center; margin:0 auto 16px; font-size:1.4rem; color:#e74c3c; }
+.logout-modal-icon i { color:#e74c3c; }
+.logout-modal-title { font-size:1.2rem; font-weight:800; color:#fff; margin:0 0 8px; }
+.logout-modal-desc  { font-size:0.88rem; color:#888; margin:0 0 24px; line-height:1.5; }
+.logout-modal-btns  { display:flex; gap:12px; justify-content:center; }
+.logout-btn-cancel { padding:10px 24px; border-radius:8px; border:1px solid #444; background:transparent; color:#aaa; font-size:0.9rem; font-weight:600; cursor:pointer; transition:all 0.2s; }
+.logout-btn-cancel:hover { border-color:#666; color:#fff; }
+.logout-btn-confirm { padding:10px 24px; border-radius:8px; border:none; background:#e74c3c; color:#fff; font-size:0.9rem; font-weight:700; cursor:pointer; transition:all 0.2s; }
+.logout-btn-confirm:hover { background:#c0392b; }
+</style>
+<section class="logout-modal-overlay" id="logoutModal">
+    <section class="logout-modal-box">
+        <section class="logout-modal-icon">
+            <i class="fas fa-sign-out-alt"></i>
+        </section>
+        <h3 class="logout-modal-title">Sair da conta?</h3>
+        <p class="logout-modal-desc">Você precisará fazer login novamente para acessar sua conta.</p>
+        <section class="logout-modal-btns">
+            <button class="logout-btn-cancel" onclick="fecharModalLogout()">Cancelar</button>
+            <form action="/logout" method="POST" style="margin:0">
+                <button type="submit" class="logout-btn-confirm">Sair da conta</button>
+            </form>
+        </section>
+    </section>
+</section>
+<script>
+function abrirModalLogout() {
+    document.getElementById('logoutModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+function fecharModalLogout() {
+    document.getElementById('logoutModal').classList.remove('open');
+    document.body.style.overflow = '';
+}
+document.getElementById('logoutModal').addEventListener('click', function(e) {
+    if (e.target === this) fecharModalLogout();
+});
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') fecharModalLogout();
+});
+</script>

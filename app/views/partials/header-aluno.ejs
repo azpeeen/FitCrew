@@ -5,46 +5,35 @@
             </section>
 
             <section class="logo">
-                <a href="/" aria-label="GymBros — Página inicial">
+                <a href="/area-aluno" aria-label="GymBros — Início">
                     <img src="/images/logo.png" alt="Logo GymBros" width="32" height="32" loading="eager">
                     <span>GymBros</span>
                 </a>
             </section>
 
             <section class="header-right">
-                <!-- Seletor de idioma -->
                 <nav class="lang-selector" id="langSelector" aria-label="Selecionar idioma">
                     <button class="lang-btn" data-lang="pt" title="Português (BR)" aria-label="Mudar para Português">🇧🇷</button>
                     <button class="lang-btn" data-lang="en" title="English (US)"   aria-label="Switch to English">🇺🇸</button>
                     <button class="lang-btn" data-lang="es" title="Español (ES)"   aria-label="Cambiar a Español">🇪🇸</button>
                 </nav>
 
-                <% if (typeof user !== 'undefined' && user && !(typeof hideThemeToggle !== 'undefined' && hideThemeToggle)) { %>
                 <button id="themeToggle" class="theme-toggle" title="Alternar tema claro/escuro" aria-label="Alternar tema">
                     <i class="fas fa-moon" id="themeIcon" aria-hidden="true"></i>
                 </button>
-                <% } %>
 
-                <% if (locals.user) { %>
                 <a href="/area-aluno" class="user-icon" aria-label="Minha área">
                     <i class="fas fa-user" aria-hidden="true"></i>
                 </a>
-                <% } else { %>
-                <a href="/login" class="user-icon" aria-label="Entrar na conta">
-                    <i class="fas fa-user" aria-hidden="true"></i>
-                </a>
-                <% } %>
             </section>
         </section>
     </header>
     <script>
     (function () {
-        // ── Aplica tema salvo antes do render ──────────────────────────────
         if (localStorage.getItem('gymbros_theme') === 'light') {
             document.body.classList.add('light-mode');
         }
 
-        // ── Scroll scrolled class ──────────────────────────────────────────
         var header = document.querySelector('.gymbros-header');
         if (header) {
             window.addEventListener('scroll', function () {
@@ -52,7 +41,6 @@
             }, { passive: true });
         }
 
-        // ── Bootstrap do toggle de tema ────────────────────────────────────
         function setThemeIcon(isLight) {
             var icon = document.getElementById('themeIcon');
             if (!icon) return;
@@ -68,18 +56,13 @@
         function initThemeToggle() {
             var toggle = document.getElementById('themeToggle');
             if (!toggle) return;
-
-            // Acerta ícone conforme tema atual
             setThemeIcon(document.body.classList.contains('light-mode'));
-
             toggle.addEventListener('click', function () {
                 var isLight = document.body.classList.toggle('light-mode');
                 localStorage.setItem('gymbros_theme', isLight ? 'light' : 'dark');
-
                 var icon = document.getElementById('themeIcon');
                 if (icon) {
                     icon.classList.add('theme-icon-spin');
-                    // Troca o ícone no ponto de opacidade zero (metade da animação)
                     setTimeout(function () { setThemeIcon(isLight); }, 180);
                     icon.addEventListener('animationend', function onEnd() {
                         icon.classList.remove('theme-icon-spin');
@@ -89,7 +72,6 @@
             });
         }
 
-        // Funciona tanto se DOM ainda não carregou quanto se já carregou
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', initThemeToggle);
         } else {
@@ -97,7 +79,43 @@
         }
     })();
     </script>
-<% if (typeof user !== 'undefined' && user) { %>
+<script>
+(function () {
+    document.addEventListener('DOMContentLoaded', function () {
+        var btn     = document.getElementById('menuToggle');
+        var sidebar = document.querySelector('.aluno-sidebar');
+        var overlay = document.getElementById('sidebarOverlay');
+        if (!sidebar || !overlay) return;
+
+        var closeBtn = document.createElement('button');
+        closeBtn.className = 'aluno-sidebar-close';
+        closeBtn.setAttribute('aria-label', 'Fechar menu');
+        closeBtn.innerHTML = '<i class="fas fa-times"></i>';
+        sidebar.insertBefore(closeBtn, sidebar.firstChild);
+
+        function openMenu()  { sidebar.classList.add('open'); overlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
+        function closeMenu() { sidebar.classList.remove('open'); overlay.classList.remove('open'); document.body.style.overflow = ''; }
+
+        if (btn) btn.addEventListener('click', openMenu);
+        overlay.addEventListener('click', closeMenu);
+        closeBtn.addEventListener('click', closeMenu);
+        sidebar.querySelectorAll('a').forEach(function (a) { a.addEventListener('click', closeMenu); });
+    });
+
+    function syncLembretesComSW() {
+        if (!navigator.serviceWorker || !navigator.serviceWorker.controller) return;
+        try {
+            var agua = JSON.parse(localStorage.getItem('gymbros_lembrete_agua') || 'null');
+            var sono = JSON.parse(localStorage.getItem('gymbros_lembrete_sono') || 'null');
+            if (agua) navigator.serviceWorker.controller.postMessage({ type: 'SCHEDULE_AGUA', payload: agua });
+            if (sono) navigator.serviceWorker.controller.postMessage({ type: 'SCHEDULE_SONO', payload: sono });
+        } catch (e) {}
+    }
+    if (navigator.serviceWorker) {
+        navigator.serviceWorker.ready.then(syncLembretesComSW);
+    }
+})();
+</script>
 <style>
 @keyframes toastIn { from { opacity:0; transform:translateY(12px) scale(.96); } to { opacity:1; transform:none; } }
 @keyframes toastOut { to { opacity:0; transform:translateY(12px) scale(.96); } }
@@ -129,7 +147,4 @@
     function escHtmlToast(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 })();
 </script>
-<% } %>
-<% if (locals.user) { %>
 <%- include('./logout-modal') %>
-<% } %>
