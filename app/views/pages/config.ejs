@@ -617,22 +617,43 @@ function bufferToBase64(buffer) {
 }
 
 function credentialToJSON(credential) {
+    const response = {};
+
     if (credential.response) {
-        const response = {};
-        for (const key of Object.keys(Object.getPrototypeOf(credential.response))) {
-            const val = credential.response[key];
-            if (typeof val === 'function') continue;
-            response[key] = val instanceof ArrayBuffer ? bufferToBase64(val) : val;
+        const proto = Object.getPrototypeOf(credential.response);
+        const keys  = Object.getOwnPropertyNames(proto).filter(k => k !== 'constructor');
+
+        for (const key of keys) {
+            try {
+                const val = credential.response[key];
+                if (typeof val === 'function') continue;
+                if (val instanceof ArrayBuffer) {
+                    response[key] = bufferToBase64(val);
+                } else if (val !== undefined && val !== null) {
+                    response[key] = val;
+                }
+            } catch (_) {}
         }
-        return {
-            id:       credential.id,
-            rawId:    bufferToBase64(credential.rawId),
-            type:     credential.type,
-            response,
-            clientExtensionResults: credential.getClientExtensionResults?.() || {},
-        };
+
+        // Garantir campos obrigatórios em todos os browsers/dispositivos
+        const campos = ['clientDataJSON','attestationObject','authenticatorData','signature','userHandle'];
+        for (const campo of campos) {
+            try {
+                const val = credential.response[campo];
+                if (val instanceof ArrayBuffer && !response[campo]) {
+                    response[campo] = bufferToBase64(val);
+                }
+            } catch (_) {}
+        }
     }
-    return credential;
+
+    return {
+        id:                    credential.id,
+        rawId:                 bufferToBase64(credential.rawId),
+        type:                  credential.type,
+        response,
+        clientExtensionResults: credential.getClientExtensionResults?.() || {},
+    };
 }
 
 // Fechar modal ao clicar fora
