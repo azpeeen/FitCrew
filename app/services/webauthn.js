@@ -8,10 +8,8 @@ const {
 } = require('@simplewebauthn/server');
 
 const RP_NAME = 'GymBros';
-const RP_ID   = process.env.NODE_ENV === 'production' ? 'gymbros.app.br' : 'localhost';
-const ORIGIN  = process.env.NODE_ENV === 'production'
-    ? 'https://gymbros.app.br'
-    : 'http://localhost:3000';
+const RP_ID  = process.env.WEBAUTHN_RP_ID  || 'gymbros.app.br';
+const ORIGIN = process.env.WEBAUTHN_ORIGIN || 'https://gymbros.app.br';
 
 // base64 → base64url
 function toBase64URL(b64) {
