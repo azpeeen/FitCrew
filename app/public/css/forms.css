@@ -264,6 +264,41 @@ body {
 
 .btn:disabled { cursor: not-allowed; filter: brightness(0.9); transform: none; }
 
+/* ── Login biométrico ─────────────────────────────────────────── */
+.login-bio-divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 4px 0;
+    color: #555;
+    font-size: .8rem;
+}
+.login-bio-divider::before,
+.login-bio-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #2a2a2a;
+}
+.btn-bio-login {
+    width: 100%;
+    padding: 13px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,215,0,.3);
+    background: rgba(255,215,0,.07);
+    color: #FFD700;
+    font-size: .92rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background .2s, border-color .2s;
+}
+.btn-bio-login:hover  { background: rgba(255,215,0,.14); border-color: rgba(255,215,0,.5); }
+.btn-bio-login:disabled { opacity: .6; cursor: not-allowed; }
+
 .btn-spinner {
   display: inline-block;
   width: 22px;

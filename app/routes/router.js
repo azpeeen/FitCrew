@@ -2567,6 +2567,111 @@ router.delete('/api/nutricao/:id', requirePlano, async (req, res) => {
 });
 
 // ══════════════════════════════════════════════════════════════════
+// WEBAUTHN — login biométrico (pré-autenticação, sem requireAuth)
+// ══════════════════════════════════════════════════════════════════
+
+router.get('/api/webauthn/login/opcoes', async (req, res) => {
+    const { identifier } = req.query;
+    if (!identifier) return res.status(400).json({ erro: 'Identificador obrigatório.' });
+    try {
+        const user = await User.findActiveByIdentifier(identifier.trim());
+        if (!user?.webauthn_enabled || !user?.webauthn_credential_id) {
+            return res.status(400).json({ erro: 'Biometria não cadastrada para este usuário.' });
+        }
+        const opcoes = await webauthn.gerarOpcoesAutenticacao(user);
+        req.session.webauthnChallenge     = opcoes.challenge;
+        req.session.webauthnLoginUserId   = user.id;
+        res.json(opcoes);
+    } catch (err) {
+        console.error('[webauthn/login/opcoes]', err.message);
+        res.status(500).json({ erro: 'Erro ao gerar opções de login.' });
+    }
+});
+
+router.post('/api/webauthn/login/verificar', async (req, res) => {
+    const expectedChallenge = req.session.webauthnChallenge;
+    const userId            = req.session.webauthnLoginUserId;
+    if (!expectedChallenge || !userId) return res.status(400).json({ erro: 'Sessão expirada. Tente novamente.' });
+
+    try {
+        const [[userRow]] = await db.execute(
+            'SELECT * FROM user WHERE id=? AND webauthn_enabled=1 AND status IN (\'ativo\',\'pendente_exclusao\')',
+            [userId]
+        );
+        if (!userRow) return res.status(400).json({ erro: 'Usuário não encontrado.' });
+
+        const verificacao = await webauthn.verificarAutenticacao(
+            req.body,
+            expectedChallenge,
+            userRow.webauthn_public_key,
+            userRow.webauthn_counter,
+        );
+        if (!verificacao.verified) return res.status(400).json({ erro: 'Autenticação biométrica falhou.' });
+
+        await db.execute('UPDATE user SET webauthn_counter=? WHERE id=?',
+            [verificacao.authenticationInfo.newCounter, userId]);
+
+        req.session.webauthnChallenge   = null;
+        req.session.webauthnLoginUserId = null;
+
+        const [plano, imcRow, avalRow] = await Promise.all([
+            User.getActivePlan(userRow.id),
+            ImcProfile.findLatestByUser(userRow.id),
+            BodyPhoto.findLatestByUser(userRow.id),
+        ]);
+
+        const imcData = imcRow ? {
+            peso: imcRow.peso, altura: imcRow.altura, imcValor: imcRow.imc_valor,
+            idade: imcRow.idade, sexo: imcRow.sexo, objetivo: imcRow.objetivo,
+            experiencia: imcRow.experiencia, diasSemana: imcRow.dias_semana,
+            tempoPorSessao: imcRow.tempo_por_sessao, localTreino: imcRow.local_treino,
+            lesoes: safeJson(imcRow.lesoes, []),
+            restricoesAlimentares: safeJson(imcRow.restricoes_alimentares, []),
+            suplementacao: safeJson(imcRow.suplementacao, []),
+            hidratacao: imcRow.hidratacao, seletividade: imcRow.seletividade,
+            alimentosSeletividade: imcRow.alimentos_seletividade,
+        } : null;
+
+        const avalRaw  = avalRow ? safeJson(avalRow.analise_raw, null) : null;
+        const avalData = avalRaw ? { ...avalRaw, data: new Date(avalRow.created_at).toLocaleDateString('pt-BR') } : null;
+
+        const diasRestantesExclusao = (userRow.status === 'pendente_exclusao' && userRow.deletion_scheduled_at)
+            ? Math.ceil((new Date(userRow.deletion_scheduled_at) - Date.now()) / 86400000)
+            : null;
+
+        req.session.user = {
+            id:                         userRow.id,
+            nome:                       userRow.nome,
+            email:                      userRow.email,
+            cpf:                        userRow.cpf,
+            plano:                      plano?.nome  || null,
+            planoId:                    plano?.id    || null,
+            planoSlug:                  plano?.slug  || null,
+            profile_photo:              userRow.profile_photo || null,
+            status:                     userRow.status,
+            deletion_scheduled_at:      userRow.deletion_scheduled_at || null,
+            diasRestantesExclusao,
+            webauthn_enabled:           userRow.webauthn_enabled || 0,
+            last_imc_update:            userRow.last_imc_update  || null,
+            last_avaliacao_update:      userRow.last_avaliacao_update || null,
+            notification_interval_days: userRow.notification_interval_days || 7,
+            imc:                        imcData,
+            avaliacaoCorporal:          avalData,
+        };
+
+        broadcast('user_online', { id: userRow.id, nome: userRow.nome, email: userRow.email });
+
+        req.session.save(err => {
+            if (err) return res.status(500).json({ erro: 'Erro ao salvar sessão.' });
+            res.json({ ok: true, redirect: '/area-aluno' });
+        });
+    } catch (err) {
+        console.error('[webauthn/login/verificar]', err.message);
+        res.status(500).json({ erro: 'Erro ao verificar login biométrico: ' + err.message });
+    }
+});
+
+// ══════════════════════════════════════════════════════════════════
 // WEBAUTHN — registro de biometria
 // ══════════════════════════════════════════════════════════════════
 
