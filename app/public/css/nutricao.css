@@ -570,12 +570,225 @@ body.light-mode .nutri-item-hora { color: #9E9C9A; }
 body.light-mode .nutri-btn-analisar { background: rgba(201,139,29,.08); border-color: rgba(201,139,29,.35); color: #C98B1D; }
 body.light-mode .nutri-btn-analisar:hover { background: rgba(201,139,29,.18); }
 
+/* Nutri card genérico */
+.nutri-card {
+    background: #1f1f1f;
+    border: 1px solid #2a2a2a;
+    border-radius: 14px;
+    padding: 20px 24px;
+    margin-top: 16px;
+}
+
+/* Modal inner wrapper */
+.nutri-form-inner { display: flex; flex-direction: column; gap: 0; }
+
+/* ── Busca ───────────────────────────────────────── */
+.nutri-busca-input-row { display: flex; gap: 8px; margin-bottom: 8px; }
+.nutri-busca-input-row .nutri-input { flex: 1; margin-bottom: 0; }
+.nutri-busca-resultados { max-height: 260px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
+.nutri-busca-item {
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 8px;
+    padding: 10px 14px;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color .15s;
+    width: 100%;
+    font-family: inherit;
+}
+.nutri-busca-item:hover { border-color: #FFD700; }
+.nutri-busca-nome { font-size: .85rem; font-weight: 600; color: #fff; margin-bottom: 3px; }
+.nutri-busca-kcal { font-size: .72rem; color: #888; display: flex; align-items: center; gap: 8px; }
+.nutri-busca-fonte { padding: 1px 6px; border-radius: 4px; font-size: .65rem; font-weight: 700; }
+.nutri-fonte-usda { background: rgba(59,130,246,.2); color: #60a5fa; }
+.nutri-fonte-openfoodfacts { background: rgba(34,197,94,.2); color: #4ade80; }
+.nutri-fonte-ia { background: rgba(168,85,247,.2); color: #c084fc; }
+.nutri-busca-loading, .nutri-busca-vazio { font-size: .82rem; color: #666; text-align: center; padding: 12px; }
+
+/* Fonte badge na timeline */
+.nutri-fonte-badge {
+    display: inline-block;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: .6rem;
+    font-weight: 700;
+    vertical-align: middle;
+}
+
+/* ── Alimento selecionado ────────────────────────── */
+.nutri-alimento-card {
+    background: #111;
+    border: 1px solid #2a2a2a;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+}
+.nutri-alimento-nome { font-weight: 700; font-size: .9rem; margin-bottom: 4px; }
+.nutri-alimento-meta { font-size: .75rem; color: #888; }
+.nutri-quantidade-row { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 12px; }
+.nutri-quantidade-row > section:first-child { flex: 1; }
+.nutri-macros-preview { display: flex; align-items: center; }
+.nutri-preview-grid { display: flex; gap: 10px; flex-wrap: wrap; }
+.nutri-preview-grid section { display: flex; flex-direction: column; align-items: center; min-width: 48px; }
+.nutri-preview-grid strong { font-size: 1rem; font-weight: 800; color: #FFD700; }
+.nutri-preview-grid small { font-size: .65rem; color: #888; }
+.nutri-btn-voltar {
+    width: 100%;
+    padding: 10px;
+    background: transparent;
+    border: 1px solid #333;
+    color: #888;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: .85rem;
+    margin-top: 8px;
+    transition: border-color .2s, color .2s;
+    font-family: inherit;
+}
+.nutri-btn-voltar:hover { border-color: #FFD700; color: #FFD700; }
+
+/* ── Itens da sessão ─────────────────────────────── */
+.nutri-itens-sessao {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: #0d0d0d;
+    border: 1px solid #FFD700;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 12px;
+}
+.nutri-itens-titulo {
+    font-size: .75rem;
+    color: #FFD700;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    margin: 0 0 8px;
+}
+.nutri-item-sessao {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: .8rem;
+    color: #aaa;
+    padding: 4px 0;
+    border-bottom: 1px solid #1a1a1a;
+}
+.nutri-item-sessao:last-child { border-bottom: none; }
+.nutri-item-sessao-info { display: flex; gap: 8px; align-items: baseline; }
+.nutri-item-sessao-nome { color: #e0e0e0; }
+.nutri-item-sessao-qtd  { font-size: .75rem; color: #888; }
+.nutri-item-sessao-kcal { font-size: .75rem; color: #aaa; white-space: nowrap; }
+.nutri-itens-total { font-size: .8rem; color: #888; margin-top: 8px; }
+.nutri-btn-concluir {
+    display: block;
+    width: 100%;
+    margin-top: 12px;
+    padding: 10px;
+    background: #FFD700;
+    color: #0d0d0d;
+    border: none;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: .85rem;
+    letter-spacing: .03em;
+    cursor: pointer;
+    transition: background .15s;
+}
+.nutri-btn-concluir:hover { background: #e6c200; }
+
+/* ── Histórico ───────────────────────────────────── */
+.nutri-hist-dia {
+    background: #141414;
+    border: 1px solid #1e1e1e;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+}
+.nutri-hist-dia-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+.nutri-hist-data { font-size: .85rem; font-weight: 700; color: #fff; text-transform: capitalize; }
+.nutri-hist-total { font-size: .78rem; color: #FFD700; }
+.nutri-hist-refeicao {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px;
+    padding: 6px 0;
+    border-top: 1px solid #1e1e1e;
+}
+.nutri-hist-tipo {
+    font-size: .72rem;
+    font-weight: 700;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    min-width: 50px;
+}
+.nutri-hist-kcal { font-size: .78rem; color: #FFD700; }
+.nutri-hist-itens { display: flex; flex-wrap: wrap; gap: 6px; width: 100%; margin-top: 4px; }
+.nutri-hist-item {
+    background: #1f1f1f;
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: .72rem;
+    color: #aaa;
+}
+.nutri-pag-btn {
+    padding: 8px 20px;
+    background: transparent;
+    border: 1px solid #333;
+    border-radius: 8px;
+    color: #888;
+    cursor: pointer;
+    font-size: .82rem;
+    margin: 0 6px;
+    transition: border-color .2s, color .2s;
+    font-family: inherit;
+}
+.nutri-pag-btn:hover { border-color: #FFD700; color: #FFD700; }
+
+/* ── LIGHT MODE (new elements) ───────────────────── */
+body.light-mode .nutri-card { background: #F0EEEB; border-color: #D8D5D1; }
+body.light-mode .nutri-busca-item { background: #E0DDD9; border-color: #C9C7C4; }
+body.light-mode .nutri-busca-item:hover { border-color: #C98B1D; }
+body.light-mode .nutri-busca-nome { color: #1C1A18; }
+body.light-mode .nutri-busca-kcal { color: #7E7C7A; }
+body.light-mode .nutri-alimento-card { background: #E0DDD9; border-color: #C9C7C4; }
+body.light-mode .nutri-alimento-meta { color: #7E7C7A; }
+body.light-mode .nutri-preview-grid strong { color: #C98B1D; }
+body.light-mode .nutri-preview-grid small { color: #7E7C7A; }
+body.light-mode .nutri-btn-voltar { border-color: #C9C7C4; color: #7E7C7A; }
+body.light-mode .nutri-btn-voltar:hover { border-color: #C98B1D; color: #C98B1D; }
+body.light-mode .nutri-itens-sessao { background: #E8E6E3; border-color: #C98B1D; }
+body.light-mode .nutri-item-sessao-nome { color: #1C1A18; }
+body.light-mode .nutri-item-sessao-qtd  { color: #7E7C7A; }
+body.light-mode .nutri-item-sessao-kcal { color: #7E7C7A; }
+body.light-mode .nutri-itens-titulo { color: #C98B1D; }
+body.light-mode .nutri-item-sessao { color: #4E4C4A; border-bottom-color: #D8D5D1; }
+body.light-mode .nutri-itens-total { color: #7E7C7A; }
+body.light-mode .nutri-hist-dia { background: #E8E6E3; border-color: #D8D5D1; }
+body.light-mode .nutri-hist-data { color: #1C1A18; }
+body.light-mode .nutri-hist-total { color: #C98B1D; }
+body.light-mode .nutri-hist-refeicao { border-top-color: #D8D5D1; }
+body.light-mode .nutri-hist-tipo { color: #7E7C7A; }
+body.light-mode .nutri-hist-kcal { color: #C98B1D; }
+body.light-mode .nutri-hist-item { background: #F0EEEB; color: #4E4C4A; }
+body.light-mode .nutri-pag-btn { border-color: #C9C7C4; color: #7E7C7A; }
+body.light-mode .nutri-pag-btn:hover { border-color: #C98B1D; color: #C98B1D; }
+
 /* ── RESPONSIVE ──────────────────────────────────── */
 @media (max-width: 768px) {
     .nutri-hero         { flex-direction: column; gap: 16px; text-align: center; }
-    .nutri-form-grid    { grid-template-columns: 1fr; }
     .nutri-macros       { padding: 16px; }
     .nutri-hero-title   { font-size: 2.2rem; }
     .nutri-agua-row     { flex-direction: column; align-items: flex-start; gap: 10px; }
     .nutri-objetivo-seletor { justify-content: center; }
+    .nutri-quantidade-row { flex-direction: column; }
+    .nutri-preview-grid { justify-content: center; }
 }

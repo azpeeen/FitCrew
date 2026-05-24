@@ -10,7 +10,8 @@ const { body, validationResult } = require('express-validator');
 const { enviarBoleto }   = require('../services/email');
 const { gerarBoletoPDF } = require('../services/pdf');
 const conquistas  = require('../services/conquistas');
-const { calcularMetas } = require('../services/nutricao');
+const { calcularMetas }   = require('../services/nutricao');
+const { searchAlimento }  = require('../services/foodSearch');
 const db          = require('../config/db');
 const User        = require('../models/User');
 const Plan        = require('../models/Plan');
@@ -234,12 +235,57 @@ function safeJson(str, fallback) {
     }
 })();
 (async () => {
-    try { await db.execute("ALTER TABLE `user` ADD COLUMN nutricao_objetivo ENUM('cutting','manutencao','bulking') DEFAULT NULL"); }
-    catch (err) { if (err.errno !== 1060) console.error('[router] nutricao_objetivo:', err.message); }
+    try {
+        const [[col]] = await db.execute(`
+            SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
+            WHERE TABLE_SCHEMA = DATABASE()
+              AND TABLE_NAME = 'user'
+              AND COLUMN_NAME = 'nutricao_objetivo'
+        `);
+        if (!col) {
+            await db.execute(
+                "ALTER TABLE `user` ADD COLUMN nutricao_objetivo ENUM('cutting','manutencao','bulking') DEFAULT NULL"
+            );
+        }
+    } catch (err) {
+        console.error('[router] nutricao_objetivo:', err.message);
+    }
 })();
 (async () => {
     try { await db.execute('ALTER TABLE nutrition_log ADD COLUMN horario TIME DEFAULT NULL'); }
     catch (err) { if (err.errno !== 1060) console.error('[router] nutrition_log horario:', err.message); }
+})();
+
+// Cria tabela de itens individuais de refeição
+(async () => {
+    try {
+        await db.execute(`
+            CREATE TABLE IF NOT EXISTS nutrition_item (
+                id            INT UNSIGNED NOT NULL AUTO_INCREMENT,
+                log_id        INT UNSIGNED NOT NULL,
+                alimento_nome VARCHAR(200) NOT NULL,
+                quantidade_g  DECIMAL(8,1) NOT NULL,
+                kcal          DECIMAL(8,1) NOT NULL DEFAULT 0,
+                proteina_g    DECIMAL(8,1) NOT NULL DEFAULT 0,
+                carbs_g       DECIMAL(8,1) NOT NULL DEFAULT 0,
+                gordura_g     DECIMAL(8,1) NOT NULL DEFAULT 0,
+                fibra_g       DECIMAL(8,1) NOT NULL DEFAULT 0,
+                fonte         ENUM('usda','openfoodfacts','ia','manual') NOT NULL DEFAULT 'manual',
+                fonte_id      VARCHAR(100) NULL,
+                created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (id),
+                CONSTRAINT fk_ni_log FOREIGN KEY (log_id) REFERENCES nutrition_log(id) ON DELETE CASCADE
+            ) ENGINE=InnoDB
+        `);
+    } catch (err) { if (err.errno !== 1050) console.error('[nutrition_item]', err.message); }
+})();
+
+(async () => {
+    try {
+        await db.execute(
+            "ALTER TABLE nutrition_item MODIFY COLUMN fonte ENUM('usda','openfoodfacts','ia','manual','taco') NOT NULL DEFAULT 'manual'"
+        );
+    } catch (err) { if (err.errno !== 1060) console.error('[nutrition_item alter fonte]', err.message); }
 })();
 
 // ── Multer: upload de foto de perfil ──────────────────────────────────────────
@@ -2054,6 +2100,199 @@ router.get('/js/area-aluno.js', (req, res) => res.sendFile(path.join(__dirname, 
 // NUTRIÇÃO
 // ====================
 
+// ── Helpers de nutrição ────────────────────────────────────────────────────────
+
+async function recalcularLog(logId) {
+    await db.execute(`
+        UPDATE nutrition_log nl
+        SET
+            kcal       = (SELECT COALESCE(SUM(kcal), 0)       FROM nutrition_item WHERE log_id = ?),
+            proteina_g = (SELECT COALESCE(SUM(proteina_g), 0) FROM nutrition_item WHERE log_id = ?),
+            carbs_g    = (SELECT COALESCE(SUM(carbs_g), 0)    FROM nutrition_item WHERE log_id = ?),
+            gordura_g  = (SELECT COALESCE(SUM(gordura_g), 0)  FROM nutrition_item WHERE log_id = ?),
+            fibra_g    = (SELECT COALESCE(SUM(fibra_g), 0)    FROM nutrition_item WHERE log_id = ?)
+        WHERE nl.id = ?
+    `, [logId, logId, logId, logId, logId, logId]);
+}
+
+// ── GET /api/nutricao/buscar?q=frango&lang=pt ─────────────────────────────────
+router.get('/api/nutricao/buscar', requireAuth, async (req, res) => {
+    const query = (req.query.q || '').trim();
+    const lang  = ['pt', 'en', 'es'].includes(req.query.lang)        ? req.query.lang
+                : ['pt', 'en', 'es'].includes(req.cookies?.gymbros_lang) ? req.cookies.gymbros_lang
+                : 'pt';
+    if (query.length < 2) return res.json([]);
+    try {
+        const resultados = await searchAlimento(query, lang);
+        res.json(resultados);
+    } catch (err) {
+        console.error('[nutricao/buscar]', err.message);
+        res.status(500).json({ erro: 'Erro na busca.' });
+    }
+});
+
+// ── POST /api/nutricao/refeicao — criar/obter log da refeição do dia ──────────
+router.post('/api/nutricao/refeicao', requireAuth, async (req, res) => {
+    const { refeicao_tipo, data: dataCliente, horario: horarioCliente } = req.body;
+    const uid  = req.session.user.id;
+    const hoje = dataCliente   || new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
+    const hora = horarioCliente || new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'America/Sao_Paulo' });
+
+    const tiposValidos = ['cafe', 'almoco', 'jantar', 'lanche', 'outro'];
+    if (!tiposValidos.includes(refeicao_tipo)) {
+        return res.status(400).json({ erro: 'Tipo de refeição inválido.' });
+    }
+
+    try {
+        let [[log]] = await db.execute(
+            'SELECT id FROM nutrition_log WHERE user_id = ? AND data = ? AND refeicao_tipo = ?',
+            [uid, hoje, refeicao_tipo]
+        );
+        if (!log) {
+            const nomes = { cafe: 'Café da manhã', almoco: 'Almoço', jantar: 'Jantar', lanche: 'Lanche', outro: 'Outro' };
+            const refeicaoEnum = { cafe: 'cafe', almoco: 'almoco', jantar: 'jantar', lanche: 'lanche_tarde', outro: 'almoco' };
+            const [result] = await db.execute(
+                'INSERT INTO nutrition_log (user_id, descricao, refeicao, refeicao_tipo, registrado_em, horario, kcal, proteina_g, carbs_g, gordura_g, fibra_g) VALUES (?, ?, ?, ?, ?, ?, 0, 0, 0, 0, 0)',
+                [uid, nomes[refeicao_tipo] || 'Refeição', refeicaoEnum[refeicao_tipo] || 'almoco', refeicao_tipo, `${hoje} ${hora}`, hora]
+            );
+            log = { id: result.insertId };
+        }
+        res.json({ ok: true, log_id: log.id });
+    } catch (err) {
+        console.error('[nutricao/refeicao]', err.message);
+        res.status(500).json({ erro: 'Erro ao criar refeição.' });
+    }
+});
+
+// ── POST /api/nutricao/item — adicionar item a uma refeição ───────────────────
+router.post('/api/nutricao/item', requireAuth, async (req, res) => {
+    const uid = req.session.user.id;
+    const { log_id, alimento_nome, quantidade_g, kcal_100g, proteina_100g, carbs_100g, gordura_100g, fibra_100g, fonte, fonte_id } = req.body;
+
+    if (!log_id || !alimento_nome || !quantidade_g) {
+        return res.status(400).json({ erro: 'Campos obrigatórios ausentes.' });
+    }
+
+    const [[log]] = await db.execute(
+        'SELECT id FROM nutrition_log WHERE id = ? AND user_id = ?',
+        [log_id, uid]
+    );
+    if (!log) return res.status(404).json({ erro: 'Refeição não encontrada.' });
+
+    const fator  = Number(quantidade_g) / 100;
+    const kcal   = Math.round(Number(kcal_100g)     * fator * 10) / 10;
+    const prot   = Math.round(Number(proteina_100g) * fator * 10) / 10;
+    const carbs  = Math.round(Number(carbs_100g)    * fator * 10) / 10;
+    const gord   = Math.round(Number(gordura_100g)  * fator * 10) / 10;
+    const fibra  = Math.round(Number(fibra_100g)    * fator * 10) / 10;
+
+    try {
+        const [result] = await db.execute(
+            'INSERT INTO nutrition_item (log_id, alimento_nome, quantidade_g, kcal, proteina_g, carbs_g, gordura_g, fibra_g, fonte, fonte_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [log_id, alimento_nome.trim(), Number(quantidade_g), kcal, prot, carbs, gord, fibra, fonte || 'manual', fonte_id || null]
+        );
+        await recalcularLog(log_id);
+        const [[item]] = await db.execute('SELECT * FROM nutrition_item WHERE id = ?', [result.insertId]);
+        res.status(201).json({ ok: true, item });
+    } catch (err) {
+        console.error('[nutricao/item]', err.message);
+        res.status(500).json({ erro: 'Erro ao adicionar item.' });
+    }
+});
+
+// ── DELETE /api/nutricao/item/:id ─────────────────────────────────────────────
+router.delete('/api/nutricao/item/:id', requireAuth, async (req, res) => {
+    const uid = req.session.user.id;
+    try {
+        const [[item]] = await db.execute(
+            `SELECT ni.id, ni.log_id FROM nutrition_item ni
+             JOIN nutrition_log nl ON nl.id = ni.log_id
+             WHERE ni.id = ? AND nl.user_id = ?`,
+            [req.params.id, uid]
+        );
+        if (!item) return res.status(404).json({ erro: 'Item não encontrado.' });
+
+        await db.execute('DELETE FROM nutrition_item WHERE id = ?', [item.id]);
+        await recalcularLog(item.log_id);
+        res.json({ ok: true });
+    } catch (err) {
+        console.error('[nutricao/item/delete]', err.message);
+        res.status(500).json({ erro: 'Erro ao remover item.' });
+    }
+});
+
+// ── GET /api/nutricao/itens/:logId ───────────────────────────────────────────
+router.get('/api/nutricao/itens/:logId', requireAuth, async (req, res) => {
+    const uid = req.session.user.id;
+    try {
+        const [[log]] = await db.execute(
+            'SELECT id FROM nutrition_log WHERE id = ? AND user_id = ?',
+            [req.params.logId, uid]
+        );
+        if (!log) return res.status(404).json({ erro: 'Log não encontrado.' });
+        const [itens] = await db.execute(
+            'SELECT id, alimento_nome, quantidade_g, kcal, proteina_g, carbs_g, gordura_g, fibra_g FROM nutrition_item WHERE log_id = ? ORDER BY id ASC',
+            [req.params.logId]
+        );
+        res.json({ itens });
+    } catch (err) {
+        res.status(500).json({ erro: 'Erro ao buscar itens.' });
+    }
+});
+
+// ── GET /api/nutricao/historico?page=1 ───────────────────────────────────────
+router.get('/api/nutricao/historico', requireAuth, async (req, res) => {
+    const uid    = req.session.user.id;
+    const page   = Math.max(1, parseInt(req.query.page) || 1);
+    const limite = 10;
+    const offset = (page - 1) * limite;
+
+    try {
+        const [dias] = await db.execute(`
+            SELECT
+                nl.data,
+                SUM(nl.kcal)       AS total_kcal,
+                SUM(nl.proteina_g) AS total_prot,
+                SUM(nl.carbs_g)    AS total_carbs,
+                SUM(nl.gordura_g)  AS total_gord
+            FROM nutrition_log nl
+            WHERE nl.user_id = ?
+            GROUP BY nl.data
+            ORDER BY nl.data DESC
+            LIMIT ${Number(limite)} OFFSET ${Number(offset)}
+        `, [uid]);
+
+        for (const dia of dias) {
+            const dataStr = new Date(dia.data).toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
+            const [logs] = await db.execute(
+                `SELECT id, refeicao_tipo, horario, kcal
+                 FROM nutrition_log
+                 WHERE user_id = ? AND data = ?
+                 ORDER BY horario ASC`,
+                [uid, dataStr]
+            );
+            for (const log of logs) {
+                const [itens] = await db.execute(
+                    `SELECT id, alimento_nome, quantidade_g, kcal, proteina_g
+                     FROM nutrition_item WHERE log_id = ?`,
+                    [log.id]
+                );
+                log.itens = itens;
+            }
+            dia.logs = logs.filter(l => l.itens.length > 0);
+        }
+
+        const [[{ total }]] = await db.execute(
+            'SELECT COUNT(DISTINCT data) as total FROM nutrition_log WHERE user_id = ?', [uid]
+        );
+
+        res.json({ dias, total: Number(total), page, totalPages: Math.ceil(Number(total) / limite) });
+    } catch (err) {
+        console.error('[nutricao/historico]', err.message);
+        res.status(500).json({ erro: 'Erro ao buscar histórico.' });
+    }
+});
+
 router.get('/nutricao', requirePlano, async (req, res) => {
     const uid = req.session.user.id;
     let imc = null;
@@ -2083,13 +2322,22 @@ router.get('/nutricao', requirePlano, async (req, res) => {
     if (imcComObjetivo) metas = calcularMetas(imcComObjetivo);
 
     try {
-        [registrosHoje] = await db.execute(
+        const dataHoje = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
+        const [rows] = await db.execute(
             `SELECT * FROM nutrition_log
-             WHERE user_id = ? AND DATE(registrado_em) = CURDATE()
-               AND refeicao != 'agua'
-             ORDER BY registrado_em ASC`,
-            [uid]
+             WHERE user_id = ? AND data = ? AND refeicao != 'agua'
+             ORDER BY refeicao_tipo ASC, registrado_em ASC`,
+            [uid, dataHoje]
         );
+        for (const r of rows) {
+            const [itens] = await db.execute(
+                `SELECT id, alimento_nome AS nome, quantidade_g, kcal, proteina_g, carbs_g, gordura_g, fibra_g, fonte
+                 FROM nutrition_item WHERE log_id = ?`,
+                [r.id]
+            );
+            r.itens = itens;
+        }
+        registrosHoje = rows;
     } catch (err) { console.error('[nutricao/logs]', err); }
 
     try {
@@ -2151,7 +2399,7 @@ router.post('/api/nutricao/objetivo', requirePlano, async (req, res) => {
 
 router.post('/api/nutricao/registrar', requirePlano, async (req, res) => {
     const uid = req.session.user.id;
-    const { refeicao, refeicao_tipo, kcal, proteina_g, carbs_g, gordura_g, fibra_g, foto_url } = req.body;
+    const { refeicao, refeicao_tipo, kcal, proteina_g, carbs_g, gordura_g, fibra_g, foto_url, data: dataCliente, horario: horarioCliente } = req.body;
 
     if (!refeicao || kcal === undefined || kcal === null || kcal === '') {
         return res.status(400).json({ erro: 'Nome da refeição e calorias são obrigatórios.' });
@@ -2162,13 +2410,15 @@ router.post('/api/nutricao/registrar', requirePlano, async (req, res) => {
 
     try {
         const [result] = await db.execute(
-            `INSERT INTO nutrition_log (user_id, refeicao, refeicao_tipo, kcal, proteina_g, carbs_g, gordura_g, fibra_g, foto_url, horario)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, TIME(NOW()))`,
+            `INSERT INTO nutrition_log (user_id, refeicao, refeicao_tipo, registrado_em, kcal, proteina_g, carbs_g, gordura_g, fibra_g, foto_url, horario)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [uid, String(refeicao).trim().slice(0, 255), tipo,
+             dataCliente && horarioCliente ? `${dataCliente} ${horarioCliente}` : null,
              Math.round(Number(kcal) || 0),
              Number(proteina_g) || 0, Number(carbs_g) || 0,
              Number(gordura_g) || 0, Number(fibra_g) || 0,
-             foto_url || null]
+             foto_url || null,
+             horarioCliente || null]
         );
         const [[novoLog]] = await db.execute('SELECT * FROM nutrition_log WHERE id = ?', [result.insertId]);
         res.json({ ok: true, log: novoLog });

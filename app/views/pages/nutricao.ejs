@@ -190,8 +190,17 @@ const macros = [
 
         <!-- 5. TIMELINE DE REFEIÇÕES -->
         <% tiposRefeicao.forEach(tipo => { %>
-        <% const itens = registrosHoje.filter(r => r.refeicao_tipo === tipo.key); %>
-        <% const totalTipo = itens.reduce((a, r) => a + (Number(r.kcal) || 0), 0); %>
+        <% const logsDoTipo = registrosHoje.filter(r => r.refeicao_tipo === tipo.key); %>
+        <% const totalTipo = logsDoTipo.reduce((a, r) => a + (Number(r.kcal) || 0), 0); %>
+        <%
+        // Verifica se há algum item (novo formato) ou log legado
+        let temItensParaMostrar = false;
+        for (const r of logsDoTipo) {
+            if ((r.itens && r.itens.length > 0 && r.itens.some(i => i.id)) || (!r.itens || r.itens.length === 0)) {
+                temItensParaMostrar = true; break;
+            }
+        }
+        %>
         <section class="nutri-refeicao-grupo">
             <section class="nutri-refeicao-header" onclick="toggleRefeicao('<%= tipo.key %>')">
                 <section class="nutri-refeicao-left">
@@ -206,11 +215,38 @@ const macros = [
                 </section>
             </section>
             <section class="nutri-refeicao-itens" id="refeicao-<%= tipo.key %>">
-                <% if (itens.length === 0) { %>
+                <% if (logsDoTipo.length === 0) { %>
                 <p class="nutri-refeicao-vazio">Nenhum item registrado</p>
                 <% } else { %>
-                <% itens.forEach(r => { %>
-                <% const horaFormatada = r.horario ? String(r.horario).slice(0,5) : null; %>
+                <%
+                let contadorItens = 0;
+                logsDoTipo.forEach(r => {
+                    const temItensNovos = r.itens && r.itens.length > 0 && r.itens.some(i => i.id);
+                    if (temItensNovos) {
+                        r.itens.filter(i => i.id).forEach(item => {
+                            contadorItens++;
+                %>
+                <section class="nutri-item-linha" id="nutri-item-i-<%= item.id %>">
+                    <section class="nutri-item-info">
+                        <section class="nutri-item-texto">
+                            <span class="nutri-item-nome"><%= item.nome %></span>
+                            <span class="nutri-item-hora"><%= item.quantidade_g %>g<% if (item.fonte && item.fonte !== 'manual') { %> · <span class="nutri-fonte-badge nutri-fonte-<%= item.fonte %>"><%= item.fonte === 'usda' ? 'USDA' : item.fonte === 'openfoodfacts' ? 'OpenFF' : 'IA' %></span><% } %></span>
+                        </section>
+                    </section>
+                    <span class="nutri-item-macros">
+                        <%= Math.round(item.kcal) %> kcal<% if (Number(item.proteina_g) > 0) { %> · P:<%= parseFloat(item.proteina_g).toFixed(0) %>g<% } %>
+                    </span>
+                    <button class="nutri-item-del" onclick="deletarItem(<%= item.id %>, <%= r.id %>, '<%= tipo.key %>', <%= item.kcal||0 %>, <%= item.proteina_g||0 %>, <%= item.carbs_g||0 %>, <%= item.gordura_g||0 %>, <%= item.fibra_g||0 %>)" type="button" title="Excluir">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </section>
+                <%
+                        });
+                    } else {
+                        // Formato legado — log sem itens
+                        contadorItens++;
+                        const horaFormatada = r.horario ? String(r.horario).slice(0,5) : null;
+                %>
                 <section class="nutri-item-linha" id="nutri-item-<%= r.id %>">
                     <section class="nutri-item-info">
                         <% if (r.foto_url) { %><img src="<%= r.foto_url %>" class="nutri-item-foto" alt=""><% } %>
@@ -226,7 +262,13 @@ const macros = [
                         <i class="fas fa-trash"></i>
                     </button>
                 </section>
-                <% }) %>
+                <%
+                    }
+                });
+                if (contadorItens === 0) {
+                %>
+                <p class="nutri-refeicao-vazio">Nenhum item registrado</p>
+                <% } %>
                 <% } %>
             </section>
         </section>
@@ -256,58 +298,83 @@ const macros = [
             </section>
         </section>
 
+        <!-- 7. HISTÓRICO DE REFEIÇÕES -->
+        <section class="nutri-card" id="nutri-historico-section">
+            <section class="nutri-card-title">
+                <i class="fas fa-clock-rotate-left"></i> Histórico de Refeições
+            </section>
+            <section id="nutri-historico-lista">
+                <p style="color:#555; font-size:.85rem; text-align:center; padding:20px;">
+                    <i class="fas fa-circle-notch fa-spin"></i> Carregando...
+                </p>
+            </section>
+            <section id="nutri-historico-paginacao" style="text-align:center; margin-top:16px;"></section>
+        </section>
+
     </section><!-- /aluno-main -->
 </section><!-- /aluno-dashboard -->
 
-<!-- FORM MODAL (bottom sheet) -->
+<!-- MODAL DE BUSCA DE ALIMENTOS (bottom sheet) -->
 <section class="nutri-form-modal" id="nutri-form-modal">
-    <section class="nutri-form-header">
-        <h3 id="nutri-form-titulo">Adicionar refeição</h3>
-        <button class="nutri-form-close" onclick="fecharForm()" type="button"><i class="fas fa-times"></i></button>
-    </section>
-    <input type="hidden" id="nutri-tipo-input">
-    <section class="nutri-form-foto-row">
-        <button class="nutri-btn-foto" id="nutri-foto-btn" type="button">
-            <i class="fas fa-camera"></i> Analisar por foto
-        </button>
-        <span class="nutri-foto-status" id="nutri-foto-status"></span>
-        <input type="file" id="nutri-foto-input" accept="image/*" capture="environment" style="display:none">
-    </section>
-    <section class="nutri-peso-wrapper" id="nutri-peso-wrapper" style="display:none">
-        <label class="nutri-label">Peso da porção (g) <span class="nutri-label-hint">— opcional, melhora a análise</span></label>
-        <section class="nutri-peso-row">
-            <input type="number" id="nutri-peso-g" class="nutri-input" placeholder="Ex: 200" min="1" step="1" style="margin-bottom:0;flex:1">
-            <button class="nutri-btn-analisar" id="nutri-btn-analisar" type="button">
-                <i class="fas fa-magnifying-glass"></i> Analisar
+    <section class="nutri-form-inner">
+        <section class="nutri-form-header">
+            <h3 id="nutri-form-titulo">Adicionar alimento</h3>
+            <button class="nutri-form-close" onclick="fecharForm()" type="button"><i class="fas fa-times"></i></button>
+        </section>
+
+        <!-- Busca de alimentos -->
+        <section class="nutri-busca-wrapper" id="nutri-busca-wrapper">
+            <section class="nutri-busca-input-row">
+                <input type="text" id="nutri-busca-input" class="nutri-input"
+                       placeholder="Buscar alimento... (ex: frango, arroz, banana)"
+                       autocomplete="off">
+                <button class="nutri-btn-foto" id="nutri-foto-btn" type="button">
+                    <i class="fas fa-camera"></i>
+                </button>
+                <input type="file" id="nutri-foto-input" accept="image/*" capture="environment" style="display:none">
+            </section>
+            <section id="nutri-busca-resultados" class="nutri-busca-resultados"></section>
+        </section>
+
+        <!-- Alimento selecionado + quantidade -->
+        <section id="nutri-alimento-selecionado" style="display:none">
+            <section class="nutri-alimento-card" id="nutri-alimento-info"></section>
+            <section class="nutri-quantidade-row">
+                <section id="nutri-quantidade-wrapper" style="flex:1">
+                    <!-- Preenchido dinamicamente pelo JS conforme o alimento -->
+                </section>
+                <section class="nutri-macros-preview" id="nutri-macros-preview"></section>
+            </section>
+            <button class="nutri-btn-salvar" id="nutri-add-item-btn" type="button">
+                <i class="fas fa-plus"></i> Adicionar à refeição
+            </button>
+            <button class="nutri-btn-voltar" onclick="voltarBusca()" type="button">
+                <i class="fas fa-arrow-left"></i> Buscar outro alimento
             </button>
         </section>
+
+        <!-- Lista de itens adicionados na sessão atual -->
+        <section id="nutri-itens-sessao" class="nutri-itens-sessao" style="display:none">
+            <h4 class="nutri-itens-titulo">Adicionados nesta refeição</h4>
+            <section id="nutri-itens-lista"></section>
+            <section class="nutri-itens-total" id="nutri-itens-total"></section>
+            <button class="nutri-btn-concluir" onclick="fecharForm()" type="button">
+                <i class="fas fa-check"></i> Concluir refeição
+            </button>
+        </section>
+
+        <!-- Peso para foto com IA -->
+        <section id="nutri-peso-wrapper" style="display:none">
+            <label class="nutri-label">Peso aproximado do alimento (g) *</label>
+            <section style="display:flex; gap:10px; align-items:center;">
+                <input type="number" id="nutri-peso-alimento" class="nutri-input"
+                       placeholder="Ex: 300" min="1" style="margin-bottom:0">
+                <button class="nutri-btn-salvar" id="nutri-analisar-btn" type="button" style="width:auto; padding:10px 18px; white-space:nowrap;">
+                    <i class="fas fa-search"></i> Analisar
+                </button>
+            </section>
+        </section>
     </section>
-    <input type="text" id="nutri-refeicao" class="nutri-input" placeholder="Nome do alimento / refeição *">
-    <section class="nutri-form-grid">
-        <section>
-            <label class="nutri-label">Calorias (kcal) *</label>
-            <input type="number" id="nutri-kcal" class="nutri-input" placeholder="350" min="0">
-        </section>
-        <section>
-            <label class="nutri-label">Proteína (g)</label>
-            <input type="number" id="nutri-proteina" class="nutri-input" placeholder="30" min="0" step="0.1">
-        </section>
-        <section>
-            <label class="nutri-label">Carboidrato (g)</label>
-            <input type="number" id="nutri-carbs" class="nutri-input" placeholder="45" min="0" step="0.1">
-        </section>
-        <section>
-            <label class="nutri-label">Gordura (g)</label>
-            <input type="number" id="nutri-gordura" class="nutri-input" placeholder="12" min="0" step="0.1">
-        </section>
-        <section>
-            <label class="nutri-label">Fibra (g)</label>
-            <input type="number" id="nutri-fibra" class="nutri-input" placeholder="3" min="0" step="0.1">
-        </section>
-    </section>
-    <button class="nutri-btn-salvar" id="nutri-salvar" type="button">
-        <i class="fas fa-check"></i> Registrar
-    </button>
 </section>
 <section class="nutri-modal-overlay" id="nutri-overlay" onclick="fecharForm()"></section>
 
@@ -325,20 +392,20 @@ window._TOTAIS_HOJE = <%- JSON.stringify(totaisHoje) %>;
 const _METAS  = window._METAS;
 const _totais = { ...window._TOTAIS_HOJE };
 
-// ── XSS helper ────────────────────────────────────────────────
+// ── XSS helper ────────────────────────────────────────
 function esc(s) {
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-// ── Ring SVG ──────────────────────────────────────────────────
+// ── Ring SVG ──────────────────────────────────────────
 function atualizarRing(kcalAtual) {
-    const meta    = _METAS.kcal;
-    const pct     = Math.min(1, meta > 0 ? kcalAtual / meta : 0);
-    const offset  = Math.round(314 * (1 - pct));
-    const circle  = document.getElementById('kcalRingCircle');
-    const pctEl   = document.getElementById('kcalRingPct');
-    const restEl  = document.getElementById('kcalRestantes');
-    const subEl   = document.getElementById('heroSub');
+    const meta   = _METAS.kcal;
+    const pct    = Math.min(1, meta > 0 ? kcalAtual / meta : 0);
+    const offset = Math.round(314 * (1 - pct));
+    const circle = document.getElementById('kcalRingCircle');
+    const pctEl  = document.getElementById('kcalRingPct');
+    const restEl = document.getElementById('kcalRestantes');
+    const subEl  = document.getElementById('heroSub');
     if (circle) {
         circle.setAttribute('stroke-dashoffset', offset);
         circle.setAttribute('stroke', kcalAtual > meta ? '#e74c3c' : '#FFD700');
@@ -348,7 +415,7 @@ function atualizarRing(kcalAtual) {
     if (subEl)  subEl.textContent  = `${kcalAtual} consumidas · ${meta} meta`;
 }
 
-// ── Barras de macro ───────────────────────────────────────────
+// ── Barras de macro ───────────────────────────────────
 const _macroConfig = {
     proteina: { meta: _METAS.proteina, unit: 'g', cor: '#FFD700' },
     carbs:    { meta: _METAS.carbs,    unit: 'g', cor: '#4fc3f7' },
@@ -368,7 +435,7 @@ function atualizarMacroBar(key, valor) {
     if (msg)  msg.textContent  = valor >= cfg.meta ? '✓ meta atingida' : `faltam ${(cfg.meta - valor).toFixed(1)}${cfg.unit}`;
 }
 
-// ── Insight ───────────────────────────────────────────────────
+// ── Insight ───────────────────────────────────────────
 function gerarInsight() {
     const faltaKcal  = Math.max(0, _METAS.kcal      - _totais.kcal);
     const faltaProt  = Math.max(0, _METAS.proteina  - _totais.proteina);
@@ -378,7 +445,6 @@ function gerarInsight() {
     if (faltaFibra >  5)  msgs.push(`faltam <strong>${faltaFibra.toFixed(0)}g de fibra</strong>`);
     if (faltaKcal  > 200) msgs.push(`faltam <strong>${faltaKcal} kcal</strong> para a meta`);
     if (_totais.kcal > _METAS.kcal) msgs.push(`você passou <strong>${_totais.kcal - _METAS.kcal} kcal</strong> da meta hoje`);
-
     const el = document.getElementById('nutri-insight');
     if (!el) return;
     if (msgs.length === 0) {
@@ -388,7 +454,7 @@ function gerarInsight() {
     }
 }
 
-// ── Atualizar totais (após add/delete) ────────────────────────
+// ── Atualizar totais (após add/delete) ────────────────
 function atualizarTotais(dKcal, dProt, dCarbs, dGord, dFibra) {
     _totais.kcal     = Math.max(0, _totais.kcal     + dKcal);
     _totais.proteina = Math.max(0, _totais.proteina + dProt);
@@ -400,29 +466,25 @@ function atualizarTotais(dKcal, dProt, dCarbs, dGord, dFibra) {
     gerarInsight();
 }
 
-// ── Água (localStorage) ───────────────────────────────────────
+// ── Água (localStorage) ───────────────────────────────
 const AGUA_KEY     = 'gymbros_agua_' + new Date().toLocaleDateString('en-CA');
 const AGUA_VOL_KEY = 'gymbros_agua_vol';
 
 function aguaVolume() {
     return parseInt(document.getElementById('aguaVolumeSelect').value) || 250;
 }
-
 function salvarVolume() {
     localStorage.setItem(AGUA_VOL_KEY, aguaVolume());
     updateAguaUI();
 }
-
 function getAgua() {
     return parseInt(localStorage.getItem(AGUA_KEY) || '0');
 }
-
 function ajustarAgua(delta) {
     const novo = Math.max(0, getAgua() + delta);
     localStorage.setItem(AGUA_KEY, novo);
     updateAguaUI();
 }
-
 function updateAguaUI() {
     const ml   = getAgua();
     const meta = _METAS.agua;
@@ -430,123 +492,21 @@ function updateAguaUI() {
     const vol  = aguaVolume();
     const qtd  = Math.round(ml / vol);
     const litros = (ml / 1000).toFixed(2).replace(/\.?0+$/, '') + 'L';
-
     const elAtual = document.getElementById('aguaAtual');
     const elFill  = document.getElementById('aguaFill');
     const elCopos = document.getElementById('aguaCopos');
-
     if (elAtual) elAtual.textContent = litros;
     if (elFill)  elFill.style.width  = pct + '%';
     if (elCopos) elCopos.textContent = qtd === 0 ? '0 registros' : `${qtd} × ${vol}ml`;
 }
 
-// ── Toggle seção de refeição ──────────────────────────────────
+// ── Toggle seção de refeição ──────────────────────────
 function toggleRefeicao(tipo) {
     const el = document.getElementById(`refeicao-${tipo}`);
     if (el) el.style.display = el.style.display === 'none' ? '' : 'none';
 }
 
-// ── Modal / bottom sheet ──────────────────────────────────────
-const _tipoLabels = { cafe:'Café da manhã', almoco:'Almoço', jantar:'Jantar', lanche:'Lanche', outro:'Outro' };
-
-function abrirForm(tipo) {
-    document.getElementById('nutri-tipo-input').value = tipo;
-    const tituloEl = document.getElementById('nutri-form-titulo');
-    if (tituloEl) tituloEl.textContent = `Adicionar · ${_tipoLabels[tipo] || tipo}`;
-    ['nutri-refeicao','nutri-kcal','nutri-proteina','nutri-carbs','nutri-gordura','nutri-fibra','nutri-peso-g']
-        .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
-    _pendingFotoFile = null;
-    const pesoWrapper = document.getElementById('nutri-peso-wrapper');
-    if (pesoWrapper) pesoWrapper.style.display = 'none';
-    document.getElementById('nutri-foto-status').textContent = '';
-    document.getElementById('nutri-form-modal').classList.add('open');
-    document.getElementById('nutri-overlay').classList.add('open');
-    document.body.style.overflow = 'hidden';
-    setTimeout(() => { const el = document.getElementById('nutri-refeicao'); if (el) el.focus(); }, 280);
-}
-
-function fecharForm() {
-    document.getElementById('nutri-form-modal').classList.remove('open');
-    document.getElementById('nutri-overlay').classList.remove('open');
-    document.body.style.overflow = '';
-    _pendingFotoFile = null;
-    const pesoWrapper = document.getElementById('nutri-peso-wrapper');
-    if (pesoWrapper) pesoWrapper.style.display = 'none';
-    document.getElementById('nutri-foto-status').textContent = '';
-}
-
-// ── Salvar refeição ───────────────────────────────────────────
-document.getElementById('nutri-salvar').addEventListener('click', async function () {
-    const nome = document.getElementById('nutri-refeicao').value.trim();
-    const kcal = document.getElementById('nutri-kcal').value;
-    if (!nome || !kcal) { document.getElementById('nutri-refeicao').focus(); return; }
-
-    this.disabled = true;
-    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
-
-    const tipo = document.getElementById('nutri-tipo-input').value || 'outro';
-    const body = {
-        refeicao:     nome,
-        refeicao_tipo: tipo,
-        kcal:         Number(kcal) || 0,
-        proteina_g:   Number(document.getElementById('nutri-proteina').value) || 0,
-        carbs_g:      Number(document.getElementById('nutri-carbs').value)    || 0,
-        gordura_g:    Number(document.getElementById('nutri-gordura').value)  || 0,
-        fibra_g:      Number(document.getElementById('nutri-fibra').value)    || 0,
-        foto_url:     _pendingFotoUrl || null,
-    };
-
-    try {
-        const res  = await fetch('/api/nutricao/registrar', {
-            method:  'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body:    JSON.stringify(body),
-        });
-        const data = await res.json();
-        if (data.ok) {
-            adicionarItemTimeline(data.log, tipo);
-            atualizarTotais(body.kcal, body.proteina_g, body.carbs_g, body.gordura_g, body.fibra_g);
-            atualizarKcalTipo(tipo, body.kcal);
-            _pendingFotoUrl = null;
-            fecharForm();
-        } else {
-            alert(data.erro || 'Erro ao registrar.');
-        }
-    } catch (_) {
-        alert('Erro de rede.');
-    } finally {
-        this.disabled = false;
-        this.innerHTML = '<i class="fas fa-check"></i> Registrar';
-    }
-});
-
-// ── Adicionar item na timeline ────────────────────────────────
-function adicionarItemTimeline(log, tipo) {
-    const container = document.getElementById(`refeicao-${tipo}`);
-    if (!container) return;
-    const vazio = container.querySelector('.nutri-refeicao-vazio');
-    if (vazio) vazio.remove();
-
-    const item = document.createElement('section');
-    item.className = 'nutri-item-linha';
-    item.id = `nutri-item-${log.id}`;
-    const horaHtml = log.horario ? `<span class="nutri-item-hora">${esc(String(log.horario).slice(0,5))}</span>` : '';
-    item.innerHTML = `
-        ${log.foto_url ? `<img src="${esc(log.foto_url)}" class="nutri-item-foto" alt="">` : ''}
-        <section class="nutri-item-info">
-            <section class="nutri-item-texto">
-                <span class="nutri-item-nome">${esc(log.refeicao)}</span>
-                ${horaHtml}
-            </section>
-        </section>
-        <span class="nutri-item-macros">${log.kcal} kcal${Number(log.proteina_g) > 0 ? ` · P:${parseFloat(log.proteina_g).toFixed(0)}g` : ''}</span>
-        <button class="nutri-item-del" onclick="deletarRegistro(${Number(log.id)},'${tipo}',${log.kcal||0},${log.proteina_g||0},${log.carbs_g||0},${log.gordura_g||0},${log.fibra_g||0})" type="button" title="Excluir">
-            <i class="fas fa-trash"></i>
-        </button>`;
-    container.appendChild(item);
-}
-
-// ── Atualizar kcal por tipo na header ─────────────────────────
+// ── Kcal por tipo ─────────────────────────────────────
 const _kcalPorTipo = {};
 function atualizarKcalTipo(tipo, delta) {
     _kcalPorTipo[tipo] = (_kcalPorTipo[tipo] || 0) + delta;
@@ -554,7 +514,7 @@ function atualizarKcalTipo(tipo, delta) {
     if (el) el.textContent = `${Math.max(0, _kcalPorTipo[tipo])} kcal`;
 }
 
-// ── Deletar registro ──────────────────────────────────────────
+// ── Deletar registro legado ───────────────────────────
 async function deletarRegistro(id, tipo, kcal, prot, carbs, gord, fibra) {
     const el = document.getElementById(`nutri-item-${id}`);
     if (!el) return;
@@ -572,70 +532,33 @@ async function deletarRegistro(id, tipo, kcal, prot, carbs, gord, fibra) {
                     container.innerHTML = '<p class="nutri-refeicao-vazio">Nenhum item registrado</p>';
                 }
             }, 200);
-        } else {
-            el.style.cssText = '';
-        }
-    } catch (_) {
-        el.style.cssText = '';
-    }
+        } else { el.style.cssText = ''; }
+    } catch (_) { el.style.cssText = ''; }
 }
 
-// ── Foto → Groq Vision (two-step: select → peso → analisar) ──
-let _pendingFotoUrl  = null;
-let _pendingFotoFile = null;
-
-document.getElementById('nutri-foto-btn').addEventListener('click', function () {
-    document.getElementById('nutri-foto-input').click();
-});
-
-document.getElementById('nutri-foto-input').addEventListener('change', function () {
-    if (!this.files[0]) return;
-    _pendingFotoFile = this.files[0];
-    const pesoWrapper = document.getElementById('nutri-peso-wrapper');
-    if (pesoWrapper) pesoWrapper.style.display = '';
-    document.getElementById('nutri-foto-status').textContent = 'Foto selecionada — informe o peso e clique em Analisar.';
-    this.value = '';
-});
-
-document.getElementById('nutri-btn-analisar').addEventListener('click', async function () {
-    if (!_pendingFotoFile) return;
-    const status = document.getElementById('nutri-foto-status');
-    status.textContent = 'Analisando...';
-    this.disabled = true;
-
-    const pesoG = document.getElementById('nutri-peso-g')?.value || '';
-    const fd = new FormData();
-    fd.append('foto', _pendingFotoFile);
-    if (pesoG) fd.append('peso_g', pesoG);
-
+// ── Deletar item do novo sistema ──────────────────────
+async function deletarItem(itemId, logId, tipo, kcal, prot, carbs, gord, fibra) {
+    const el = document.getElementById(`nutri-item-i-${itemId}`);
+    if (!el) return;
+    el.style.cssText = 'opacity:0;transform:translateX(20px);transition:opacity .2s,transform .2s;';
     try {
-        const res  = await fetch('/api/nutricao/foto', { method: 'POST', body: fd });
+        const res  = await fetch(`/api/nutricao/item/${itemId}`, { method: 'DELETE' });
         const data = await res.json();
-        if (data.ok && data.analise) {
-            const a = data.analise;
-            if (a.refeicao)   document.getElementById('nutri-refeicao').value  = a.refeicao;
-            if (a.kcal)       document.getElementById('nutri-kcal').value      = a.kcal;
-            if (a.proteina_g) document.getElementById('nutri-proteina').value  = a.proteina_g;
-            if (a.carbs_g)    document.getElementById('nutri-carbs').value     = a.carbs_g;
-            if (a.gordura_g)  document.getElementById('nutri-gordura').value   = a.gordura_g;
-            if (a.fibra_g)    document.getElementById('nutri-fibra').value     = a.fibra_g;
-            _pendingFotoUrl  = data.fotoUrl || null;
-            _pendingFotoFile = null;
-            status.textContent = 'Pronto!';
-            const pesoWrapper = document.getElementById('nutri-peso-wrapper');
-            if (pesoWrapper) pesoWrapper.style.display = 'none';
-        } else {
-            status.textContent = 'Não foi possível analisar.';
-        }
-    } catch (_) {
-        status.textContent = 'Erro ao enviar.';
-    } finally {
-        this.disabled = false;
-    }
-    setTimeout(() => status.textContent = '', 4000);
-});
+        if (data.ok) {
+            setTimeout(() => {
+                el.remove();
+                atualizarTotais(-kcal, -prot, -carbs, -gord, -fibra);
+                atualizarKcalTipo(tipo, -kcal);
+                const container = document.getElementById(`refeicao-${tipo}`);
+                if (container && !container.querySelector('.nutri-item-linha')) {
+                    container.innerHTML = '<p class="nutri-refeicao-vazio">Nenhum item registrado</p>';
+                }
+            }, 200);
+        } else { el.style.cssText = ''; }
+    } catch (_) { el.style.cssText = ''; }
+}
 
-// ── Objetivo nutricional ──────────────────────────────────────
+// ── Objetivo nutricional ──────────────────────────────
 async function setObjetivo(objetivo) {
     document.querySelectorAll('.nutri-obj-btn').forEach(b => b.classList.remove('active'));
     const btn = document.querySelector(`.nutri-obj-btn[onclick*="'${objetivo}'"]`);
@@ -650,9 +573,489 @@ async function setObjetivo(objetivo) {
     } catch (_) {}
 }
 
-// ── Init ──────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+// NOVO MODAL DE BUSCA DE ALIMENTOS
+// ═══════════════════════════════════════════════════════
+
+function getLocalDatetime() {
+    const now = new Date();
+    const data    = now.toLocaleDateString('en-CA');
+    const horario = now.toTimeString().slice(0, 8);
+    return { data, horario };
+}
+
+let _logIdAtual    = null;
+let _alimentoAtual = null;
+let _itensSessao   = [];
+let _fotoFile      = null;
+let _searchTimeout = null;
+let _tipoAtual     = null;
+
+async function abrirForm(tipo) {
+    const modal = document.getElementById('nutri-form-modal');
+    // Só resetar contexto se trocar de tipo
+    if (modal.dataset.tipo !== tipo) {
+        _logIdAtual  = null;
+        _itensSessao = [];
+    }
+    _tipoAtual = tipo;
+    modal.dataset.tipo = tipo;
+    const labels = { cafe:'Café da manhã', almoco:'Almoço', jantar:'Jantar', lanche:'Lanche', outro:'Outro' };
+    document.getElementById('nutri-form-titulo').textContent = labels[tipo] || 'Refeição';
+    modal.classList.add('open');
+    document.getElementById('nutri-overlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    resetarBusca();
+    setTimeout(() => { const el = document.getElementById('nutri-busca-input'); if (el) el.focus(); }, 280);
+
+    if (!_logIdAtual) {
+        try {
+            const r = await fetch('/api/nutricao/refeicao', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ refeicao_tipo: tipo, ...getLocalDatetime() }),
+            });
+            const d = await r.json();
+            if (d.ok) {
+                _logIdAtual = d.log_id;
+                const ri = await fetch('/api/nutricao/itens/' + d.log_id);
+                const di = await ri.json();
+                if (di.itens && di.itens.length) {
+                    _itensSessao = di.itens.map(i => ({ ...i, _nome: i.alimento_nome }));
+                    atualizarItensSessao();
+                }
+            }
+        } catch (_) {}
+    }
+}
+
+function fecharForm() {
+    document.getElementById('nutri-form-modal').classList.remove('open');
+    document.getElementById('nutri-overlay').classList.remove('open');
+    document.body.style.overflow = '';
+    if (_itensSessao.length > 0) location.reload();
+}
+
+function resetarBusca() {
+    _alimentoAtual = null;
+    const inp = document.getElementById('nutri-busca-input');
+    if (inp) inp.value = '';
+    document.getElementById('nutri-busca-resultados').innerHTML = '';
+    document.getElementById('nutri-alimento-selecionado').style.display = 'none';
+    document.getElementById('nutri-busca-wrapper').style.display = 'block';
+    document.getElementById('nutri-peso-wrapper').style.display  = 'none';
+    atualizarItensSessao();
+}
+
+function voltarBusca() {
+    _alimentoAtual = null;
+    document.getElementById('nutri-alimento-selecionado').style.display = 'none';
+    document.getElementById('nutri-busca-wrapper').style.display = 'block';
+    // Limpar busca anterior mas manter itens já adicionados na sessão
+    const inp = document.getElementById('nutri-busca-input');
+    if (inp) inp.value = '';
+    document.getElementById('nutri-busca-resultados').innerHTML = '';
+    if (inp) inp.focus();
+    atualizarItensSessao();
+}
+
+let _searchAbortCtrl = null;
+
+// Busca com debounce
+document.getElementById('nutri-busca-input').addEventListener('input', function () {
+    clearTimeout(_searchTimeout);
+    if (_searchAbortCtrl) { _searchAbortCtrl.abort(); _searchAbortCtrl = null; }
+    const q = this.value.trim();
+    if (q.length < 2) {
+        document.getElementById('nutri-busca-resultados').innerHTML = '';
+        return;
+    }
+    document.getElementById('nutri-busca-resultados').innerHTML =
+        '<p class="nutri-busca-loading"><i class="fas fa-circle-notch fa-spin"></i> Buscando...</p>';
+    _searchTimeout = setTimeout(() => buscarAlimento(q), 400);
+});
+
+async function buscarAlimento(q) {
+    _searchAbortCtrl = new AbortController();
+    const lang = (document.documentElement.lang || 'pt').slice(0, 2);
+    try {
+        const res  = await fetch(
+            '/api/nutricao/buscar?q=' + encodeURIComponent(q) + '&lang=' + lang,
+            { signal: _searchAbortCtrl.signal }
+        );
+        const data = await res.json();
+        const el   = document.getElementById('nutri-busca-resultados');
+        if (!data.length) {
+            el.innerHTML = '<p class="nutri-busca-vazio">Nenhum resultado. Tente outro termo ou use a câmera.</p>';
+            return;
+        }
+        el.innerHTML = data.map((a, i) => `
+            <button class="nutri-busca-item" onclick="selecionarAlimento(${i})" type="button">
+                <section class="nutri-busca-nome">${esc(a.nome)}</section>
+                <section class="nutri-busca-kcal">${Math.round(a.por100g.kcal)} kcal/100g</section>
+            </button>
+        `).join('');
+        el.dataset.resultados = JSON.stringify(data);
+    } catch (e) {
+        if (e.name === 'AbortError') return;
+        document.getElementById('nutri-busca-resultados').innerHTML =
+            '<p class="nutri-busca-vazio">Erro na busca.</p>';
+    }
+}
+
+// ── Alimentos contáveis ───────────────────────────────
+const _alimentosContaveis = [
+    'egg', 'ovo', 'ovos', 'bread', 'pão', 'pao', 'biscuit', 'bolacha',
+    'cookie', 'biscoito', 'cracker', 'wafer', 'tortilla', 'wrap',
+    'muffin', 'pancake', 'waffle', 'bagel', 'croissant', 'torrada', 'toast',
+];
+
+function isContavel(nomeAlimento) {
+    const n = nomeAlimento.toLowerCase();
+    return _alimentosContaveis.some(c => n.includes(c));
+}
+
+function getPesoUnitario(nome) {
+    const n = (nome || '').toLowerCase()
+        .normalize('NFD').replace(/[̀-ͯ]/g, '');
+    if (n.includes('ovo') || n.includes('egg'))                                                         return 60;
+    if (n.includes('pao frances') || n.includes('french bread') || n.includes('pao, frances'))          return 50;
+    if (n.includes('pao') || n.includes('bread'))                                                       return 50;
+    if (n.includes('bolacha') || n.includes('biscoito') || n.includes('cookie') || n.includes('cracker')) return 10;
+    if (n.includes('torrada') || n.includes('toast'))                                                   return 12;
+    if (n.includes('omelete'))                                                                          return 60;
+    if (n.includes('nugget'))                                                                           return 20;
+    if (n.includes('muffin'))                                                                           return 80;
+    if (n.includes('bagel'))                                                                            return 100;
+    if (n.includes('croissant'))                                                                        return 60;
+    return null;
+}
+
+function atualizarPreview() {
+    if (!_alimentoAtual) return;
+    const g = Number(document.getElementById('nutri-quantidade')?.value);
+    const el = document.getElementById('nutri-macros-preview');
+    if (!el) return;
+    if (!g) { el.innerHTML = ''; return; }
+    const f = g / 100;
+    const a = _alimentoAtual.por100g;
+    el.innerHTML = `
+        <section class="nutri-preview-grid">
+            <section><strong>${Math.round(a.kcal * f)}</strong><small>kcal</small></section>
+            <section><strong>${(a.proteina * f).toFixed(1)}g</strong><small>prot</small></section>
+            <section><strong>${(a.carbs * f).toFixed(1)}g</strong><small>carbs</small></section>
+            <section><strong>${(a.gordura * f).toFixed(1)}g</strong><small>gord</small></section>
+        </section>
+    `;
+}
+
+function renderizarCampoQuantidade() {
+    const wrapper     = document.getElementById('nutri-quantidade-wrapper');
+    const contavel    = isContavel(_alimentoAtual.nome);
+    const pesoUnit    = getPesoUnitario(_alimentoAtual.nome);
+
+    if (contavel) {
+        wrapper.innerHTML = `
+            <section style="display:flex; gap:10px; margin-bottom:4px;">
+                <section style="flex:1">
+                    <label class="nutri-label">Unidades</label>
+                    <input type="number" id="nutri-unidades" class="nutri-input"
+                           placeholder="Ex: 2" min="1" step="1" style="margin-bottom:0">
+                </section>
+                <section style="flex:1">
+                    <label class="nutri-label">ou Gramas (g)</label>
+                    <input type="number" id="nutri-quantidade" class="nutri-input"
+                           placeholder="Ex: 120" min="1" max="5000" style="margin-bottom:0">
+                </section>
+            </section>
+            <small style="color:#555; font-size:.7rem; display:block; margin-bottom:8px;">
+                Preencha unidades${pesoUnit ? ` (1 unid. ≈ ${pesoUnit}g)` : ''} OU gramas — ao menos um é obrigatório
+            </small>
+        `;
+        if (pesoUnit) {
+            setTimeout(() => {
+                const unEl = document.getElementById('nutri-unidades');
+                if (unEl) {
+                    unEl.addEventListener('input', function () {
+                        const un = Number(this.value);
+                        if (un > 0) {
+                            const g = Math.round(un * pesoUnit);
+                            document.getElementById('nutri-quantidade').value = g;
+                            atualizarPreview();
+                        }
+                    });
+                }
+            }, 50);
+        }
+    } else {
+        wrapper.innerHTML = `
+            <label class="nutri-label">Quantidade (g ou ml) *</label>
+            <input type="number" id="nutri-quantidade" class="nutri-input"
+                   placeholder="Ex: 300" min="1" max="5000" style="margin-bottom:0">
+        `;
+    }
+
+    setTimeout(() => {
+        const el = document.getElementById('nutri-quantidade');
+        if (el) {
+            el.addEventListener('input', atualizarPreview);
+            el.focus();
+        }
+    }, 50);
+}
+
+function selecionarAlimento(idx) {
+    const resultadosRaw = document.getElementById('nutri-busca-resultados').dataset.resultados;
+    if (!resultadosRaw) return;
+    const resultados = JSON.parse(resultadosRaw);
+    if (idx >= 0) _alimentoAtual = resultados[idx];
+    if (!_alimentoAtual) return;
+
+    document.getElementById('nutri-busca-wrapper').style.display = 'none';
+    document.getElementById('nutri-alimento-selecionado').style.display = 'block';
+    document.getElementById('nutri-macros-preview').innerHTML = '';
+
+    const a = _alimentoAtual.por100g;
+    document.getElementById('nutri-alimento-info').innerHTML = `
+        <section class="nutri-alimento-nome">${esc(_alimentoAtual.nome)}</section>
+        <section class="nutri-alimento-meta">
+            Por 100g: ${Math.round(a.kcal)} kcal ·
+            P: ${a.proteina.toFixed(1)}g ·
+            C: ${a.carbs.toFixed(1)}g ·
+            G: ${a.gordura.toFixed(1)}g
+        </section>
+    `;
+    renderizarCampoQuantidade();
+}
+
+// Adicionar item
+document.getElementById('nutri-add-item-btn').addEventListener('click', async () => {
+    const inputUnidades = document.getElementById('nutri-unidades');
+    const inputGramas   = document.getElementById('nutri-quantidade');
+    const tipo = document.getElementById('nutri-form-modal').dataset.tipo;
+
+    let g = Number(inputGramas?.value);
+
+    if ((!g || g <= 0) && inputUnidades) {
+        const unidades = Number(inputUnidades.value);
+        if (unidades > 0) {
+            const pesoUnit = getPesoUnitario(_alimentoAtual?.nome || '');
+            if (pesoUnit) {
+                g = unidades * pesoUnit;
+                if (inputGramas) inputGramas.value = g;
+            } else {
+                alert('Para este alimento, informe o peso em gramas.');
+                inputGramas?.focus();
+                return;
+            }
+        }
+    }
+
+    if (!g || g <= 0) { alert('Informe a quantidade em gramas ou o número de unidades.'); return; }
+    if (!_alimentoAtual) return;
+
+    const btn = document.getElementById('nutri-add-item-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Salvando...';
+
+    try {
+        if (!_logIdAtual) {
+            const r = await fetch('/api/nutricao/refeicao', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ refeicao_tipo: tipo, ...getLocalDatetime() }),
+            });
+            const d = await r.json();
+            if (!d.ok) { alert('Erro ao criar refeição.'); return; }
+            _logIdAtual = d.log_id;
+        }
+
+        const a = _alimentoAtual.por100g;
+        const res = await fetch('/api/nutricao/item', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                log_id:        _logIdAtual,
+                alimento_nome: _alimentoAtual.nome,
+                quantidade_g:  g,
+                kcal_100g:     a.kcal,
+                proteina_100g: a.proteina,
+                carbs_100g:    a.carbs,
+                gordura_100g:  a.gordura,
+                fibra_100g:    a.fibra,
+                fonte:         _alimentoAtual.fonte,
+                fonte_id:      _alimentoAtual.id,
+            }),
+        });
+        const data = await res.json();
+        if (!data.ok) { alert(data.erro || 'Erro ao adicionar item.'); return; }
+
+        const f = g / 100;
+        _itensSessao.push({ ...data.item, _nome: _alimentoAtual.nome });
+        atualizarTotais(
+            Math.round(a.kcal * f),
+            parseFloat((a.proteina * f).toFixed(1)),
+            parseFloat((a.carbs   * f).toFixed(1)),
+            parseFloat((a.gordura * f).toFixed(1)),
+            parseFloat((a.fibra   * f).toFixed(1))
+        );
+        atualizarKcalTipo(tipo, Math.round(a.kcal * f));
+        atualizarItensSessao();
+        voltarBusca();
+    } catch (_) {
+        alert('Erro de rede.');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-plus"></i> Adicionar à refeição';
+    }
+});
+
+function atualizarItensSessao() {
+    const wrapper = document.getElementById('nutri-itens-sessao');
+    const lista   = document.getElementById('nutri-itens-lista');
+    const totalEl = document.getElementById('nutri-itens-total');
+    if (!_itensSessao.length) { wrapper.style.display = 'none'; return; }
+    wrapper.style.display = 'block';
+    lista.innerHTML = _itensSessao.map(i => `
+        <section class="nutri-item-sessao">
+            <section class="nutri-item-sessao-info">
+                <span class="nutri-item-sessao-nome">${esc(i._nome || i.alimento_nome)}</span>
+                <span class="nutri-item-sessao-qtd">${i.quantidade_g}g</span>
+            </section>
+            <span class="nutri-item-sessao-kcal">${Math.round(i.kcal)} kcal · P:${Number(i.proteina_g).toFixed(0)}g</span>
+        </section>
+    `).join('');
+    const totKcal = _itensSessao.reduce((a, i) => a + Number(i.kcal), 0);
+    const totProt = _itensSessao.reduce((a, i) => a + Number(i.proteina_g), 0);
+    totalEl.innerHTML = `Total: <strong>${Math.round(totKcal)} kcal</strong> · P: ${totProt.toFixed(1)}g`;
+}
+
+// ── Foto com IA ───────────────────────────────────────
+document.getElementById('nutri-foto-btn').addEventListener('click', () =>
+    document.getElementById('nutri-foto-input').click()
+);
+
+document.getElementById('nutri-foto-input').addEventListener('change', function () {
+    _fotoFile = this.files[0];
+    if (!_fotoFile) return;
+    document.getElementById('nutri-busca-wrapper').style.display = 'none';
+    document.getElementById('nutri-peso-wrapper').style.display  = 'block';
+    setTimeout(() => { const el = document.getElementById('nutri-peso-alimento'); if (el) el.focus(); }, 100);
+    this.value = '';
+});
+
+document.getElementById('nutri-analisar-btn').addEventListener('click', async () => {
+    const peso = Number(document.getElementById('nutri-peso-alimento').value);
+    if (!peso || !_fotoFile) { alert('Informe o peso do alimento.'); return; }
+    const btn = document.getElementById('nutri-analisar-btn');
+    btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i>';
+    btn.disabled  = true;
+    try {
+        const fd = new FormData();
+        fd.append('foto', _fotoFile);
+        fd.append('peso_g', peso);
+        const res  = await fetch('/api/nutricao/foto', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (!data.ok) { alert(data.erro || 'Não foi possível analisar.'); return; }
+        const a = data.analise;
+        _alimentoAtual = {
+            nome:    a.refeicao,
+            fonte:   'ia',
+            id:      null,
+            por100g: {
+                kcal:     (a.kcal        / peso) * 100,
+                proteina: (a.proteina_g  / peso) * 100,
+                carbs:    (a.carbs_g     / peso) * 100,
+                gordura:  (a.gordura_g   / peso) * 100,
+                fibra:    ((a.fibra_g || 0) / peso) * 100,
+            },
+        };
+        document.getElementById('nutri-peso-wrapper').style.display = 'none';
+        selecionarAlimento(-1);
+        // Preencher gramas com o peso informado
+        setTimeout(() => {
+            const qEl = document.getElementById('nutri-quantidade');
+            if (qEl) { qEl.value = peso; atualizarPreview(); }
+        }, 80);
+    } catch (_) { alert('Erro ao analisar.'); }
+    finally {
+        btn.innerHTML = '<i class="fas fa-search"></i> Analisar';
+        btn.disabled  = false;
+    }
+});
+
+// ═══════════════════════════════════════════════════════
+// HISTÓRICO
+// ═══════════════════════════════════════════════════════
+
+async function carregarHistorico(page) {
+    page = page || 1;
+    const res  = await fetch(`/api/nutricao/historico?page=${page}`).catch(() => null);
+    if (!res) return;
+    const data = await res.json().catch(() => null);
+    if (!data) return;
+    const el   = document.getElementById('nutri-historico-lista');
+    const pag  = document.getElementById('nutri-historico-paginacao');
+    if (!el) return;
+
+    if (!data.dias || !data.dias.length) {
+        el.innerHTML = '<p class="nutri-empty" style="padding:20px;text-align:center;color:#555;font-size:.85rem">Nenhum registro ainda.</p>';
+        return;
+    }
+
+    const tipoLabel = { cafe:'Café', almoco:'Almoço', jantar:'Jantar', lanche:'Lanche', outro:'Outro' };
+
+    el.innerHTML = data.dias.map(dia => `
+        <section class="nutri-hist-dia">
+            <section class="nutri-hist-dia-header">
+                <span class="nutri-hist-data">${formatarDataHist(dia.data)}</span>
+                <span class="nutri-hist-total">${Math.round(dia.total_kcal)} kcal · P: ${Number(dia.total_prot).toFixed(0)}g</span>
+            </section>
+            ${(dia.logs || []).map(log => `
+            <section class="nutri-hist-refeicao">
+                <span class="nutri-hist-tipo">${tipoLabel[log.refeicao_tipo] || 'Refeição'}</span>
+                <span class="nutri-hist-kcal">${Math.round(log.kcal)} kcal</span>
+                <section class="nutri-hist-itens">
+                    ${(log.itens || []).filter(i => i.id).map(i =>
+                        `<span class="nutri-hist-item">${esc(i.alimento_nome || i.nome || '—')} ${i.quantidade_g}g</span>`
+                    ).join('')}
+                </section>
+            </section>`).join('')}
+        </section>
+    `).join('');
+
+    if (pag) {
+        pag.innerHTML = '';
+        if (data.page > 1) {
+            const btn = document.createElement('button');
+            btn.className   = 'nutri-pag-btn';
+            btn.textContent = '← Mais recentes';
+            btn.type        = 'button';
+            btn.onclick     = () => carregarHistorico(data.page - 1);
+            pag.appendChild(btn);
+        }
+        if (data.page < data.totalPages) {
+            const btn = document.createElement('button');
+            btn.className   = 'nutri-pag-btn';
+            btn.textContent = 'Mais antigos →';
+            btn.type        = 'button';
+            btn.onclick     = () => carregarHistorico(data.page + 1);
+            pag.appendChild(btn);
+        }
+    }
+}
+
+function formatarDataHist(val) {
+    if (!val) return '—';
+    const s = String(val).trim().slice(0, 10);
+    if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+        const [y, m, d] = s.split('-');
+        return new Date(Number(y), Number(m) - 1, Number(d))
+            .toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: 'short' });
+    }
+    return s;
+}
+
+// ── Init ──────────────────────────────────────────────
 (function init() {
-    // Inicializar _kcalPorTipo com dados do servidor
     <%
     const tipoKeys = ['cafe','almoco','jantar','lanche','outro'];
     tipoKeys.forEach(k => {
@@ -673,6 +1076,7 @@ async function setObjetivo(objetivo) {
     updateAguaUI();
     gerarInsight();
     atualizarRing(_totais.kcal);
+    carregarHistorico(1);
 })();
 </script>
 </body>
