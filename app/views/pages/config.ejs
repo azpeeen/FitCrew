@@ -394,16 +394,50 @@
 <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
 <script src="/js/config.js"></script>
 <script>
+// ── Toast ─────────────────────────────────────────────────────────────────────
+function showToast(msg, tipo = 'info') {
+    const cores = { info: '#FFD700', erro: '#e74c3c', sucesso: '#22c55e' };
+    const toast = document.createElement('section');
+    toast.style.cssText = `
+        position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+        background:#1f1f1f;border:1px solid ${cores[tipo]};
+        color:#fff;padding:14px 22px;border-radius:10px;
+        font-size:.88rem;font-weight:600;z-index:999999;
+        box-shadow:0 8px 32px rgba(0,0,0,.5);max-width:340px;
+        text-align:center;animation:fadeIn .2s ease;
+    `;
+    toast.textContent = msg;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3500);
+}
+
+// ── Mini confirm (substitui confirm() nativo) ─────────────────────────────────
+function showConfirm(msg, onConfirm) {
+    const overlay = document.createElement('section');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:999998;display:flex;align-items:center;justify-content:center;';
+    overlay.innerHTML = `
+        <section style="background:#1f1f1f;border:1px solid #333;border-radius:14px;padding:28px 24px;max-width:320px;width:90%;text-align:center;">
+            <p style="font-size:.92rem;color:#fff;margin:0 0 20px;line-height:1.5;">${msg}</p>
+            <section style="display:flex;gap:10px;justify-content:center;">
+                <button id="mc-cancel" style="padding:9px 20px;border-radius:8px;border:1px solid #444;background:transparent;color:#aaa;font-size:.85rem;cursor:pointer;">Cancelar</button>
+                <button id="mc-ok"     style="padding:9px 20px;border-radius:8px;border:none;background:#e74c3c;color:#fff;font-size:.85rem;font-weight:700;cursor:pointer;">Confirmar</button>
+            </section>
+        </section>`;
+    document.body.appendChild(overlay);
+    overlay.querySelector('#mc-cancel').onclick = () => overlay.remove();
+    overlay.querySelector('#mc-ok').onclick     = () => { overlay.remove(); onConfirm(); };
+}
+
 // ── Cadastrar biometria ───────────────────────────────────────────────────────
 async function cadastrarBiometria() {
     if (!window.PublicKeyCredential) {
-        alert('Seu dispositivo não suporta autenticação biométrica.');
+        showToast('Seu dispositivo não suporta autenticação biométrica.', 'erro');
         return;
     }
     try {
         const opcoesRes = await fetch('/api/webauthn/registro/opcoes');
         const opcoes    = await opcoesRes.json();
-        if (opcoes.erro) { alert(opcoes.erro); return; }
+        if (opcoes.erro) { showToast(opcoes.erro, 'erro'); return; }
 
         opcoes.challenge = base64ToBuffer(opcoes.challenge);
         opcoes.user.id   = base64ToBuffer(opcoes.user.id);
@@ -423,26 +457,31 @@ async function cadastrarBiometria() {
         });
         const verData = await verRes.json();
         if (verData.ok) {
-            alert('Biometria cadastrada com sucesso!');
-            location.reload();
+            showToast('Biometria cadastrada com sucesso!', 'sucesso');
+            setTimeout(() => location.reload(), 1200);
         } else {
-            alert('Erro: ' + (verData.erro || 'Falha no registro.'));
+            showToast(verData.erro || 'Falha no registro.', 'erro');
         }
     } catch (err) {
         console.error(err);
-        alert('Erro ao cadastrar biometria: ' + err.message);
+        showToast('Erro ao cadastrar biometria: ' + err.message, 'erro');
     }
 }
 
 // ── Remover biometria ─────────────────────────────────────────────────────────
-async function removerBiometria() {
-    if (!confirm('Deseja remover a biometria deste dispositivo?')) return;
-    try {
-        const res  = await fetch('/api/webauthn/registro/remover', { method: 'POST' });
-        const data = await res.json();
-        if (data.ok) { alert('Biometria removida.'); location.reload(); }
-        else alert(data.erro || 'Erro ao remover biometria.');
-    } catch (err) { alert('Erro: ' + err.message); }
+function removerBiometria() {
+    showConfirm('Deseja remover a biometria deste dispositivo?', async () => {
+        try {
+            const res  = await fetch('/api/webauthn/registro/remover', { method: 'POST' });
+            const data = await res.json();
+            if (data.ok) {
+                showToast('Biometria removida.', 'sucesso');
+                setTimeout(() => location.reload(), 1200);
+            } else {
+                showToast(data.erro || 'Erro ao remover biometria.', 'erro');
+            }
+        } catch (err) { showToast('Erro: ' + err.message, 'erro'); }
+    });
 }
 
 // ── Modal de exclusão ─────────────────────────────────────────────────────────
@@ -457,9 +496,7 @@ async function abrirModalExclusao() {
             const expira = data.planoExpira
                 ? new Date(data.planoExpira).toLocaleDateString('pt-BR')
                 : 'data não definida';
-            aviso.innerHTML = `<i class="fas fa-info-circle"></i>
-                Você tem o plano <strong>${data.planoNome}</strong> ativo até <strong>${expira}</strong>.
-                Ao excluir, perderá o acesso imediatamente. Não haverá reembolso proporcional.`;
+            aviso.innerHTML = `<i class="fas fa-info-circle"></i><span>Você tem o plano <strong>${data.planoNome}</strong> ativo até <strong>${expira}</strong>. Ao excluir, perderá o acesso imediatamente. Não haverá reembolso proporcional.</span>`;
             aviso.style.display = 'flex';
         }
     } catch (_) {}
@@ -472,7 +509,7 @@ function fecharModalExclusao() {
 
 async function confirmarExclusaoSenha() {
     const senha = document.getElementById('senha-exclusao').value;
-    if (!senha) { alert('Digite sua senha para confirmar.'); return; }
+    if (!senha) { showToast('Digite sua senha para confirmar.', 'erro'); return; }
     await solicitarExclusao({ senha });
 }
 
@@ -480,7 +517,7 @@ async function confirmarExclusaoBio() {
     try {
         const opcoesRes = await fetch('/api/webauthn/auth/opcoes');
         const opcoes    = await opcoesRes.json();
-        if (opcoes.erro) { alert(opcoes.erro); return; }
+        if (opcoes.erro) { showToast(opcoes.erro, 'erro'); return; }
         opcoes.challenge = base64ToBuffer(opcoes.challenge);
         if (opcoes.allowCredentials) {
             opcoes.allowCredentials = opcoes.allowCredentials.map(c => ({
@@ -495,12 +532,14 @@ async function confirmarExclusaoBio() {
             body:    JSON.stringify(assertJSON),
         });
         const verData = await verRes.json();
-        if (!verData.ok) { alert('Verificação biométrica falhou.'); return; }
+        if (!verData.ok) { showToast('Verificação biométrica falhou.', 'erro'); return; }
         await solicitarExclusao({ webauthn_verificado: true });
-    } catch (err) { alert('Erro na biometria: ' + err.message); }
+    } catch (err) { showToast('Erro na biometria: ' + err.message, 'erro'); }
 }
 
 async function solicitarExclusao(payload) {
+    const btn = document.querySelector('.btn-confirmar-exclusao');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Aguarde...'; }
     try {
         const res  = await fetch('/api/conta/solicitar-exclusao', {
             method:  'POST',
@@ -509,23 +548,36 @@ async function solicitarExclusao(payload) {
         });
         const data = await res.json();
         if (data.ok) {
-            alert('Conta agendada para exclusão em 30 dias. Você ainda pode cancelar fazendo login.');
-            location.href = '/logout';
+            fecharModalExclusao();
+            showToast('Conta agendada para exclusão em 30 dias. Você pode cancelar fazendo login.', 'info');
+            setTimeout(() => { location.href = '/logout'; }, 2500);
         } else {
-            alert(data.erro || 'Erro ao solicitar exclusão.');
+            if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-trash-alt"></i> Excluir conta'; }
+            showToast(data.erro || 'Erro ao solicitar exclusão.', 'erro');
         }
-    } catch (err) { alert('Erro: ' + err.message); }
+    } catch (err) {
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-trash-alt"></i> Excluir conta'; }
+        showToast('Erro: ' + err.message, 'erro');
+    }
 }
 
 async function cancelarExclusao() {
+    const btns = document.querySelectorAll('[onclick="cancelarExclusao()"]');
+    btns.forEach(b => { b.disabled = true; b.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Aguarde...'; });
     try {
         const res  = await fetch('/api/conta/cancelar-exclusao', { method: 'POST' });
         const data = await res.json();
         if (data.ok) {
-            alert('Exclusão cancelada. Sua conta está ativa novamente.');
-            location.reload();
+            showToast('Que bom ter você de volta, <%= user.nome.split(" ")[0] %>! 🎉 Sua conta está ativa.', 'sucesso');
+            setTimeout(() => location.reload(), 2800);
+        } else {
+            btns.forEach(b => { b.disabled = false; b.innerHTML = '<i class="fas fa-rotate-left"></i> Cancelar exclusão'; });
+            showToast('Erro ao cancelar exclusão.', 'erro');
         }
-    } catch (err) { alert('Erro ao cancelar exclusão.'); }
+    } catch (err) {
+        btns.forEach(b => { b.disabled = false; b.innerHTML = '<i class="fas fa-rotate-left"></i> Cancelar exclusão'; });
+        showToast('Erro ao cancelar exclusão.', 'erro');
+    }
 }
 
 // ── Helpers WebAuthn ──────────────────────────────────────────────────────────

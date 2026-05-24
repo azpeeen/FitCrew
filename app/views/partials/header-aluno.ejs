@@ -153,8 +153,29 @@
     <i class="fas fa-triangle-exclamation"></i>
     Sua conta está agendada para exclusão em <strong><%= user.diasRestantesExclusao ?? 30 %> dia(s)</strong>.
     <strong>Cancele antes que o prazo expire.</strong>
-    <button onclick="cancelarExclusao()" class="btn-cancelar-exclusao">
+    <button id="btn-banner-cancelar" onclick="cancelarExclusaoBanner()" class="btn-cancelar-exclusao">
         Cancelar exclusão
     </button>
 </section>
+<script>
+async function cancelarExclusaoBanner() {
+    const btn = document.getElementById('btn-banner-cancelar');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Aguarde...'; }
+    try {
+        const res  = await fetch('/api/conta/cancelar-exclusao', { method: 'POST' });
+        const data = await res.json();
+        if (data.ok) {
+            const t = document.createElement('section');
+            t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1f1f1f;border:1px solid #22c55e;color:#fff;padding:14px 22px;border-radius:10px;font-size:.88rem;font-weight:600;z-index:999999;box-shadow:0 8px 32px rgba(0,0,0,.5);max-width:340px;text-align:center;';
+            t.textContent = 'Que bom ter você de volta, <%= user.nome.split(" ")[0] %>! 🎉 Sua conta está ativa.';
+            document.body.appendChild(t);
+            setTimeout(() => location.reload(), 2800);
+        } else {
+            if (btn) { btn.disabled = false; btn.innerHTML = 'Cancelar exclusão'; }
+        }
+    } catch (_) {
+        if (btn) { btn.disabled = false; btn.innerHTML = 'Cancelar exclusão'; }
+    }
+}
+</script>
 <% } %>
