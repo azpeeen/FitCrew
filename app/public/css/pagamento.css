@@ -686,7 +686,13 @@ main {
 }
 .boleto-msg i { color: #C98B1D; flex-shrink: 0; margin-top: 0.15rem; }
 
-.boleto-confirmar { width: 100%; justify-content: center; }
+.boleto-confirmar {
+    width: 100%;
+    justify-content: center;
+    max-width: none;
+    padding: 1.6rem 2.4rem;
+    font-size: 1.7rem;
+}
 
 /* ==============================
    STEP 3 — CONFIRMATION
