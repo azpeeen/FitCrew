@@ -10,26 +10,6 @@ webpush.setVapidDetails(
     process.env.VAPID_PRIVATE_KEY
 );
 
-(async () => {
-    try {
-        await db.execute(`
-            CREATE TABLE IF NOT EXISTS push_subscriptions (
-                id           INT UNSIGNED    AUTO_INCREMENT PRIMARY KEY,
-                user_id      INT UNSIGNED    NOT NULL,
-                endpoint     VARCHAR(512)    NOT NULL,
-                p256dh       VARCHAR(255)    NOT NULL,
-                auth         VARCHAR(255)    NOT NULL,
-                device_label VARCHAR(100)    NULL,
-                created_at   TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
-                UNIQUE KEY uq_endpoint (endpoint),
-                CONSTRAINT fk_push_user FOREIGN KEY (user_id)
-                    REFERENCES user(id) ON DELETE CASCADE
-            ) ENGINE=InnoDB
-        `);
-    } catch (err) {
-        console.error('[push] init table:', err.message);
-    }
-})();
 
 async function deleteSub(endpoint) {
     try {

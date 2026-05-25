@@ -380,6 +380,24 @@ function safeJson(str, fallback) {
     } catch (err) {
         if (err.errno !== 1060) console.error('[migration] ai_session context_summary:', err.message);
     }
+
+    // 16. push_subscriptions (Web Push VAPID)
+    try {
+        await db.execute(`
+            CREATE TABLE IF NOT EXISTS push_subscriptions (
+                id           INT UNSIGNED    AUTO_INCREMENT PRIMARY KEY,
+                user_id      INT UNSIGNED    NOT NULL,
+                endpoint     VARCHAR(512)    NOT NULL,
+                p256dh       VARCHAR(255)    NOT NULL,
+                auth         VARCHAR(255)    NOT NULL,
+                device_label VARCHAR(100)    NULL,
+                created_at   TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE KEY uq_endpoint (endpoint),
+                CONSTRAINT fk_push_user FOREIGN KEY (user_id)
+                    REFERENCES user(id) ON DELETE CASCADE
+            ) ENGINE=InnoDB
+        `);
+    } catch (err) { if (err.errno !== 1050) console.error('[migration] push_subscriptions:', err.message); }
 })();
 
 // Soft delete cron — anonimiza contas com deletion_scheduled_at vencido (a cada 24h)
