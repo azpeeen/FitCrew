@@ -170,36 +170,26 @@ main a {
 /* Botões */
 .plan-button {
     display: block;
-    padding: 10px 20px;
-    color: white;
+    padding: 14px 24px;
+    background: #FFD700;
+    color: #000;
     text-decoration: none;
-    border-radius: 5px;
-    font-weight: bold;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 15px;
     margin-top: 15px;
-    transition: all 0.3s ease;
+    transition: background 0.2s, transform 0.1s;
     text-align: center;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
     border: none;
     width: 100%;
     cursor: pointer;
 }
 
 .plan-button:hover {
-    filter: brightness(1.1);
-    transform: translateY(-2px);
-}
-
-.starter .plan-button {
-    background: #cfcfcf;
-}
-
-.gymbro .plan-button {
-    background: #C5A349;
-}
-
-.blaok .plan-button {
-    background: #000;
+    background: #FFC200;
+    transform: translateY(-1px);
 }
 
 /* Badge "Mais Popular" */

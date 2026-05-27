@@ -23,6 +23,7 @@ const i18n        = require('../config/i18n');
 const { broadcast, onlineUsers } = require('../events');
 const cloudinary = require('../config/cloudinary');
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const requirePlanLevel = require('../middleware/requirePlanLevel');
 
 function safeJson(str, fallback) {
     try { return JSON.parse(str || 'null') ?? fallback; }
@@ -398,6 +399,13 @@ function safeJson(str, fallback) {
             ) ENGINE=InnoDB
         `);
     } catch (err) { if (err.errno !== 1050) console.error('[migration] push_subscriptions:', err.message); }
+
+    // 17. Remover Starter e atualizar preços dos planos
+    try {
+        await db.execute("UPDATE plan SET status='inativo' WHERE slug='starter' AND status='ativo'");
+        await db.execute("UPDATE plan SET preco=29.90 WHERE slug='gymbro' AND preco=85.60");
+        await db.execute("UPDATE plan SET preco=59.90 WHERE slug='black' AND preco=145.90");
+    } catch (err) { console.error('[migration] planos_update:', err.message); }
 })();
 
 // Soft delete cron — anonimiza contas com deletion_scheduled_at vencido (a cada 24h)
@@ -547,7 +555,7 @@ function validarCPF(cpf) {
 // Páginas públicas
 router.get('/', (req, res) => res.render('pages/index', { seo: {
     title:         'GymBros — Treino Inteligente com IA',
-    description:   'Treine com inteligência artificial ao seu lado. Planos de treino, dieta e acompanhamento personalizados com o GymBros. A partir de R$ 64,90/mês.',
+    description:   'Treine com inteligência artificial ao seu lado. Planos de treino, dieta e acompanhamento personalizados com o GymBros. A partir de R$ 29,90/mês.',
     keywords:      'treino inteligente, personal trainer ia, gymbros, treinos online, saúde, bem-estar, ia fitness',
     canonical:     '/',
     ogTitle:       'GymBros — Treino Inteligente com IA',
@@ -580,12 +588,12 @@ router.get('/register', (req, res) => {
 });
 
 router.get('/planos', (req, res) => res.render('pages/planos', { seo: {
-    title:         'Planos GymBros: Starter, GymBro e Black',
-    description:   'Compare os planos GymBros: Starter (R$64,90), GymBro (R$85,60) e Black (R$145,90). Treino inteligente, IA personalizada e acompanhamento completo.',
+    title:         'Planos GymBros: GymBro e Black',
+    description:   'Compare os planos GymBros: GymBro (R$29,90) e Black (R$59,90). Treino inteligente, IA personalizada e acompanhamento completo.',
     keywords:      'planos gymbros, treino com ia, assinatura fitness, plano treino ia',
     canonical:     '/planos',
-    ogTitle:       'Escolha seu Plano GymBros — A partir de R$64,90',
-    ogDescription: 'Starter, GymBro ou Black. Treino inteligente + IA personal trainer.',
+    ogTitle:       'Escolha seu Plano GymBros — A partir de R$29,90',
+    ogDescription: 'GymBro ou Black. Treino inteligente + IA personal trainer.',
 }}));
 
 router.get('/academias', (req, res) => res.render('pages/academias', { seo: {
@@ -1594,9 +1602,10 @@ router.get('/meu-plano', requirePlano, async (req, res) => {
             progresso,
         };
 
+        const maxPreco = Math.max(...todosPlanos.map(x => Number(x.preco)));
         const outrosPlanos = todosPlanos
             .filter(p => p.id !== planoBase.id)
-            .map((p, _, arr) => {
+            .map(p => {
                 const ben = (() => { try { return JSON.parse(p.beneficios || '[]'); } catch { return []; } })();
                 return {
                     nome:       p.nome.toUpperCase(),
@@ -1604,7 +1613,7 @@ router.get('/meu-plano', requirePlano, async (req, res) => {
                     beneficios: ben,
                     preco:      `R$ ${Number(p.preco).toFixed(2).replace('.', ',')}`,
                     periodo:    'mês',
-                    destaque:   Number(p.preco) === Math.max(...arr.map(x => Number(x.preco))),
+                    destaque:   Number(p.preco) === maxPreco,
                 };
             });
 
@@ -1680,7 +1689,7 @@ router.get('/imc-form', requirePlano, async (req, res) => {
 });
 
 //Avaliação Corporal
-router.get('/ai/avaliacao', requirePlano, async (req, res) => {
+router.get('/ai/avaliacao', requirePlanLevel(['black']), async (req, res) => {
     let avaliacoes = [];
     try {
         const [rows] = await db.execute(

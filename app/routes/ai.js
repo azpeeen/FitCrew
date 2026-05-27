@@ -35,6 +35,8 @@ function checkRateLimit(userId, key, max, windowMs) {
 
 // Planos gymbro e black têm acesso à IA
 const requireIA = requirePlanLevel(['gymbro', 'black']);
+// Apenas plano Black tem acesso à avaliação corporal por foto
+const requireAvaliacao = requirePlanLevel(['black']);
 
 
 // Cache de exercícios do banco — expira em 24h
@@ -351,7 +353,7 @@ router.get('/chat', requireIA, (req, res) => {
 });
 
 // GET /ai/avaliacao — renderiza a página de avaliação corporal
-router.get('/avaliacao', requireIA, (req, res) => {
+router.get('/avaliacao', requireAvaliacao, (req, res) => {
     if (!req.session.user) return res.redirect('/login');
     res.render('pages/ai-avaliacao', { user: req.session.user,
         seo: { title: 'Avaliação Corporal IA — GymBros', canonical: '/ai/avaliacao', robots: 'noindex, nofollow', description: 'Avaliação corporal por inteligência artificial GymBros.' },
@@ -359,7 +361,7 @@ router.get('/avaliacao', requireIA, (req, res) => {
 });
 
 // POST /ai/avaliacao — avaliação corporal por imagem (visão do LLaMA 4)
-router.post('/avaliacao', requireIA, async (req, res) => {
+router.post('/avaliacao', requireAvaliacao, async (req, res) => {
     if (!req.session.user) return res.status(401).json({ erro: 'Não autorizado.' });
 
     const { fotoFrontal, fotoLateral, fotoPosterior } = req.body;
@@ -450,7 +452,7 @@ Analise a composição corporal do aluno pela(s) foto(s) enviadas e retorne SOME
 });
 
 // POST /ai/avaliacao-salvar — persiste avaliação no DB e na sessão
-router.post('/avaliacao-salvar', requireIA, async (req, res) => {
+router.post('/avaliacao-salvar', requireAvaliacao, async (req, res) => {
     if (!req.session.user) return res.status(401).json({ erro: 'Não autorizado.' });
 
     const { resultado, fotoPath } = req.body;

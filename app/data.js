@@ -48,9 +48,9 @@ function seedAcademias() {
 // ── SEED Planos ───────────────────────────────────────────────────────────────
 function seedPlanos() {
     planos.push(
-        { id: 'pl001', nome: 'Starter', descricao: 'Para quem está começando na vida fitness.',  preco: 64.90,  duracao: 'mensal', beneficios: ['Treinos manuais ilimitados', 'Execução de treino com GIFs', 'Check-in manual de treino', 'Streak de treinos', 'Notificações de água e sono'],                          status: 'ativo', createdAt: daysAgo(365) },
-        { id: 'pl002', nome: 'GymBro',  descricao: 'O plano mais popular do GymBros.',           preco: 85.60,  duracao: 'mensal', beneficios: ['Tudo do Starter', 'IA treinadora personalizada', 'Plano de treino gerado por IA', 'Plano de dieta gerado por IA', 'Histórico completo de conversas IA'],                                          status: 'ativo', createdAt: daysAgo(365) },
-        { id: 'pl003', nome: 'Black',   descricao: 'Acesso total, sem limites.',                  preco: 145.90, duracao: 'mensal', beneficios: ['Tudo do GymBro', 'Avaliação corporal por foto (IA Vision)', 'Personal trainer IA exclusivo', 'Análise avançada de evolução corporal', 'Suporte prioritário'],                                    status: 'ativo', createdAt: daysAgo(365) }
+        { id: 'pl001', nome: 'Starter', descricao: 'Para quem está começando na vida fitness.',  preco: 64.90,  duracao: 'mensal', beneficios: ['Treinos manuais ilimitados', 'Execução de treino com GIFs', 'Check-in manual de treino', 'Streak de treinos', 'Notificações de água e sono'],                          status: 'inativo', createdAt: daysAgo(365) },
+        { id: 'pl002', nome: 'GymBro',  descricao: 'O plano mais popular do GymBros.',           preco: 29.90,  duracao: 'mensal', beneficios: ['IA treinadora personalizada', 'Plano de treino gerado por IA', 'Plano de dieta gerado por IA', 'Histórico completo de conversas IA', 'Treinos manuais + execução com GIFs'],                     status: 'ativo', createdAt: daysAgo(365) },
+        { id: 'pl003', nome: 'Black',   descricao: 'Acesso total, sem limites.',                  preco: 59.90,  duracao: 'mensal', beneficios: ['Tudo do GymBro', 'Avaliação corporal por foto (IA Vision)', 'Personal trainer IA exclusivo', 'Análise avançada de evolução corporal', 'Suporte prioritário'],                                    status: 'ativo', createdAt: daysAgo(365) }
     );
 }
 
@@ -87,9 +87,9 @@ function seedUsuarios() {
     ];
     const planosIds   = ['pl001', 'pl002', 'pl003'];
     const planosNomes = ['Starter', 'GymBro', 'Black'];
-    const precos      = [64.90, 85.60, 145.90];
-    // Distribuição: 25% Starter, 45% GymBro, 30% Black (mais receita)
-    const planoDistrib = (i) => i % 20 < 5 ? 0 : i % 20 < 14 ? 1 : 2;
+    const precos      = [64.90, 29.90, 59.90];
+    // Distribuição: 55% GymBro, 45% Black (Starter desativado)
+    const planoDistrib = (i) => i % 20 < 11 ? 1 : 2;
     const acadIds     = academias.map(a => a.id);
 
     nomes.forEach(([nome, sobrenome], i) => {
