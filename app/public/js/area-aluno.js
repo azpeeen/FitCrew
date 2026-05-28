@@ -6,6 +6,12 @@ function fecharBanner(id) {
     if (el) { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }
 }
 
+function dismissBiometriaBanner() {
+    localStorage.setItem('gymbros_biometria_dismissed', '1');
+    const el = document.getElementById('bannerBiometria');
+    if (el) { el.style.opacity = '0'; setTimeout(() => el.style.display = 'none', 300); }
+}
+
 // ==============================
 // ANIMAÇÃO DE PROGRESSO
 // ==============================

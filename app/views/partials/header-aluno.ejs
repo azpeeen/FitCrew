@@ -147,6 +147,7 @@
     function escHtmlToast(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 })();
 </script>
+<script src="/js/landscape-report.js" defer></script>
 <%- include('./logout-modal') %>
 <% if (locals.user && user.status === 'pendente_exclusao') { %>
 <section class="banner-exclusao-pendente">

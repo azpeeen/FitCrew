@@ -59,6 +59,25 @@
     <!-- CONTEÚDO PRINCIPAL -->
     <section class="aluno-main">
 
+        <% if (!user.webauthn_enabled) { %>
+        <section class="biometria-banner" id="bannerBiometria">
+          <section class="biometria-banner-content">
+            <i class="fas fa-fingerprint"></i>
+            <section class="biometria-banner-text">
+              <strong>Ative o login por biometria</strong>
+              <span>Acesse sua conta com impressão digital ou Face ID</span>
+            </section>
+          </section>
+          <section class="biometria-banner-actions">
+            <a href="/config" class="biometria-banner-btn">Ativar agora</a>
+            <button class="biometria-banner-dismiss" onclick="dismissBiometriaBanner()">
+              <i class="fas fa-times"></i>
+            </button>
+          </section>
+        </section>
+        <script>if (localStorage.getItem('gymbros_biometria_dismissed') === '1') { var b = document.getElementById('bannerBiometria'); if (b) b.style.display = 'none'; }</script>
+        <% } %>
+
         <!-- BANNERS DE NOTIFICAÇÃO -->
         <%
           const agora = new Date();

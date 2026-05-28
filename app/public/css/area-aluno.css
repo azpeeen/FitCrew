@@ -1456,6 +1456,51 @@ body.light-mode .plano-card-destaque .plano-card-btn i { color: #000; } /* hover
 .notif-fechar  { background: none; border: none; color: #aaa; cursor: pointer; font-size: 1rem; padding: 0 4px; }
 .notif-fechar:hover { color: #fff; }
 
+/* BANNER BIOMETRIA */
+.biometria-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: 10px;
+    border-left: 4px solid #818cf8;
+    background: rgba(129, 140, 248, 0.10);
+    margin-bottom: 16px;
+    animation: slideDown 0.3s ease;
+}
+.biometria-banner-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #fff;
+    font-size: 0.9rem;
+}
+.biometria-banner-content > i { font-size: 1.4rem; color: #818cf8; flex-shrink: 0; }
+.biometria-banner-text { display: flex; flex-direction: column; gap: 2px; }
+.biometria-banner-text strong { font-size: 0.9rem; font-weight: 700; color: #fff; }
+.biometria-banner-text span   { font-size: 0.78rem; color: #aaa; }
+.biometria-banner-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.biometria-banner-btn {
+    background: #818cf8;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+}
+.biometria-banner-btn:hover { background: #6366f1; }
+.biometria-banner-dismiss { background: none; border: none; color: #aaa; cursor: pointer; font-size: 0.95rem; padding: 4px; line-height: 1; }
+.biometria-banner-dismiss:hover { color: #fff; }
+@media (max-width: 768px) {
+    .biometria-banner { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .biometria-banner-actions { width: 100%; justify-content: flex-end; }
+}
+
 @keyframes slideDown {
     from { opacity: 0; transform: translateY(-8px); }
     to   { opacity: 1; transform: translateY(0); }
@@ -1710,3 +1755,69 @@ body.light-mode .plano-card-destaque .plano-card-btn i { color: #000; } /* hover
 @media (max-width: 768px) {
     .sidebar-scan-item { display: block; }
 }
+
+/* ==============================
+   LANDSCAPE REPORT OVERLAY
+   ============================== */
+#landscape-report-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: #121212;
+    display: flex;
+    flex-direction: column;
+    padding: 14px 16px;
+    overflow-y: auto;
+    animation: slideDown 0.25s ease;
+}
+.lr-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #2a2a2a;
+    flex-shrink: 0;
+}
+.lr-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #FFD700;
+}
+.lr-title i { color: #FFD700; }
+.lr-close {
+    background: none;
+    border: none;
+    color: #aaa;
+    cursor: pointer;
+    font-size: 1.1rem;
+    padding: 4px 8px;
+    border-radius: 6px;
+    line-height: 1;
+}
+.lr-close:hover { color: #fff; background: rgba(255,255,255,0.08); }
+.lr-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    flex: 1;
+    align-content: start;
+}
+.lr-metric-card {
+    background: #1f1f1f;
+    border-radius: 10px;
+    padding: 14px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    text-align: center;
+    border: 1px solid #2a2a2a;
+}
+.lr-metric-icon  { font-size: 1rem; color: #FFD700; }
+.lr-metric-value { font-size: 1.25rem; font-weight: 800; color: #fff; line-height: 1.1; }
+.lr-metric-label { font-size: 0.68rem; color: #888; text-transform: uppercase; letter-spacing: 0.4px; }
