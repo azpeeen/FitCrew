@@ -272,7 +272,10 @@ async function searchOFF(query, lang = 'pt', pageSize = 6) {
     const cached = cacheGet(cacheKey);
     if (cached) return cached;
 
-    const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&search_simple=1&action=process&json=1&page_size=50&lc=${lang}`;
+    // Normaliza hífens para espaço — OFF trata espaços como AND, maximizando resultados
+    const queryNormalizada = query.replace(/-/g, ' ');
+
+    const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(queryNormalizada)}&search_simple=1&action=process&json=1&page_size=50&lc=${lang}`;
 
     let data;
     try { data = await httpGet(url, 4000); }
@@ -372,9 +375,13 @@ const PALAVRAS_ES = [
 ];
 
 function filtrarPortugues(results, query) {
-    const qWords = query.toLowerCase().split(' ').filter(w => w.length > 2);
+    const qLower = query.toLowerCase().trim();
+    const qWords = qLower.split(' ').filter(w => w.length > 2);
     return results.filter(r => {
         const nome = r.nome.toLowerCase();
+        // Se o nome contém a query inteira como substring, nunca filtra
+        if (nome.includes(qLower)) return true;
+        // Filtra palavras tipicamente espanholas
         if (PALAVRAS_ES.some(p => nome.includes(p))) return false;
         if (!qWords.some(w => nome.includes(w))) return false;
         return true;
