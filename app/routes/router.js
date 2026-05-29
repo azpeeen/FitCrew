@@ -20,7 +20,7 @@ const Payment     = require('../models/Payment');
 const ImcProfile  = require('../models/ImcProfile');
 const BodyPhoto   = require('../models/BodyPhoto');
 const i18n        = require('../config/i18n');
-const { broadcast, onlineUsers } = require('../events');
+const { broadcast, onlineUsers, addTicketClient, broadcastTicket } = require('../events');
 const cloudinary = require('../config/cloudinary');
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const requirePlanLevel = require('../middleware/requirePlanLevel');
@@ -2155,7 +2155,7 @@ router.post('/api/suporte/tickets/:id/mensagem', requireAuth, async (req, res) =
             'SELECT id, remetente, texto, created_at FROM ticket_mensagem WHERE id = ?',
             [result.insertId]
         );
-        broadcast('ticket_mensagem', { ticketId: ticket.id, msg });
+        broadcastTicket(ticket.id, 'ticket_mensagem', { ticketId: ticket.id, msg });
         res.json({ ...msg, criadaEm: msg.created_at });
     } catch (err) {
         console.error('[suporte/tickets/mensagem]', err.message);
@@ -2179,13 +2179,7 @@ router.get('/api/suporte/tickets/:id/stream', requireAuth, async (req, res) => {
     res.setHeader('Connection', 'keep-alive');
     res.flushHeaders();
 
-    const clientId = `ticket_${ticketId}_${userId}_${Date.now()}`;
-    if (!global.ticketClients) global.ticketClients = new Map();
-    global.ticketClients.set(clientId, { res, ticketId });
-
-    req.on('close', () => {
-        global.ticketClients.delete(clientId);
-    });
+    addTicketClient(ticketId, res);
 });
 
 //Administração
