@@ -438,7 +438,7 @@ function safeJson(str, fallback) {
                 user_id    INT UNSIGNED NOT NULL,
                 assunto    VARCHAR(150) NOT NULL,
                 mensagem   TEXT NOT NULL,
-                categoria  ENUM('bug','duvida','pagamento','outro') NOT NULL DEFAULT 'outro',
+                tipo       VARCHAR(100) NOT NULL DEFAULT 'Outro',
                 status     ENUM('aberto','em_atendimento','fechado') NOT NULL DEFAULT 'aberto',
                 created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 PRIMARY KEY (id),
@@ -447,6 +447,13 @@ function safeJson(str, fallback) {
             ) ENGINE=InnoDB
         `);
     } catch (err) { if (err.errno !== 1050) console.error('[migration] ticket:', err.message); }
+
+    try {
+        await db.execute("ALTER TABLE ticket ADD COLUMN tipo VARCHAR(100) NOT NULL DEFAULT 'Outro' AFTER mensagem");
+        await db.execute("ALTER TABLE ticket DROP COLUMN categoria");
+    } catch (err) {
+        if (err.errno !== 1060 && err.errno !== 1091) console.error('[migration] ticket alter:', err.message);
+    }
 })();
 
 // Soft delete cron — anonimiza contas com deletion_scheduled_at vencido (a cada 24h)
