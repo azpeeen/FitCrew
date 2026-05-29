@@ -454,6 +454,22 @@ function safeJson(str, fallback) {
     } catch (err) {
         if (err.errno !== 1060 && err.errno !== 1091) console.error('[migration] ticket alter:', err.message);
     }
+
+    // 20. Tabela de mensagens de ticket
+    try {
+        await db.execute(`
+            CREATE TABLE IF NOT EXISTS ticket_mensagem (
+                id         INT UNSIGNED NOT NULL AUTO_INCREMENT,
+                ticket_id  INT UNSIGNED NOT NULL,
+                remetente  ENUM('usuario','admin') NOT NULL DEFAULT 'usuario',
+                texto      TEXT NOT NULL,
+                created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (id),
+                INDEX idx_tm_ticket (ticket_id),
+                CONSTRAINT fk_tm_ticket FOREIGN KEY (ticket_id) REFERENCES ticket(id) ON DELETE CASCADE
+            ) ENGINE=InnoDB
+        `);
+    } catch (err) { if (err.errno !== 1050) console.error('[migration] ticket_mensagem:', err.message); }
 })();
 
 // Soft delete cron — anonimiza contas com deletion_scheduled_at vencido (a cada 24h)
@@ -2087,6 +2103,89 @@ router.post('/api/suporte/tickets', requireAuth, [
         console.error('[suporte/tickets]', err.message);
         return res.status(500).json({ erro: 'Erro ao enviar ticket.' });
     }
+});
+
+router.get('/api/suporte/tickets', requireAuth, async (req, res) => {
+    try {
+        const [tickets] = await db.execute(
+            'SELECT id, assunto, tipo, status, created_at FROM ticket WHERE user_id = ? ORDER BY created_at DESC',
+            [req.session.user.id]
+        );
+        res.json(tickets);
+    } catch (err) {
+        console.error('[suporte/tickets/list]', err.message);
+        res.status(500).json({ erro: 'Erro ao buscar tickets.' });
+    }
+});
+
+router.get('/api/suporte/tickets/:id', requireAuth, async (req, res) => {
+    const userId = req.session.user.id;
+    try {
+        const [[ticket]] = await db.execute(
+            'SELECT id, assunto, tipo, status FROM ticket WHERE id = ? AND user_id = ?',
+            [req.params.id, userId]
+        );
+        if (!ticket) return res.status(404).json({ erro: 'Ticket não encontrado.' });
+        const [mensagens] = await db.execute(
+            'SELECT id, remetente, texto, created_at FROM ticket_mensagem WHERE ticket_id = ? ORDER BY created_at ASC',
+            [ticket.id]
+        );
+        res.json({ ...ticket, mensagens });
+    } catch (err) {
+        console.error('[suporte/tickets/get]', err.message);
+        res.status(500).json({ erro: 'Erro ao buscar ticket.' });
+    }
+});
+
+router.post('/api/suporte/tickets/:id/mensagem', requireAuth, async (req, res) => {
+    const userId = req.session.user.id;
+    const { texto } = req.body;
+    if (!texto?.trim()) return res.status(400).json({ erro: 'Texto obrigatório.' });
+    try {
+        const [[ticket]] = await db.execute(
+            "SELECT id FROM ticket WHERE id = ? AND user_id = ? AND status != 'fechado'",
+            [req.params.id, userId]
+        );
+        if (!ticket) return res.status(404).json({ erro: 'Ticket não encontrado ou fechado.' });
+        const [result] = await db.execute(
+            "INSERT INTO ticket_mensagem (ticket_id, remetente, texto) VALUES (?, 'usuario', ?)",
+            [ticket.id, texto.trim()]
+        );
+        const [[msg]] = await db.execute(
+            'SELECT id, remetente, texto, created_at FROM ticket_mensagem WHERE id = ?',
+            [result.insertId]
+        );
+        broadcast('ticket_mensagem', { ticketId: ticket.id, msg });
+        res.json({ ...msg, criadaEm: msg.created_at });
+    } catch (err) {
+        console.error('[suporte/tickets/mensagem]', err.message);
+        res.status(500).json({ erro: 'Erro ao enviar mensagem.' });
+    }
+});
+
+router.get('/api/suporte/tickets/:id/stream', requireAuth, async (req, res) => {
+    const userId   = req.session.user.id;
+    const ticketId = parseInt(req.params.id, 10);
+    try {
+        const [[ticket]] = await db.execute(
+            'SELECT id FROM ticket WHERE id = ? AND user_id = ?',
+            [ticketId, userId]
+        );
+        if (!ticket) return res.status(404).end();
+    } catch { return res.status(500).end(); }
+
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders();
+
+    const clientId = `ticket_${ticketId}_${userId}_${Date.now()}`;
+    if (!global.ticketClients) global.ticketClients = new Map();
+    global.ticketClients.set(clientId, { res, ticketId });
+
+    req.on('close', () => {
+        global.ticketClients.delete(clientId);
+    });
 });
 
 //Administração
