@@ -72,7 +72,7 @@ async function enviarBoleto({
 
   const attachments = [
     {
-      filename: 'boleto-gymbros.pdf',
+      filename: 'boleto-fitcrew.pdf',
       content: pdfBuffer.toString('base64'),
     },
   ];
@@ -85,7 +85,7 @@ async function enviarBoleto({
     <p>O arquivo em PDF está anexado para sua conveniência.</p>
     <br>
     <p>Se tiver qualquer dúvida, é só responder este email 💪</p>
-    <p>Equipe GymBros</p>
+    <p>Equipe FitCrew</p>
   `;
 
   const text = `
@@ -98,15 +98,15 @@ Código para pagamento: ${linhaDigitavel}
 O arquivo em PDF está anexado para sua conveniência.
 
 Se tiver qualquer dúvida, é só responder este email.
-Equipe GymBros
+Equipe FitCrew
   `.trim();
 
   try {
     const response = await resend.emails.send({
-      from: 'GymBros <noreply@gymbros.app.br>',
+      from: 'FitCrew <noreply@gymbros.app.br>',
       reply_to: 'contato@gymbros.app.br',
       to: [to],
-      subject: `GymBros | Detalhes da sua assinatura — ${planoNome}`,
+      subject: `FitCrew | Detalhes da sua assinatura — ${planoNome}`,
       html,
       text,
       attachments,

@@ -1,268 +1,497 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <%- include('../partials/seo') %>
-    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
-    <link rel="stylesheet" href="/css/header.css">
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/style-mobile.css" media="only screen and (max-width: 768px)">
-    <link rel="stylesheet" href="/css/style-medium.css" media="only screen and (max-width: 1440px)">
-    <link rel="stylesheet" href="/css/footer.css">
-</head>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico" />
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+    <link
+      rel="preload"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      as="style"
+      onload="
+        this.onload = null;
+        this.rel = 'stylesheet';
+      "
+    />
+    <noscript
+      ><link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    /></noscript>
+    <link rel="stylesheet" href="/css/header.css" />
+    <link rel="stylesheet" href="/css/style.css" />
+    <link
+      rel="stylesheet"
+      href="/css/style-mobile.css"
+      media="only screen and (max-width: 768px)"
+    />
+    <link
+      rel="stylesheet"
+      href="/css/style-medium.css"
+      media="only screen and (max-width: 1440px)"
+    />
+    <link rel="stylesheet" href="/css/footer.css" />
+  </head>
 
-<body>
+  <body>
     <%- include('../partials/header') %>
 
     <section class="side-menu" id="sideMenu">
-    <span class="close-menu" id="closeMenu"><i class="fas fa-times"></i></span>
-    <ul class="menu-items">
-        <li><a href="/" data-translate="nav.home"><i class="fas fa-home"></i> Home</a></li>
-        <li><a href="/academias" data-translate="nav.academias"><i class="fas fa-dumbbell"></i> Academias</a></li>
-        <li><a href="/about" data-translate="nav.about"><i class="fas fa-info-circle"></i> Sobre nós</a></li>
-        <li><a href="/planos" data-translate="nav.planos"><i class="fas fa-tags"></i> Planos e Preços</a></li>
-    </ul>
-</section>
+      <span class="close-menu" id="closeMenu"
+        ><i class="fas fa-times"></i
+      ></span>
+      <ul class="menu-items">
+        <li>
+          <a href="/" data-translate="nav.home"
+            ><i class="fas fa-home"></i> Home</a
+          >
+        </li>
+        <li>
+          <a href="/academias" data-translate="nav.academias"
+            ><i class="fas fa-dumbbell"></i> Academias</a
+          >
+        </li>
+        <li>
+          <a href="/about" data-translate="nav.about"
+            ><i class="fas fa-info-circle"></i> Sobre nós</a
+          >
+        </li>
+        <li>
+          <a href="/planos" data-translate="nav.planos"
+            ><i class="fas fa-tags"></i> Planos e Preços</a
+          >
+        </li>
+      </ul>
+    </section>
 
     <section class="menu-overlay" id="menuOverlay"></section>
 
     <main>
-    <!-- HERO — não alterar -->
-    <section class="banner-home">
-        <img src="/images/banner.png" alt="">
-    </section>
+      <!-- HERO — não alterar -->
+      <section class="banner-home">
+        <img src="/images/banner.png" alt="" />
+      </section>
 
-    <!-- SEÇÃO 1: Números de impacto -->
-    <section class="impact-numbers animate-in">
+      <!-- SEÇÃO 1: Números de impacto -->
+      <section class="impact-numbers animate-in">
         <section class="impact-grid">
-            <section class="impact-card">
-                <span class="impact-number" data-target="1321">0</span>
-                <span class="impact-label" data-translate="index.impact.exercises">Exercícios disponíveis</span>
-            </section>
-            <section class="impact-card">
-                <span class="impact-number" data-target="235" data-suffix="+">0</span>
-                <span class="impact-label" data-translate="index.impact.gifs">GIFs de execução</span>
-            </section>
-            <section class="impact-card">
-                <span class="impact-number" data-target="3">0</span>
-                <span class="impact-label" data-translate="index.impact.langs">Idiomas suportados</span>
-            </section>
-            <section class="impact-card">
-                <span class="impact-number impact-text">IA</span>
-                <span class="impact-label" data-translate="index.impact.ai">Treinadora integrada</span>
-            </section>
+          <section class="impact-card">
+            <span class="impact-number" data-target="1321">0</span>
+            <span class="impact-label" data-translate="index.impact.exercises"
+              >Exercícios disponíveis</span
+            >
+          </section>
+          <section class="impact-card">
+            <span class="impact-number" data-target="235" data-suffix="+"
+              >0</span
+            >
+            <span class="impact-label" data-translate="index.impact.gifs"
+              >GIFs de execução</span
+            >
+          </section>
+          <section class="impact-card">
+            <span class="impact-number" data-target="3">0</span>
+            <span class="impact-label" data-translate="index.impact.langs"
+              >Idiomas suportados</span
+            >
+          </section>
+          <section class="impact-card">
+            <span class="impact-number impact-text">IA</span>
+            <span class="impact-label" data-translate="index.impact.ai"
+              >Treinadora integrada</span
+            >
+          </section>
         </section>
-    </section>
+      </section>
 
-    <!-- SEÇÃO 2: IA Treinadora -->
-    <section class="split-section ai-section animate-in">
+      <!-- SEÇÃO 2: IA Treinadora -->
+      <section class="split-section ai-section animate-in">
         <section class="split-text">
-            <span class="section-badge" data-translate="index.ai.badge">✦ Inteligência Artificial</span>
-            <h2 data-translate="index.ai.title">Seu personal trainer está no app</h2>
-            <p data-translate="index.ai.desc">A IA do GymBros analisa seu perfil, objetivos e histórico para criar planos de treino e dieta 100% personalizados. Basta conversar.</p>
-            <ul class="feature-bullets">
-                <li><span class="check-icon">✓</span> <span data-translate="index.ai.bullet1">Plano de treino gerado em segundos</span></li>
-                <li><span class="check-icon">✓</span> <span data-translate="index.ai.bullet2">Dieta adaptada ao seu objetivo</span></li>
-                <li><span class="check-icon">✓</span> <span data-translate="index.ai.bullet3">Avaliação corporal por foto (plano Black)</span></li>
-            </ul>
-            <a href="/planos" class="btn-veja-mais" data-translate="index.ai.btn">Conhecer planos →</a>
+          <span class="section-badge" data-translate="index.ai.badge"
+            >✦ Inteligência Artificial</span
+          >
+          <h2 data-translate="index.ai.title">
+            Seu personal trainer está no app
+          </h2>
+          <p data-translate="index.ai.desc">
+            A IA do FitCrew analisa seu perfil, objetivos e histórico para criar
+            planos de treino e dieta 100% personalizados. Basta conversar.
+          </p>
+          <ul class="feature-bullets">
+            <li>
+              <span class="check-icon">✓</span>
+              <span data-translate="index.ai.bullet1"
+                >Plano de treino gerado em segundos</span
+              >
+            </li>
+            <li>
+              <span class="check-icon">✓</span>
+              <span data-translate="index.ai.bullet2"
+                >Dieta adaptada ao seu objetivo</span
+              >
+            </li>
+            <li>
+              <span class="check-icon">✓</span>
+              <span data-translate="index.ai.bullet3"
+                >Avaliação corporal por foto (plano Black)</span
+              >
+            </li>
+          </ul>
+          <a href="/planos" class="btn-veja-mais" data-translate="index.ai.btn"
+            >Conhecer planos →</a
+          >
         </section>
         <section class="split-image">
-            <section class="photo-placeholder photo-slot">
-                <img src="images/chatapp.png" alt="IA Treinadora" width="540px" style="border-radius: 20px;" class="zoomable-img">
-                <span class="zoom-hint" aria-hidden="true">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
-                </span>
-            </section>
+          <section class="photo-placeholder photo-slot">
+            <img
+              src="images/chatapp.png"
+              alt="IA Treinadora"
+              width="540px"
+              style="border-radius: 20px"
+              class="zoomable-img"
+            />
+            <span class="zoom-hint" aria-hidden="true">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                <line x1="11" y1="8" x2="11" y2="14" />
+                <line x1="8" y1="11" x2="14" y2="11" />
+              </svg>
+            </span>
+          </section>
         </section>
-    </section>
+      </section>
 
-    <!-- SEÇÃO 3: Como funciona -->
-    <section class="how-it-works animate-in">
+      <!-- SEÇÃO 3: Como funciona -->
+      <section class="how-it-works animate-in">
         <h2 data-translate="index.how.title">Do zero ao treino em 3 passos</h2>
         <section class="steps-grid">
-            <section class="step-card">
-                <span class="step-number">01</span>
-                <section class="step-icon">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-                </section>
-                <h3 data-translate="index.how.step1.title">Crie seu perfil</h3>
-                <p data-translate="index.how.step1.desc">Informe seus objetivos, nível de condicionamento e preferências</p>
+          <section class="step-card">
+            <span class="step-number">01</span>
+            <section class="step-icon">
+              <svg
+                width="32"
+                height="32"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="12" cy="8" r="4" />
+                <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+              </svg>
             </section>
-            <section class="step-connector" aria-hidden="true">
-                <svg width="48" height="20" viewBox="0 0 48 20" fill="none"><line x1="0" y1="10" x2="36" y2="10" stroke="#B8860B" stroke-width="2" stroke-dasharray="4 3"/><polyline points="30,4 40,10 30,16" fill="none" stroke="#B8860B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <h3 data-translate="index.how.step1.title">Crie seu perfil</h3>
+            <p data-translate="index.how.step1.desc">
+              Informe seus objetivos, nível de condicionamento e preferências
+            </p>
+          </section>
+          <section class="step-connector" aria-hidden="true">
+            <svg width="48" height="20" viewBox="0 0 48 20" fill="none">
+              <line
+                x1="0"
+                y1="10"
+                x2="36"
+                y2="10"
+                stroke="#B8860B"
+                stroke-width="2"
+                stroke-dasharray="4 3"
+              />
+              <polyline
+                points="30,4 40,10 30,16"
+                fill="none"
+                stroke="#B8860B"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </section>
+          <section class="step-card">
+            <span class="step-number">02</span>
+            <section class="step-icon">
+              <svg
+                width="32"
+                height="32"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="2" y="3" width="20" height="14" rx="2" />
+                <path d="M8 21h8M12 17v4" />
+                <circle cx="12" cy="10" r="3" />
+              </svg>
             </section>
-            <section class="step-card">
-                <span class="step-number">02</span>
-                <section class="step-icon">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><circle cx="12" cy="10" r="3"/></svg>
-                </section>
-                <h3 data-translate="index.how.step2.title">Converse com a IA</h3>
-                <p data-translate="index.how.step2.desc">Peça seu treino ou dieta. A IA monta tudo personalizado pra você</p>
+            <h3 data-translate="index.how.step2.title">Converse com a IA</h3>
+            <p data-translate="index.how.step2.desc">
+              Peça seu treino ou dieta. A IA monta tudo personalizado pra você
+            </p>
+          </section>
+          <section class="step-connector" aria-hidden="true">
+            <svg width="48" height="20" viewBox="0 0 48 20" fill="none">
+              <line
+                x1="0"
+                y1="10"
+                x2="36"
+                y2="10"
+                stroke="#B8860B"
+                stroke-width="2"
+                stroke-dasharray="4 3"
+              />
+              <polyline
+                points="30,4 40,10 30,16"
+                fill="none"
+                stroke="#B8860B"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </section>
+          <section class="step-card">
+            <span class="step-number">03</span>
+            <section class="step-icon">
+              <svg
+                width="32"
+                height="32"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polygon points="5 3 19 12 5 21 5 3" />
+              </svg>
             </section>
-            <section class="step-connector" aria-hidden="true">
-                <svg width="48" height="20" viewBox="0 0 48 20" fill="none"><line x1="0" y1="10" x2="36" y2="10" stroke="#B8860B" stroke-width="2" stroke-dasharray="4 3"/><polyline points="30,4 40,10 30,16" fill="none" stroke="#B8860B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </section>
-            <section class="step-card">
-                <span class="step-number">03</span>
-                <section class="step-icon">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                </section>
-                <h3 data-translate="index.how.step3.title">Execute e evolua</h3>
-                <p data-translate="index.how.step3.desc">Siga o treino com GIFs, registre suas cargas e acompanhe seu progresso</p>
-            </section>
+            <h3 data-translate="index.how.step3.title">Execute e evolua</h3>
+            <p data-translate="index.how.step3.desc">
+              Siga o treino com GIFs, registre suas cargas e acompanhe seu
+              progresso
+            </p>
+          </section>
         </section>
-    </section>
+      </section>
 
-    <!-- SEÇÃO 4: Carrossel de categorias musculares -->
-    <section class="categorias-treino">
-        <h2 data-translate="index.categories.title">Treine cada músculo do seu corpo</h2>
-        <p class="categorias-subtitle" data-translate="index.categories.subtitle">1.321 exercícios com GIF para cada grupo muscular</p>
+      <!-- SEÇÃO 4: Carrossel de categorias musculares -->
+      <section class="categorias-treino">
+        <h2 data-translate="index.categories.title">
+          Treine cada músculo do seu corpo
+        </h2>
+        <p
+          class="categorias-subtitle"
+          data-translate="index.categories.subtitle"
+        >
+          1.321 exercícios com GIF para cada grupo muscular
+        </p>
         <section class="categories-outer">
-            <section class="categories-track">
-
-                <!-- SET 1 -->
-                <section class="category-item">
-                    <img src="images/peito.png" alt="Peito" width="75px">
-                    <span data-translate="index.cat.peito">Peito</span>
-                </section>
-                <section class="category-item">             
-                    <img src="images/costas.png" alt="Costas" width="72px">
-                    <span data-translate="index.cat.costas">Costas</span>
-                </section>
-                <section class="category-item">
-                    <img src="images/perna.png" alt="Pernas" width="72px">
-                    <span data-translate="index.cat.pernas">Pernas</span>
-                </section>
-                <section class="category-item">
-                    <img src="images/ombro.png" alt="Ombros" width="72px">
-                    <span data-translate="index.cat.ombros">Ombros</span>
-                </section>
-                <section class="category-item">
-                    <img src="images/biceps.png" alt="Bíceps" width="62px">
-                    <span data-translate="index.cat.biceps">Bíceps</span>
-                </section>
-                <section class="category-item">
-                    <img src="images/triceps.png" alt="Tríceps" width="32px">
-                    <span data-translate="index.cat.triceps">Tríceps</span>
-                </section>
-                <section class="category-item">
-                    <img src="images/abdomen.png" alt="Abdômen" width="62px">
-                    <span data-translate="index.cat.core">Core</span>
-                </section>
-                <section class="category-item">
-                    <img src="images/cardio.png" alt="Cardio" width="62px">
-                    <span data-translate="index.cat.cardio">Cardio</span>
-                </section>
-                <section class="category-item">
-                    <img src="images/gluteo.png" alt="Glúteos" width="52px">
-                    <span data-translate="index.cat.gluteos">Glúteos</span>
-                </section>
-                <section class="category-item">
-                    <img src="images/antebraço.png" alt="Antebraço" width="72px">
-                    <span data-translate="index.cat.antebraco">Antebraço</span>
-                </section>
-
-                <!-- SET 2 — cópia idêntica para loop imperceptível -->
-               <section class="category-item">
-                    <img src="images/peito.png" alt="Peito" width="75px">
-                    <span data-translate="index.cat.peito">Peito</span>
-                </section>
-                <section class="category-item">             
-                    <img src="images/costas.png" alt="Costas" width="72px">
-                    <span data-translate="index.cat.costas">Costas</span>
-                </section>
-                <section class="category-item">
-                    <img src="images/perna.png" alt="Pernas" width="72px">
-                    <span data-translate="index.cat.pernas">Pernas</span>
-                </section>
-                <section class="category-item">
-                    <img src="images/ombro.png" alt="Ombros" width="72px">
-                    <span data-translate="index.cat.ombros">Ombros</span>
-                </section>
-                <section class="category-item">
-                    <img src="images/biceps.png" alt="Bíceps" width="62px">
-                    <span data-translate="index.cat.biceps">Bíceps</span>
-                </section>
-                <section class="category-item">
-                    <img src="images/triceps.png" alt="Tríceps" width="32px">
-                    <span data-translate="index.cat.triceps">Tríceps</span>
-                </section>
-                <section class="category-item">
-                    <img src="images/abdomen.png" alt="Abdômen" width="62px">
-                    <span data-translate="index.cat.core">Core</span>
-                </section>
-                <section class="category-item">
-                    <img src="images/cardio.png" alt="Cardio" width="62px">
-                    <span data-translate="index.cat.cardio">Cardio</span>
-                </section>
-                <section class="category-item">
-                    <img src="images/gluteo.png" alt="Glúteos" width="52px">
-                    <span data-translate="index.cat.gluteos">Glúteos</span>
-                </section>
-                <section class="category-item">
-                    <img src="images/antebraço.png" alt="Antebraço" width="52px">
-                    <span data-translate="index.cat.antebraco">Antebraço</span>
-                </section>
+          <section class="categories-track">
+            <!-- SET 1 -->
+            <section class="category-item">
+              <img src="images/peito.png" alt="Peito" width="75px" />
+              <span data-translate="index.cat.peito">Peito</span>
             </section>
+            <section class="category-item">
+              <img src="images/costas.png" alt="Costas" width="72px" />
+              <span data-translate="index.cat.costas">Costas</span>
+            </section>
+            <section class="category-item">
+              <img src="images/perna.png" alt="Pernas" width="72px" />
+              <span data-translate="index.cat.pernas">Pernas</span>
+            </section>
+            <section class="category-item">
+              <img src="images/ombro.png" alt="Ombros" width="72px" />
+              <span data-translate="index.cat.ombros">Ombros</span>
+            </section>
+            <section class="category-item">
+              <img src="images/biceps.png" alt="Bíceps" width="62px" />
+              <span data-translate="index.cat.biceps">Bíceps</span>
+            </section>
+            <section class="category-item">
+              <img src="images/triceps.png" alt="Tríceps" width="32px" />
+              <span data-translate="index.cat.triceps">Tríceps</span>
+            </section>
+            <section class="category-item">
+              <img src="images/abdomen.png" alt="Abdômen" width="62px" />
+              <span data-translate="index.cat.core">Core</span>
+            </section>
+            <section class="category-item">
+              <img src="images/cardio.png" alt="Cardio" width="62px" />
+              <span data-translate="index.cat.cardio">Cardio</span>
+            </section>
+            <section class="category-item">
+              <img src="images/gluteo.png" alt="Glúteos" width="52px" />
+              <span data-translate="index.cat.gluteos">Glúteos</span>
+            </section>
+            <section class="category-item">
+              <img src="images/antebraço.png" alt="Antebraço" width="72px" />
+              <span data-translate="index.cat.antebraco">Antebraço</span>
+            </section>
+
+            <!-- SET 2 — cópia idêntica para loop imperceptível -->
+            <section class="category-item">
+              <img src="images/peito.png" alt="Peito" width="75px" />
+              <span data-translate="index.cat.peito">Peito</span>
+            </section>
+            <section class="category-item">
+              <img src="images/costas.png" alt="Costas" width="72px" />
+              <span data-translate="index.cat.costas">Costas</span>
+            </section>
+            <section class="category-item">
+              <img src="images/perna.png" alt="Pernas" width="72px" />
+              <span data-translate="index.cat.pernas">Pernas</span>
+            </section>
+            <section class="category-item">
+              <img src="images/ombro.png" alt="Ombros" width="72px" />
+              <span data-translate="index.cat.ombros">Ombros</span>
+            </section>
+            <section class="category-item">
+              <img src="images/biceps.png" alt="Bíceps" width="62px" />
+              <span data-translate="index.cat.biceps">Bíceps</span>
+            </section>
+            <section class="category-item">
+              <img src="images/triceps.png" alt="Tríceps" width="32px" />
+              <span data-translate="index.cat.triceps">Tríceps</span>
+            </section>
+            <section class="category-item">
+              <img src="images/abdomen.png" alt="Abdômen" width="62px" />
+              <span data-translate="index.cat.core">Core</span>
+            </section>
+            <section class="category-item">
+              <img src="images/cardio.png" alt="Cardio" width="62px" />
+              <span data-translate="index.cat.cardio">Cardio</span>
+            </section>
+            <section class="category-item">
+              <img src="images/gluteo.png" alt="Glúteos" width="52px" />
+              <span data-translate="index.cat.gluteos">Glúteos</span>
+            </section>
+            <section class="category-item">
+              <img src="images/antebraço.png" alt="Antebraço" width="52px" />
+              <span data-translate="index.cat.antebraco">Antebraço</span>
+            </section>
+          </section>
         </section>
-    </section>
+      </section>
 
-    <!-- SEÇÃO 5: Execução de treino (split invertido) -->
-    <section class="split-section execution-section animate-in">
+      <!-- SEÇÃO 5: Execução de treino (split invertido) -->
+      <section class="split-section execution-section animate-in">
         <section class="split-image">
-            <section class="photo-placeholder photo-slot phone-mockup">
-                <img src="images/treinoapp.png" alt="Execução de treino no app" width="265px" style="border-radius: 20px;" class="zoomable-img">
-                <span class="zoom-hint" aria-hidden="true">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
-                </span>
-            </section>
+          <section class="photo-placeholder photo-slot phone-mockup">
+            <img
+              src="images/treinoapp.png"
+              alt="Execução de treino no app"
+              width="265px"
+              style="border-radius: 20px"
+              class="zoomable-img"
+            />
+            <span class="zoom-hint" aria-hidden="true">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                <line x1="11" y1="8" x2="11" y2="14" />
+                <line x1="8" y1="11" x2="14" y2="11" />
+              </svg>
+            </span>
+          </section>
         </section>
         <section class="split-text">
-            <span class="section-badge" data-translate="index.exec.badge">✦ Execução guiada</span>
-            <h2 data-translate="index.exec.title">Treine com GIF, séries e cronômetro</h2>
-            <p data-translate="index.exec.desc">Cada exercício com GIF demonstrativo, contagem de séries, registro de carga e timer de descanso. Tudo numa tela só.</p>
-            <ul class="feature-bullets">
-                <li><span class="check-icon">✓</span> <span data-translate="index.exec.bullet1">GIF animado para cada exercício</span></li>
-                <li><span class="check-icon">✓</span> <span data-translate="index.exec.bullet2">Timer de descanso automático</span></li>
-                <li><span class="check-icon">✓</span> <span data-translate="index.exec.bullet3">Registro de carga e histórico de evolução</span></li>
-            </ul>
+          <span class="section-badge" data-translate="index.exec.badge"
+            >✦ Execução guiada</span
+          >
+          <h2 data-translate="index.exec.title">
+            Treine com GIF, séries e cronômetro
+          </h2>
+          <p data-translate="index.exec.desc">
+            Cada exercício com GIF demonstrativo, contagem de séries, registro
+            de carga e timer de descanso. Tudo numa tela só.
+          </p>
+          <ul class="feature-bullets">
+            <li>
+              <span class="check-icon">✓</span>
+              <span data-translate="index.exec.bullet1"
+                >GIF animado para cada exercício</span
+              >
+            </li>
+            <li>
+              <span class="check-icon">✓</span>
+              <span data-translate="index.exec.bullet2"
+                >Timer de descanso automático</span
+              >
+            </li>
+            <li>
+              <span class="check-icon">✓</span>
+              <span data-translate="index.exec.bullet3"
+                >Registro de carga e histórico de evolução</span
+              >
+            </li>
+          </ul>
         </section>
-    </section>
+      </section>
 
-    <!-- SEÇÃO FINAL — não alterar -->
-    <section class="planos">
+      <!-- SEÇÃO FINAL — não alterar -->
+      <section class="planos">
+        <img src="/images/biceps-logo.png" class="corner-left" />
+        <img src="/images/biceps-logo2.png" class="corner-right" />
 
-        <img src="/images/biceps-logo.png" class="corner-left">
-        <img src="/images/biceps-logo2.png" class="corner-right">
-
-        <h2 data-translate="index.plans.title">TREINO INTELIGENTE. IA PERSONALIZADA. DO SEU JEITO.</h2>
+        <h2 data-translate="index.plans.title">
+          TREINO INTELIGENTE. IA PERSONALIZADA. DO SEU JEITO.
+        </h2>
         <p data-translate="index.plans.desc">
-            Com o GymBros, você treina com inteligência artificial ao seu lado planos de treino, dieta e acompanhamento personalizados.
-            A gente cuida da tecnologia, você cuida da evolução.
-            Conheça nossos planos e encontre o que combina com sua rotina.
+          Com o FitCrew, você treina com inteligência artificial ao seu lado
+          planos de treino, dieta e acompanhamento personalizados. A gente cuida
+          da tecnologia, você cuida da evolução. Conheça nossos planos e
+          encontre o que combina com sua rotina.
         </p>
         <a href="/planos">
-        <h2 class="btn-veja-mais" data-translate="index.plans.btn">VER PLANOS</h2>
+          <h2 class="btn-veja-mais" data-translate="index.plans.btn">
+            VER PLANOS
+          </h2>
         </a>
-    </section>
-
-
-
+      </section>
     </main>
 
     <!-- Lightbox -->
-    <section id="img-lightbox" class="img-lightbox" role="dialog" aria-modal="true" aria-label="Imagem ampliada">
-        <button class="lightbox-close" id="lightboxClose" aria-label="Fechar">&times;</button>
-        <section class="lightbox-inner">
-            <img id="lightboxImg" src="" alt="">
-        </section>
+    <section
+      id="img-lightbox"
+      class="img-lightbox"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Imagem ampliada"
+    >
+      <button class="lightbox-close" id="lightboxClose" aria-label="Fechar">
+        &times;
+      </button>
+      <section class="lightbox-inner">
+        <img id="lightboxImg" src="" alt="" />
+      </section>
     </section>
 
     <%- include('../partials/footer') %>
@@ -270,124 +499,139 @@
     <script src="/js/menu.js"></script>
     <script src="/js/header.js"></script>
     <script>
-    (function () {
+      (function () {
         /* ── Intersection Observer: animate-in + counters ── */
         var countersStarted = new WeakSet();
 
-        var observer = new IntersectionObserver(function (entries) {
+        var observer = new IntersectionObserver(
+          function (entries) {
             entries.forEach(function (entry) {
-                if (!entry.isIntersecting) return;
-                entry.target.classList.add('visible');
+              if (!entry.isIntersecting) return;
+              entry.target.classList.add("visible");
 
-                entry.target.querySelectorAll('[data-target]').forEach(function (el) {
-                    if (countersStarted.has(el)) return;
-                    countersStarted.add(el);
-                    var target = parseInt(el.dataset.target, 10);
-                    var suffix = el.dataset.suffix || '';
-                    var duration = 1400;
-                    var start = null;
-                    function step(ts) {
-                        if (!start) start = ts;
-                        var progress = Math.min((ts - start) / duration, 1);
-                        var eased = 1 - Math.pow(1 - progress, 3);
-                        el.textContent = Math.floor(eased * target).toLocaleString('pt-BR') + suffix;
-                        if (progress < 1) requestAnimationFrame(step);
-                    }
-                    requestAnimationFrame(step);
+              entry.target
+                .querySelectorAll("[data-target]")
+                .forEach(function (el) {
+                  if (countersStarted.has(el)) return;
+                  countersStarted.add(el);
+                  var target = parseInt(el.dataset.target, 10);
+                  var suffix = el.dataset.suffix || "";
+                  var duration = 1400;
+                  var start = null;
+                  function step(ts) {
+                    if (!start) start = ts;
+                    var progress = Math.min((ts - start) / duration, 1);
+                    var eased = 1 - Math.pow(1 - progress, 3);
+                    el.textContent =
+                      Math.floor(eased * target).toLocaleString("pt-BR") +
+                      suffix;
+                    if (progress < 1) requestAnimationFrame(step);
+                  }
+                  requestAnimationFrame(step);
                 });
 
-                observer.unobserve(entry.target);
+              observer.unobserve(entry.target);
             });
-        }, { threshold: 0.1 });
+          },
+          { threshold: 0.1 },
+        );
 
-        document.querySelectorAll('.animate-in').forEach(function (el) {
-            observer.observe(el);
+        document.querySelectorAll(".animate-in").forEach(function (el) {
+          observer.observe(el);
         });
 
         /* ── Lightbox ──────────────────────────────────── */
         (function () {
-            var lightbox   = document.getElementById('img-lightbox');
-            var lbImg      = document.getElementById('lightboxImg');
-            var closeBtn   = document.getElementById('lightboxClose');
+          var lightbox = document.getElementById("img-lightbox");
+          var lbImg = document.getElementById("lightboxImg");
+          var closeBtn = document.getElementById("lightboxClose");
 
-            document.querySelectorAll('.zoomable-img').forEach(function (img) {
-                img.addEventListener('click', function () {
-                    lbImg.src = this.src;
-                    lbImg.alt = this.alt;
-                    lightbox.classList.add('open');
-                    document.body.style.overflow = 'hidden';
-                });
+          document.querySelectorAll(".zoomable-img").forEach(function (img) {
+            img.addEventListener("click", function () {
+              lbImg.src = this.src;
+              lbImg.alt = this.alt;
+              lightbox.classList.add("open");
+              document.body.style.overflow = "hidden";
             });
+          });
 
-            function closeLightbox() {
-                lightbox.classList.remove('open');
-                document.body.style.overflow = '';
+          function closeLightbox() {
+            lightbox.classList.remove("open");
+            document.body.style.overflow = "";
+          }
+
+          lightbox.addEventListener("click", function (e) {
+            if (
+              e.target === lightbox ||
+              e.target === lightbox.querySelector(".lightbox-inner")
+            ) {
+              closeLightbox();
             }
-
-            lightbox.addEventListener('click', function (e) {
-                if (e.target === lightbox || e.target === lightbox.querySelector('.lightbox-inner')) {
-                    closeLightbox();
-                }
-            });
-            closeBtn.addEventListener('click', closeLightbox);
-            document.addEventListener('keydown', function (e) {
-                if (e.key === 'Escape') closeLightbox();
-            });
-        }());
+          });
+          closeBtn.addEventListener("click", closeLightbox);
+          document.addEventListener("keydown", function (e) {
+            if (e.key === "Escape") closeLightbox();
+          });
+        })();
 
         /* ── Infinite marquee via RAF ────────────────────── */
         (function () {
-            var track = document.querySelector('.categories-track');
-            if (!track) return;
+          var track = document.querySelector(".categories-track");
+          if (!track) return;
 
-            var SET_SIZE = 11;
-            var pos = 0;
-            var paused = false;
-            var oneSetWidth = 0;
+          var SET_SIZE = 11;
+          var pos = 0;
+          var paused = false;
+          var oneSetWidth = 0;
 
-            function cloneUntilFull() {
-                // Template: os itens aria-hidden (set 2) já não têm data-translate
-                var all = Array.from(track.children);
-                var template = all.slice(SET_SIZE, SET_SIZE * 2);
-                // Estima quantos sets precisa para cobrir 4× o viewport
-                var approxSetWidth = track.scrollWidth / 2;
-                var setsNeeded = Math.ceil((window.innerWidth * 4) / approxSetWidth);
-                var setsHave = 2;
-                while (setsHave < setsNeeded) {
-                    template.forEach(function (item) {
-                        track.appendChild(item.cloneNode(true));
-                    });
-                    setsHave++;
-                }
-                // Recalcula com base no DOM final
-                oneSetWidth = track.scrollWidth / setsHave;
+          function cloneUntilFull() {
+            // Template: os itens aria-hidden (set 2) já não têm data-translate
+            var all = Array.from(track.children);
+            var template = all.slice(SET_SIZE, SET_SIZE * 2);
+            // Estima quantos sets precisa para cobrir 4× o viewport
+            var approxSetWidth = track.scrollWidth / 2;
+            var setsNeeded = Math.ceil(
+              (window.innerWidth * 4) / approxSetWidth,
+            );
+            var setsHave = 2;
+            while (setsHave < setsNeeded) {
+              template.forEach(function (item) {
+                track.appendChild(item.cloneNode(true));
+              });
+              setsHave++;
             }
+            // Recalcula com base no DOM final
+            oneSetWidth = track.scrollWidth / setsHave;
+          }
 
-            function tick() {
-                if (!paused) {
-                    pos += 0.6;
-                    if (pos >= oneSetWidth) pos -= oneSetWidth;
-                    track.style.transform = 'translateX(-' + pos + 'px)';
-                }
-                requestAnimationFrame(tick);
+          function tick() {
+            if (!paused) {
+              pos += 0.6;
+              if (pos >= oneSetWidth) pos -= oneSetWidth;
+              track.style.transform = "translateX(-" + pos + "px)";
             }
+            requestAnimationFrame(tick);
+          }
 
-            track.addEventListener('mouseenter', function () { paused = true; });
-            track.addEventListener('mouseleave', function () { paused = false; });
+          track.addEventListener("mouseenter", function () {
+            paused = true;
+          });
+          track.addEventListener("mouseleave", function () {
+            paused = false;
+          });
 
-            function init() {
-                cloneUntilFull();
-                tick();
-            }
+          function init() {
+            cloneUntilFull();
+            tick();
+          }
 
-            if (document.readyState === 'complete') {
-                init();
-            } else {
-                window.addEventListener('load', init);
-            }
-        }());
-    }());
+          if (document.readyState === "complete") {
+            init();
+          } else {
+            window.addEventListener("load", init);
+          }
+        })();
+      })();
     </script>
-</body>
-
+  </body>
 </html>

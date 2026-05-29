@@ -1,157 +1,229 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <%- include('../partials/seo') %>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <%- include('../partials/seo') %>
 
-  <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
-  <link rel="stylesheet" href="/css/forms.css">
-  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
-</head>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico" />
+    <link rel="stylesheet" href="/css/forms.css" />
+    <link
+      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+      rel="stylesheet"
+    />
+  </head>
 
-<body class="auth-page auth-login">
-  <section class="wrapper">
-    <form id="loginForm" class="auth-form">
-      <section class="auth-header">
-        <p class="auth-kicker">Bem-vindo de volta</p>
-        <h1>Login</h1>
-        <p class="auth-subtitle">Entre na sua conta para acessar sua área GymBros.</p>
-      </section>
+  <body class="auth-page auth-login">
+    <section class="wrapper">
+      <form id="loginForm" class="auth-form">
+        <section class="auth-header">
+          <p class="auth-kicker">Bem-vindo de volta</p>
+          <h1>Login</h1>
+          <p class="auth-subtitle">
+            Entre na sua conta para acessar sua área FitCrew.
+          </p>
+        </section>
 
-      <span class="success-message"></span>
+        <span class="success-message"></span>
 
-      <section class="input-box">
-        <input type="text" id="username" name="username" placeholder="Usuário, CPF ou E-mail">
-        <i class='bx bxs-user'></i>
-        <span class="error-message" id="username-error"></span>
-      </section>
+        <section class="input-box">
+          <input
+            type="text"
+            id="username"
+            name="username"
+            placeholder="Usuário, CPF ou E-mail"
+          />
+          <i class="bx bxs-user"></i>
+          <span class="error-message" id="username-error"></span>
+        </section>
 
-      <section class="input-box">
-        <input type="password" id="password" name="password" placeholder="Senha">
-        <button type="button" class="toggle-password" data-target="password" title="Mostrar/ocultar senha">
-          <i class='bx bx-hide'></i>
+        <section class="input-box">
+          <input
+            type="password"
+            id="password"
+            name="password"
+            placeholder="Senha"
+          />
+          <button
+            type="button"
+            class="toggle-password"
+            data-target="password"
+            title="Mostrar/ocultar senha"
+          >
+            <i class="bx bx-hide"></i>
+          </button>
+          <span class="error-message" id="password-error"></span>
+        </section>
+
+        <button type="submit" class="btn">Entrar</button>
+
+        <section class="login-bio-divider">
+          <span>ou</span>
+        </section>
+
+        <button
+          type="button"
+          class="btn-bio-login"
+          id="btnBioLogin"
+          onclick="loginBiometrico()"
+        >
+          <i class="bx bx-fingerprint"></i> Entrar com biometria
         </button>
-        <span class="error-message" id="password-error"></span>
-      </section>
 
-      <button type="submit" class="btn">Entrar</button>
+        <section class="register-link">
+          <p>Não tem uma conta? <a href="/register">Registrar</a></p>
+        </section>
+      </form>
 
-      <section class="login-bio-divider">
-        <span>ou</span>
-      </section>
+      <aside class="auth-brand-panel">
+        <a
+          href="/"
+          class="brand-link"
+          aria-label="Voltar para a página inicial"
+        >
+          <img src="/images/logo-form.png" class="logo" alt="Logo FitCrew" />
+        </a>
 
-      <button type="button" class="btn-bio-login" id="btnBioLogin" onclick="loginBiometrico()">
-        <i class='bx bx-fingerprint'></i> Entrar com biometria
-      </button>
+        <section class="brand-copy">
+          <span>FITCREW</span>
+          <h2>Seu treino, sua evolução.</h2>
+          <p>
+            Controle treinos, acompanhe progresso e use IA para treinar com mais
+            inteligência.
+          </p>
+        </section>
+      </aside>
+    </section>
 
-      <section class="register-link">
-        <p>Não tem uma conta? <a href="/register">Registrar</a></p>
-      </section>
-    </form>
+    <script src="/js/forms.js" type="module"></script>
+    <script>
+      function showLoginToast(msg, cor) {
+        const t = document.createElement("section");
+        t.style.cssText = `position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a1a;border:1px solid ${cor};color:#fff;padding:13px 20px;border-radius:10px;font-size:.87rem;font-weight:600;z-index:99999;box-shadow:0 8px 28px rgba(0,0,0,.5);max-width:320px;text-align:center;`;
+        t.textContent = msg;
+        document.body.appendChild(t);
+        setTimeout(() => t.remove(), 3500);
+      }
 
-    <aside class="auth-brand-panel">
-      <a href="/" class="brand-link" aria-label="Voltar para a página inicial">
-        <img src="/images/logo-form.png" class="logo" alt="Logo GymBros">
-      </a>
+      function b64ToBuffer(b64) {
+        const s = atob(b64.replace(/-/g, "+").replace(/_/g, "/"));
+        const u = new Uint8Array(s.length);
+        for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i);
+        return u.buffer;
+      }
 
-      <section class="brand-copy">
-        <span>GYMBROS</span>
-        <h2>Seu treino, sua evolução.</h2>
-        <p>Controle treinos, acompanhe progresso e use IA para treinar com mais inteligência.</p>
-      </section>
-    </aside>
-  </section>
+      function bufToB64(buf) {
+        const u = new Uint8Array(buf);
+        let s = "";
+        for (let i = 0; i < u.length; i++) s += String.fromCharCode(u[i]);
+        return btoa(s)
+          .replace(/\+/g, "-")
+          .replace(/\//g, "_")
+          .replace(/=/g, "");
+      }
 
-  <script src="/js/forms.js" type="module"></script>
-  <script>
-  function showLoginToast(msg, cor) {
-      const t = document.createElement('section');
-      t.style.cssText = `position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a1a;border:1px solid ${cor};color:#fff;padding:13px 20px;border-radius:10px;font-size:.87rem;font-weight:600;z-index:99999;box-shadow:0 8px 28px rgba(0,0,0,.5);max-width:320px;text-align:center;`;
-      t.textContent = msg;
-      document.body.appendChild(t);
-      setTimeout(() => t.remove(), 3500);
-  }
-
-  function b64ToBuffer(b64) {
-      const s = atob(b64.replace(/-/g,'+').replace(/_/g,'/'));
-      const u = new Uint8Array(s.length);
-      for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i);
-      return u.buffer;
-  }
-
-  function bufToB64(buf) {
-      const u = new Uint8Array(buf);
-      let s = '';
-      for (let i = 0; i < u.length; i++) s += String.fromCharCode(u[i]);
-      return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
-  }
-
-  function credToJSON(cred) {
-      const resp = {};
-      if (cred.response) {
+      function credToJSON(cred) {
+        const resp = {};
+        if (cred.response) {
           const proto = Object.getPrototypeOf(cred.response);
-          for (const key of Object.getOwnPropertyNames(proto).filter(k => k !== 'constructor')) {
-              try {
-                  const val = cred.response[key];
-                  if (typeof val === 'function') continue;
-                  resp[key] = val instanceof ArrayBuffer ? bufToB64(val) : (val ?? undefined);
-              } catch (_) {}
+          for (const key of Object.getOwnPropertyNames(proto).filter(
+            (k) => k !== "constructor",
+          )) {
+            try {
+              const val = cred.response[key];
+              if (typeof val === "function") continue;
+              resp[key] =
+                val instanceof ArrayBuffer ? bufToB64(val) : (val ?? undefined);
+            } catch (_) {}
           }
-          for (const campo of ['clientDataJSON','authenticatorData','signature','userHandle']) {
-              try {
-                  const val = cred.response[campo];
-                  if (val instanceof ArrayBuffer && !resp[campo]) resp[campo] = bufToB64(val);
-              } catch (_) {}
+          for (const campo of [
+            "clientDataJSON",
+            "authenticatorData",
+            "signature",
+            "userHandle",
+          ]) {
+            try {
+              const val = cred.response[campo];
+              if (val instanceof ArrayBuffer && !resp[campo])
+                resp[campo] = bufToB64(val);
+            } catch (_) {}
           }
+        }
+        return {
+          id: cred.id,
+          rawId: bufToB64(cred.rawId),
+          type: cred.type,
+          response: resp,
+          clientExtensionResults: cred.getClientExtensionResults?.() || {},
+        };
       }
-      return { id: cred.id, rawId: bufToB64(cred.rawId), type: cred.type, response: resp,
-               clientExtensionResults: cred.getClientExtensionResults?.() || {} };
-  }
 
-  async function loginBiometrico() {
-      if (!window.PublicKeyCredential) {
-          showLoginToast('Seu dispositivo não suporta biometria.', '#e74c3c'); return;
-      }
-      const identifier = document.getElementById('username').value.trim();
-      if (!identifier) {
-          showLoginToast('Digite seu usuário, CPF ou e-mail primeiro.', '#FFD700'); return;
-      }
-      const btn = document.getElementById('btnBioLogin');
-      btn.disabled = true;
-      btn.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> Aguarde...';
-      try {
-          const opRes = await fetch('/api/webauthn/login/opcoes?identifier=' + encodeURIComponent(identifier));
+      async function loginBiometrico() {
+        if (!window.PublicKeyCredential) {
+          showLoginToast("Seu dispositivo não suporta biometria.", "#e74c3c");
+          return;
+        }
+        const identifier = document.getElementById("username").value.trim();
+        if (!identifier) {
+          showLoginToast(
+            "Digite seu usuário, CPF ou e-mail primeiro.",
+            "#FFD700",
+          );
+          return;
+        }
+        const btn = document.getElementById("btnBioLogin");
+        btn.disabled = true;
+        btn.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> Aguarde...';
+        try {
+          const opRes = await fetch(
+            "/api/webauthn/login/opcoes?identifier=" +
+              encodeURIComponent(identifier),
+          );
           const opcoes = await opRes.json();
-          if (opcoes.erro) { showLoginToast(opcoes.erro, '#e74c3c'); return; }
+          if (opcoes.erro) {
+            showLoginToast(opcoes.erro, "#e74c3c");
+            return;
+          }
 
           opcoes.challenge = b64ToBuffer(opcoes.challenge);
           if (opcoes.allowCredentials) {
-              opcoes.allowCredentials = opcoes.allowCredentials.map(c => ({ ...c, id: b64ToBuffer(c.id) }));
+            opcoes.allowCredentials = opcoes.allowCredentials.map((c) => ({
+              ...c,
+              id: b64ToBuffer(c.id),
+            }));
           }
 
-          const assertion = await navigator.credentials.get({ publicKey: opcoes });
-          const verRes    = await fetch('/api/webauthn/login/verificar', {
-              method: 'POST', headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(credToJSON(assertion)),
+          const assertion = await navigator.credentials.get({
+            publicKey: opcoes,
+          });
+          const verRes = await fetch("/api/webauthn/login/verificar", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(credToJSON(assertion)),
           });
           const verData = await verRes.json();
           if (verData.ok) {
-              showLoginToast('Login biométrico realizado!', '#22c55e');
-              setTimeout(() => { location.href = verData.redirect || '/area-aluno'; }, 800);
+            showLoginToast("Login biométrico realizado!", "#22c55e");
+            setTimeout(() => {
+              location.href = verData.redirect || "/area-aluno";
+            }, 800);
           } else {
-              showLoginToast(verData.erro || 'Falha na autenticação.', '#e74c3c');
+            showLoginToast(verData.erro || "Falha na autenticação.", "#e74c3c");
           }
-      } catch (err) {
-          const msg = err.name === 'NotAllowedError' ? 'Digital não reconhecida. Tente novamente.'
-              : err.name === 'AbortError'            ? 'Verificação cancelada.'
-              : 'Erro na biometria. Tente novamente.';
-          showLoginToast(msg, '#e74c3c');
-      } finally {
+        } catch (err) {
+          const msg =
+            err.name === "NotAllowedError"
+              ? "Digital não reconhecida. Tente novamente."
+              : err.name === "AbortError"
+                ? "Verificação cancelada."
+                : "Erro na biometria. Tente novamente.";
+          showLoginToast(msg, "#e74c3c");
+        } finally {
           btn.disabled = false;
-          btn.innerHTML = '<i class="bx bx-fingerprint"></i> Entrar com biometria';
+          btn.innerHTML =
+            '<i class="bx bx-fingerprint"></i> Entrar com biometria';
+        }
       }
-  }
-  </script>
-</body>
+    </script>
+  </body>
 </html>

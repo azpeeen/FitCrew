@@ -118,7 +118,7 @@ async function gerarBoletoPDF({
         .font('Helvetica-Bold')
         .fontSize(24)
         .fillColor(brand)
-        .text('GymBros', 36, 30);
+        .text('FitCrew', 36, 30);
 
       doc
         .font('Helvetica')
@@ -140,7 +140,7 @@ async function gerarBoletoPDF({
 
       doc.fillColor('#222');
       doc.font('Helvetica-Bold').fontSize(11).text('Beneficiário', 48, 110);
-      doc.font('Helvetica').fontSize(10).text('GymBros Tecnologia e Bem-estar', 48, 126);
+      doc.font('Helvetica').fontSize(10).text('FitCrew Tecnologia e Bem-estar', 48, 126);
 
       doc.font('Helvetica-Bold').fontSize(11).text('Vencimento', 390, 110, { width: 120, align: 'right' });
       doc.font('Helvetica').fontSize(10).text(String(vencimento), 390, 126, { width: 120, align: 'right' });
@@ -209,7 +209,7 @@ async function gerarBoletoPDF({
       box(doc, 36, 548, usableWidth, 110, 'Instruções', [
         '• Não receber após o vencimento.',
         '• Após a confirmação do pagamento, a assinatura pode levar até 2 dias úteis para ser ativada.',
-        '• Em caso de dúvidas, entre em contato com o suporte GymBros.',
+        '• Em caso de dúvidas, entre em contato com o suporte FitCrew.',
         '• Este boleto foi gerado automaticamente para fins de demonstração.',
       ]);
 
@@ -225,7 +225,7 @@ async function gerarBoletoPDF({
         .font('Helvetica')
         .fontSize(8)
         .fillColor('#999')
-        .text('GymBros — plataforma digital de saúde e bem-estar', 36, 700, {
+        .text('FitCrew — plataforma digital de saúde e bem-estar', 36, 700, {
           width: usableWidth,
           align: 'center',
         });

@@ -1,82 +1,167 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <%- include('../partials/seo') %>
-    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
-    <link rel="stylesheet" href="/css/header.css">
-    <link rel="stylesheet" href="/css/planos-mobile.css" media="only screen and (max-width: 768px)">
-    <link rel="stylesheet" href="/css/planos.css">
-    <link rel="stylesheet" href="/css/footer.css">
-</head>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico" />
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+    <link
+      rel="preload"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      as="style"
+      onload="
+        this.onload = null;
+        this.rel = 'stylesheet';
+      "
+    />
+    <noscript
+      ><link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    /></noscript>
+    <link rel="stylesheet" href="/css/header.css" />
+    <link
+      rel="stylesheet"
+      href="/css/planos-mobile.css"
+      media="only screen and (max-width: 768px)"
+    />
+    <link rel="stylesheet" href="/css/planos.css" />
+    <link rel="stylesheet" href="/css/footer.css" />
+  </head>
 
-<body>
+  <body>
     <%- include('../partials/header') %>
 
     <section class="side-menu" id="sideMenu">
-        <span class="close-menu" id="closeMenu"><i class="fas fa-times"></i></span>
-        <ul class="menu-items">
-            <li><a href="/" data-translate="nav.home"><i class="fas fa-home"></i> Home</a></li>
-            <li><a href="/academias" data-translate="nav.academias"><i class="fas fa-dumbbell"></i> Academias</a></li>
-            <li><a href="/about" data-translate="nav.about"><i class="fas fa-info-circle"></i> Sobre nós</a></li>
-            <li><a href="/planos" data-translate="nav.planos"><i class="fas fa-tags"></i> Planos e Preços</a></li>
-        </ul>
+      <span class="close-menu" id="closeMenu"
+        ><i class="fas fa-times"></i
+      ></span>
+      <ul class="menu-items">
+        <li>
+          <a href="/" data-translate="nav.home"
+            ><i class="fas fa-home"></i> Home</a
+          >
+        </li>
+        <li>
+          <a href="/academias" data-translate="nav.academias"
+            ><i class="fas fa-dumbbell"></i> Academias</a
+          >
+        </li>
+        <li>
+          <a href="/about" data-translate="nav.about"
+            ><i class="fas fa-info-circle"></i> Sobre nós</a
+          >
+        </li>
+        <li>
+          <a href="/planos" data-translate="nav.planos"
+            ><i class="fas fa-tags"></i> Planos e Preços</a
+          >
+        </li>
+      </ul>
     </section>
 
     <section class="menu-overlay" id="menuOverlay"></section>
 
     <main>
-        <section class="plans-hero">
-            <h1 data-translate="plans.hero.title">PLANOS E PREÇOS DO GYMBROS</h1>
-            <p data-translate="plans.hero.desc">O maior site de saúde e bem-estar do mundo, com melhores preços acessíveis para todos</p>
+      <section class="plans-hero">
+        <h1 data-translate="plans.hero.title">PLANOS E PREÇOS DO FITCREW</h1>
+        <p data-translate="plans.hero.desc">
+          O maior site de saúde e bem-estar do mundo, com melhores preços
+          acessíveis para todos
+        </p>
+      </section>
+
+      <section
+        class="planos-banner planos-banner--aviso"
+        id="banner-sem-plano"
+        style="display: none"
+      >
+        <i class="fas fa-lock"></i>
+        <p data-translate="plans.no_plan">
+          Você ainda não possui um plano ativo. Escolha um plano para acessar a
+          área do aluno.
+        </p>
+      </section>
+
+      <!-- Banner: sem plano ativo -->
+      <section
+        class="planos-banner planos-banner--aviso"
+        id="banner-sem-plano"
+        style="display: none"
+      >
+        <i class="fas fa-lock"></i>
+        <p>
+          Você ainda não possui um plano ativo. Escolha um plano para acessar a
+          área do aluno.
+        </p>
+      </section>
+
+      <section class="plans-container">
+        <section class="plan-card fitcrew">
+          <h2 class="plan-name">FITCREW</h2>
+          <ul class="plan-features">
+            <li data-translate="plans.gymbro.f2">
+              IA treinadora personalizada
+            </li>
+            <li data-translate="plans.gymbro.f3">
+              Plano de treino gerado por IA
+            </li>
+            <li data-translate="plans.gymbro.f4">
+              Plano de dieta gerado por IA
+            </li>
+            <li data-translate="plans.gymbro.f5">
+              Histórico completo de conversas IA
+            </li>
+            <li>Treinos manuais + execução com GIFs</li>
+          </ul>
+          <p class="plan-price">
+            R$ 29,90<span data-translate="plans.price.month">/mês</span>
+          </p>
+          <button
+            class="plan-button"
+            data-translate="plans.btn.subscribe"
+            onclick="assinar('fitcrew')"
+          >
+            Assinar agora
+          </button>
         </section>
 
-        <section class="planos-banner planos-banner--aviso" id="banner-sem-plano" style="display:none">
-            <i class="fas fa-lock"></i>
-            <p data-translate="plans.no_plan">Você ainda não possui um plano ativo. Escolha um plano para acessar a área do aluno.</p>
+        <section class="plan-card blaok">
+          <h2 class="plan-name">BLACK</h2>
+          <ul class="plan-features">
+            <li data-translate="plans.black.f1">Tudo do FitCrew</li>
+            <li data-translate="plans.black.f2">
+              Avaliação corporal por foto (IA Vision)
+            </li>
+            <li data-translate="plans.black.f3">
+              Personal trainer IA exclusivo
+            </li>
+            <li data-translate="plans.black.f4">
+              Análise avançada de evolução corporal
+            </li>
+            <li data-translate="plans.black.f5">Suporte prioritário</li>
+          </ul>
+          <p class="plan-price">
+            R$ 59,90<span data-translate="plans.price.month">/mês</span>
+          </p>
+          <button
+            class="plan-button"
+            data-translate="plans.btn.subscribe"
+            onclick="assinar('black')"
+          >
+            Assinar agora
+          </button>
         </section>
-
-        <!-- Banner: sem plano ativo -->
-        <section class="planos-banner planos-banner--aviso" id="banner-sem-plano" style="display:none">
-            <i class="fas fa-lock"></i>
-            <p>Você ainda não possui um plano ativo. Escolha um plano para acessar a área do aluno.</p>
-        </section>
-
-
-        <section class="plans-container">
-            <section class="plan-card gymbro">
-                <h2 class="plan-name">GYMBRO</h2>
-                <ul class="plan-features">
-                    <li data-translate="plans.gymbro.f2">IA treinadora personalizada</li>
-                    <li data-translate="plans.gymbro.f3">Plano de treino gerado por IA</li>
-                    <li data-translate="plans.gymbro.f4">Plano de dieta gerado por IA</li>
-                    <li data-translate="plans.gymbro.f5">Histórico completo de conversas IA</li>
-                    <li>Treinos manuais + execução com GIFs</li>
-                </ul>
-                <p class="plan-price">R$ 29,90<span data-translate="plans.price.month">/mês</span></p>
-                <button class="plan-button" data-translate="plans.btn.subscribe" onclick="assinar('gymbro')">Assinar agora</button>
-            </section>
-
-            <section class="plan-card blaok">
-                <h2 class="plan-name">BLACK</h2>
-                <ul class="plan-features">
-                    <li data-translate="plans.black.f1">Tudo do GymBro</li>
-                    <li data-translate="plans.black.f2">Avaliação corporal por foto (IA Vision)</li>
-                    <li data-translate="plans.black.f3">Personal trainer IA exclusivo</li>
-                    <li data-translate="plans.black.f4">Análise avançada de evolução corporal</li>
-                    <li data-translate="plans.black.f5">Suporte prioritário</li>
-                </ul>
-                <p class="plan-price">R$ 59,90<span data-translate="plans.price.month">/mês</span></p>
-                <button class="plan-button" data-translate="plans.btn.subscribe" onclick="assinar('black')">Assinar agora</button>
-            </section>
-        </section>
-        <p class="plans-legal-note"><i class="fas fa-info-circle"></i> Os planos GymBro e Black incluem acesso ao Personal Trainer IA. As recomendações geradas têm caráter informativo e não substituem a orientação de profissional de saúde habilitado. Consulte sempre um especialista antes de iniciar um programa de treino ou dieta. Veja nossos <a href="/termos">Termos de Serviço</a>.</p>
+      </section>
+      <p class="plans-legal-note">
+        <i class="fas fa-info-circle"></i> Os planos FitCrew e Black incluem
+        acesso ao Personal Trainer IA. As recomendações geradas têm caráter
+        informativo e não substituem a orientação de profissional de saúde
+        habilitado. Consulte sempre um especialista antes de iniciar um programa
+        de treino ou dieta. Veja nossos <a href="/termos">Termos de Serviço</a>.
+      </p>
     </main>
     <%- include('../partials/footer') %>
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
@@ -85,19 +170,19 @@
     <script src="/js/carrossel.js"></script>
 
     <script>
-        (function () {
-            const p = new URLSearchParams(window.location.search);
-            if (p.get('semPlano') === '1') {
-                document.getElementById('banner-sem-plano').style.display = 'flex';
-                window.history.replaceState({}, '', '/planos');
-            }
-        })();
-
-        function assinar(planoId) {
-            sessionStorage.setItem('planoPendente', planoId);
-            window.location.href = '/pagamento?plano=' + encodeURIComponent(planoId);
+      (function () {
+        const p = new URLSearchParams(window.location.search);
+        if (p.get("semPlano") === "1") {
+          document.getElementById("banner-sem-plano").style.display = "flex";
+          window.history.replaceState({}, "", "/planos");
         }
-    </script>
-</body>
+      })();
 
+      function assinar(planoId) {
+        sessionStorage.setItem("planoPendente", planoId);
+        window.location.href =
+          "/pagamento?plano=" + encodeURIComponent(planoId);
+      }
+    </script>
+  </body>
 </html>

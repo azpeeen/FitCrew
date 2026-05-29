@@ -5,9 +5,9 @@
 */
 const _base   = typeof baseUrl !== 'undefined' ? baseUrl : 'http://localhost:3000';
 const _seo    = typeof seo    !== 'undefined' ? seo    : {};
-const _title  = _seo.title       || 'GymBros — Academias e Treinos Online';
-const _desc   = _seo.description || 'Treine com inteligência artificial ao seu lado. Planos de treino, dieta e acompanhamento personalizados com o GymBros.';
-const _kw     = _seo.keywords    || 'academia, treinos, fitness, personal trainer, gymbros, saúde';
+const _title  = _seo.title       || 'FitCrew — Academias e Treinos Online';
+const _desc   = _seo.description || 'Treine com inteligência artificial ao seu lado. Planos de treino, dieta e acompanhamento personalizados com o FitCrew.';
+const _kw     = _seo.keywords    || 'academia, treinos, fitness, personal trainer, fitcrew, saúde';
 const _robots = _seo.robots      || 'index, follow';
 const _path   = _seo.canonical   || '/';
 const _canon  = _base + _path;
@@ -15,7 +15,7 @@ const _type   = _seo.ogType      || 'website';
 const _ogTit  = _seo.ogTitle     || _title;
 const _ogDesc = _seo.ogDescription || _desc;
 const _ogImg  = _seo.ogImage     || (_base + '/images/logo.png');
-const _ogAlt  = _seo.ogImageAlt  || 'GymBros — Academias ilimitadas em todo o Brasil';
+const _ogAlt  = _seo.ogImageAlt  || 'FitCrew — Academias ilimitadas em todo o Brasil';
 %>
 <title><%= _title %></title>
 <meta name="description" content="<%= _desc %>">
@@ -31,7 +31,7 @@ const _ogAlt  = _seo.ogImageAlt  || 'GymBros — Academias ilimitadas em todo o 
 <meta property="og:title"              content="<%= _ogTit %>">
 <meta property="og:description"        content="<%= _ogDesc %>">
 <meta property="og:url"                content="<%= _canon %>">
-<meta property="og:site_name"          content="GymBros">
+<meta property="og:site_name"          content="FitCrew">
 <meta property="og:image"              content="<%= _ogImg %>">
 <meta property="og:image:secure_url"   content="<%= _ogImg %>">
 <meta property="og:image:width"        content="512">
@@ -51,5 +51,5 @@ const _ogAlt  = _seo.ogImageAlt  || 'GymBros — Academias ilimitadas em todo o 
 <meta name="theme-color" content="#FFD700">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="GymBros">
+<meta name="apple-mobile-web-app-title" content="FitCrew">
 <link rel="apple-touch-icon" href="/images/logo.png">

@@ -1,47 +1,62 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <%- include('../partials/seo') %>
-  <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
-  <link rel="stylesheet" href="/css/header.css">
-  <link rel="stylesheet" href="/css/footer.css">
-  <link rel="stylesheet" href="/css/plano-gymbro.css">
-  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
-</head>
-<body>
-  <%- include('../partials/header') %>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <%- include('../partials/seo') %>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico" />
+    <link rel="stylesheet" href="/css/header.css" />
+    <link rel="stylesheet" href="/css/footer.css" />
+    <link rel="stylesheet" href="/css/plano-gymbro.css" />
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+    <link
+      rel="preload"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      as="style"
+      onload="
+        this.onload = null;
+        this.rel = 'stylesheet';
+      "
+    />
+    <noscript
+      ><link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    /></noscript>
+  </head>
+  <body>
+    <%- include('../partials/header') %>
 
-  <main>
-    <section class="compra-container">
-      <a href="/planos" class="btn-voltar"><i class="fas fa-arrow-left"></i></a>
-      <h1>Finalizar Compra</h1>
+    <main>
+      <section class="compra-container">
+        <a href="/planos" class="btn-voltar"
+          ><i class="fas fa-arrow-left"></i
+        ></a>
+        <h1>Finalizar Compra</h1>
 
-      <section class="plano-selecionado">
-        <section class="badge">Mais Popular</section>
-        <h2>GYMBRO</h2>
-        <p>IA treinadora personalizada</p>
-        <p>Plano de treino gerado por IA</p>
-        <p>Plano de dieta gerado por IA</p>
-        <p>Histórico completo de conversas IA</p>
-        <p>Treinos manuais + execução com GIFs</p>
-        <p><strong>R$ 29,90/mês</strong></p>
-        <button id="confirmarCompra" class="btn-confirmar">Confirmar Compra</button>
+        <section class="plano-selecionado">
+          <section class="badge">Mais Popular</section>
+          <h2>FITCREW</h2>
+          <p>IA treinadora personalizada</p>
+          <p>Plano de treino gerado por IA</p>
+          <p>Plano de dieta gerado por IA</p>
+          <p>Histórico completo de conversas IA</p>
+          <p>Treinos manuais + execução com GIFs</p>
+          <p><strong>R$ 29,90/mês</strong></p>
+          <button id="confirmarCompra" class="btn-confirmar">
+            Confirmar Compra
+          </button>
+        </section>
       </section>
-    </section>
 
-    <section class="feedback" id="feedback">
-      <section class="icon" id="feedbackIcon"></section>
-      <p id="feedbackMsg"></p>
-    </section>
-  </main>
+      <section class="feedback" id="feedback">
+        <section class="icon" id="feedbackIcon"></section>
+        <p id="feedbackMsg"></p>
+      </section>
+    </main>
 
-  <%- include('../partials/footer') %>
-  <script src="/js/compra.js"></script>
-
-</body>
+    <%- include('../partials/footer') %>
+    <script src="/js/compra.js"></script>
+  </body>
 </html>

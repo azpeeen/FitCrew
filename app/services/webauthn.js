@@ -7,7 +7,7 @@ const {
     verifyAuthenticationResponse,
 } = require('@simplewebauthn/server');
 
-const RP_NAME = 'GymBros';
+const RP_NAME = 'FitCrew';
 const RP_ID  = process.env.WEBAUTHN_RP_ID  || 'gymbros.app.br';
 const ORIGIN = process.env.WEBAUTHN_ORIGIN || 'https://gymbros.app.br';
 

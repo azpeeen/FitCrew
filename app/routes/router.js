@@ -577,23 +577,23 @@ function validarCPF(cpf) {
 
 // Páginas públicas
 router.get('/', (req, res) => res.render('pages/index', { seo: {
-    title:         'GymBros — Treino Inteligente com IA',
-    description:   'Treine com inteligência artificial ao seu lado. Planos de treino, dieta e acompanhamento personalizados com o GymBros. A partir de R$ 29,90/mês.',
+    title:         'FitCrew — Treino Inteligente com IA',
+    description:   'Treine com inteligência artificial ao seu lado. Planos de treino, dieta e acompanhamento personalizados com o FitCrew. A partir de R$ 29,90/mês.',
     keywords:      'treino inteligente, personal trainer ia, gymbros, treinos online, saúde, bem-estar, ia fitness',
     canonical:     '/',
-    ogTitle:       'GymBros — Treino Inteligente com IA',
+    ogTitle:       'FitCrew — Treino Inteligente com IA',
     ogDescription: 'Planos de treino e dieta personalizados por IA. Comece agora.',
 }}));
 
 router.get('/login', (req, res) => {
     if (req.session.user) return res.redirect('/area-aluno');
     res.render('pages/login', { seo: {
-        title:         'Login — GymBros',
-        description:   'Acesse sua conta GymBros para ver seus treinos, acompanhar sua evolução e usar o personal trainer IA GymBot.',
+        title:         'Login — FitCrew',
+        description:   'Acesse sua conta FitCrew para ver seus treinos, acompanhar sua evolução e usar o personal trainer IA GymBot.',
         keywords:      'login gymbros, entrar gymbros, acesso aluno',
         canonical:     '/login',
         robots:        'noindex, follow',
-        ogTitle:       'Entrar no GymBros',
+        ogTitle:       'Entrar no FitCrew',
         ogDescription: 'Acesse sua conta e continue seu treino.',
     }});
 });
@@ -601,60 +601,60 @@ router.get('/login', (req, res) => {
 router.get('/register', (req, res) => {
     if (req.session.user) return res.redirect('/area-aluno');
     res.render('pages/register', { user: req.session.user || null, seo: {
-        title:         'Cadastro — GymBros',
-        description:   'Crie sua conta GymBros gratuitamente e acesse treinos personalizados, planos de dieta e o personal trainer IA GymBot.',
+        title:         'Cadastro — FitCrew',
+        description:   'Crie sua conta FitCrew gratuitamente e acesse treinos personalizados, planos de dieta e o personal trainer IA GymBot.',
         keywords:      'cadastro gymbros, criar conta, registrar gymbros',
         canonical:     '/register',
-        ogTitle:       'Crie sua Conta GymBros Grátis',
+        ogTitle:       'Crie sua Conta FitCrew Grátis',
         ogDescription: 'Junte-se a milhares de alunos e treine sem limites.',
     }});
 });
 
 router.get('/planos', (req, res) => res.render('pages/planos', { seo: {
-    title:         'Planos GymBros: GymBro e Black',
-    description:   'Compare os planos GymBros: GymBro (R$29,90) e Black (R$59,90). Treino inteligente, IA personalizada e acompanhamento completo.',
+    title:         'Planos FitCrew: GymBro e Black',
+    description:   'Compare os planos FitCrew: GymBro (R$29,90) e Black (R$59,90). Treino inteligente, IA personalizada e acompanhamento completo.',
     keywords:      'planos gymbros, treino com ia, assinatura fitness, plano treino ia',
     canonical:     '/planos',
-    ogTitle:       'Escolha seu Plano GymBros — A partir de R$29,90',
+    ogTitle:       'Escolha seu Plano FitCrew — A partir de R$29,90',
     ogDescription: 'GymBro ou Black. Treino inteligente + IA personal trainer.',
 }}));
 
 router.get('/academias', (req, res) => res.render('pages/academias', { seo: {
-    title:         'Academias — GymBros',
-    description:   'Encontre academias e estúdios cadastrados no GymBros perto de você.',
+    title:         'Academias — FitCrew',
+    description:   'Encontre academias e estúdios cadastrados no FitCrew perto de você.',
     keywords:      'academia, academia perto de mim, gymbros academias, mapa academia',
     canonical:     '/academias',
-    ogTitle:       'Academias GymBros — Mapa',
-    ogDescription: 'Encontre academias cadastradas no GymBros perto de você.',
+    ogTitle:       'Academias FitCrew — Mapa',
+    ogDescription: 'Encontre academias cadastradas no FitCrew perto de você.',
 }}));
 
 router.get('/compra', (req, res) => res.render('pages/compra', { seo: {
-    title:         'Assinar GymBros — Dados de Pagamento',
-    description:   'Finalize sua assinatura GymBros com segurança. Acesse treinos personalizados por IA em minutos.',
+    title:         'Assinar FitCrew — Dados de Pagamento',
+    description:   'Finalize sua assinatura FitCrew com segurança. Acesse treinos personalizados por IA em minutos.',
     keywords:      'assinar gymbros, pagamento academia, contratar gymbros',
     canonical:     '/compra',
     robots:        'noindex, nofollow',
-    ogTitle:       'Assinar GymBros',
+    ogTitle:       'Assinar FitCrew',
     ogDescription: 'Finalize sua assinatura e comece a treinar agora.',
 }}));
 
 router.get('/compra2', (req, res) => res.render('pages/compra2', { seo: {
-    title:         'Assinar GymBros — Confirmação de Plano',
-    description:   'Revise e confirme os dados do seu plano GymBros antes de finalizar a assinatura.',
+    title:         'Assinar FitCrew — Confirmação de Plano',
+    description:   'Revise e confirme os dados do seu plano FitCrew antes de finalizar a assinatura.',
     keywords:      'confirmar plano gymbros, assinatura',
     canonical:     '/compra2',
     robots:        'noindex, nofollow',
-    ogTitle:       'Confirmação de Plano — GymBros',
+    ogTitle:       'Confirmação de Plano — FitCrew',
     ogDescription: 'Revise seu plano antes de finalizar.',
 }}));
 
 router.get('/compra3', (req, res) => res.render('pages/compra3', { seo: {
-    title:         'Assinatura GymBros Confirmada!',
-    description:   'Sua assinatura GymBros foi confirmada! Acesse agora treinos personalizados por IA e o GymBot personal trainer IA.',
+    title:         'Assinatura FitCrew Confirmada!',
+    description:   'Sua assinatura FitCrew foi confirmada! Acesse agora treinos personalizados por IA e o GymBot personal trainer IA.',
     keywords:      'assinatura confirmada gymbros, bem vindo gymbros',
     canonical:     '/compra3',
     robots:        'noindex, nofollow',
-    ogTitle:       'Bem-vindo ao GymBros!',
+    ogTitle:       'Bem-vindo ao FitCrew!',
     ogDescription: 'Assinatura confirmada. Comece a treinar agora mesmo!',
 }}));
 
@@ -673,10 +673,10 @@ router.get('/pagamento', async (req, res) => {
             user: req.session.user,
             plano,
             seo: {
-                title:       'Pagamento — GymBros',
+                title:       'Pagamento — FitCrew',
                 canonical:   '/pagamento',
                 robots:      'noindex, nofollow',
-                description: 'Finalize sua assinatura GymBros com segurança.',
+                description: 'Finalize sua assinatura FitCrew com segurança.',
             }
         });
     } catch (err) {
@@ -829,46 +829,46 @@ router.post('/api/boleto', async (req, res) => {
 });
 
 router.get('/about', (req, res) => res.render('pages/about', { seo: {
-    title:         'Sobre o GymBros — Nossa Missão e Equipe',
-    description:   'Conheça a história do GymBros, nossa missão de democratizar o acesso à saúde e fitness no Brasil e o time apaixonado por esporte.',
+    title:         'Sobre o FitCrew — Nossa Missão e Equipe',
+    description:   'Conheça a história do FitCrew, nossa missão de democratizar o acesso à saúde e fitness no Brasil e o time apaixonado por esporte.',
     keywords:      'sobre gymbros, história gymbros, missão gymbros, equipe gymbros',
     canonical:     '/about',
-    ogTitle:       'Sobre o GymBros — Saúde para Todos',
+    ogTitle:       'Sobre o FitCrew — Saúde para Todos',
     ogDescription: 'Nossa missão: democratizar o acesso à saúde e ao fitness no Brasil.',
 }}));
 
 router.get('/privacidade', (req, res) => res.render('pages/privacidade', { user: req.session.user || null, seo: {
-    title:         'Política de Privacidade — GymBros',
-    description:   'Saiba como o GymBros coleta, usa e protege seus dados pessoais em conformidade com a LGPD.',
+    title:         'Política de Privacidade — FitCrew',
+    description:   'Saiba como o FitCrew coleta, usa e protege seus dados pessoais em conformidade com a LGPD.',
     keywords:      'política de privacidade gymbros, lgpd gymbros, proteção de dados gymbros',
     canonical:     '/privacidade',
-    ogTitle:       'Política de Privacidade — GymBros',
+    ogTitle:       'Política de Privacidade — FitCrew',
     ogDescription: 'Transparência total sobre como tratamos seus dados pessoais.',
 }}));
 
 router.get('/termos', (req, res) => res.render('pages/termos', { user: req.session.user || null, seo: {
-    title:         'Termos de Serviço — GymBros',
-    description:   'Leia os termos e condições de uso da plataforma GymBros: planos, pagamentos, cancelamento e uso aceitável.',
+    title:         'Termos de Serviço — FitCrew',
+    description:   'Leia os termos e condições de uso da plataforma FitCrew: planos, pagamentos, cancelamento e uso aceitável.',
     keywords:      'termos de serviço gymbros, termos de uso gymbros, condições gymbros',
     canonical:     '/termos',
-    ogTitle:       'Termos de Serviço — GymBros',
-    ogDescription: 'Conheça as regras e condições para uso da plataforma GymBros.',
+    ogTitle:       'Termos de Serviço — FitCrew',
+    ogDescription: 'Conheça as regras e condições para uso da plataforma FitCrew.',
 }}));
 
 router.get('/faq', (req, res) => res.render('pages/faq', { user: req.session.user || null, seo: {
-    title:         'FAQ — Perguntas Frequentes | GymBros',
-    description:   'Respostas para as dúvidas mais comuns sobre o GymBros: acesso a academias, planos, pagamentos, IA e suporte.',
+    title:         'FAQ — Perguntas Frequentes | FitCrew',
+    description:   'Respostas para as dúvidas mais comuns sobre o FitCrew: acesso a academias, planos, pagamentos, IA e suporte.',
     keywords:      'faq gymbros, dúvidas gymbros, perguntas frequentes gymbros',
     canonical:     '/faq',
-    ogTitle:       'Perguntas Frequentes — GymBros',
-    ogDescription: 'Tire suas dúvidas sobre o GymBros: planos, academias, pagamentos e mais.',
+    ogTitle:       'Perguntas Frequentes — FitCrew',
+    ogDescription: 'Tire suas dúvidas sobre o FitCrew: planos, academias, pagamentos e mais.',
 }}));
 
 // F6 — Scanner de QR Code
 router.get('/scan', requireAuth, (req, res) => {
     res.render('pages/scan', {
         user: req.session.user,
-        seo: { title: 'Escanear Equipamento — GymBros', robots: 'noindex' },
+        seo: { title: 'Escanear Equipamento — FitCrew', robots: 'noindex' },
     });
 });
 
@@ -905,7 +905,7 @@ router.get('/equipamento/:qr_token', requireAuth, async (req, res) => {
             equipamento,
             exercicios,
             seo: {
-                title:       `${equipamento.nome} — GymBros`,
+                title:       `${equipamento.nome} — FitCrew`,
                 robots:      'noindex',
                 description: `Exercícios no ${equipamento.nome} com GIFs de execução.`,
             },
@@ -942,8 +942,8 @@ router.get('/area-aluno', requirePlano, async (req, res) => {
             metaSemanal,
             ultimasConquistas,
             seo: {
-                title: 'Painel do Aluno — GymBros', canonical: '/area-aluno',
-                robots: 'noindex, nofollow', description: 'Painel do aluno GymBros.',
+                title: 'Painel do Aluno — FitCrew', canonical: '/area-aluno',
+                robots: 'noindex, nofollow', description: 'Painel do aluno FitCrew.',
             },
         });
     } catch (err) {
@@ -951,7 +951,7 @@ router.get('/area-aluno', requirePlano, async (req, res) => {
         res.render('pages/area-aluno', {
             user: req.session.user,
             totalConquistas: 0, checkinsNaSemana: 0, metaSemanal: 0, ultimasConquistas: [],
-            seo: { title: 'Painel do Aluno — GymBros', canonical: '/area-aluno', robots: 'noindex, nofollow', description: 'Painel do aluno GymBros.' },
+            seo: { title: 'Painel do Aluno — FitCrew', canonical: '/area-aluno', robots: 'noindex, nofollow', description: 'Painel do aluno FitCrew.' },
         });
     }
 });
@@ -1054,7 +1054,7 @@ router.get('/treinos', requirePlano, async (req, res) => {
         workouts,
         iaPlanos,
         sugestoes: SUGESTOES_TREINO,
-        seo: { title: 'Meus Treinos — GymBros', canonical: '/treinos', robots: 'noindex, nofollow', description: 'Gerencie seus treinos no GymBros.' },
+        seo: { title: 'Meus Treinos — FitCrew', canonical: '/treinos', robots: 'noindex, nofollow', description: 'Gerencie seus treinos no FitCrew.' },
     });
 });
 
@@ -1240,7 +1240,7 @@ router.get('/treinos/execucao', requirePlano, async (req, res) => {
         plano,
         sessaoExistente,
         seo: {
-            title:       `${plano.nome} — GymBros`,
+            title:       `${plano.nome} — FitCrew`,
             canonical:   `/treinos/execucao?plano_id=${planoId}`,
             robots:      'noindex, nofollow',
             description: 'Modo de execução de treino.',
@@ -1571,7 +1571,7 @@ router.get('/evolucao', requirePlano, async (req, res) => {
         exerciciosExecutados,
         volumeSemanal,
         locale: req.locale || 'pt',
-        seo: { title: 'Minha Evolução — GymBros', canonical: '/evolucao', robots: 'noindex, nofollow', description: 'Acompanhe sua evolução física no GymBros.' },
+        seo: { title: 'Minha Evolução — FitCrew', canonical: '/evolucao', robots: 'noindex, nofollow', description: 'Acompanhe sua evolução física no FitCrew.' },
     });
 });
 
@@ -1644,7 +1644,7 @@ router.get('/meu-plano', requirePlano, async (req, res) => {
             });
 
         res.render('pages/meu-plano', { user, planoAtual, outrosPlanos,
-            seo: { title: 'Meu Plano — GymBros', canonical: '/meu-plano', robots: 'noindex, nofollow', description: 'Gerencie seu plano GymBros.' },
+            seo: { title: 'Meu Plano — FitCrew', canonical: '/meu-plano', robots: 'noindex, nofollow', description: 'Gerencie seu plano FitCrew.' },
         });
     } catch (err) {
         console.error('[meu-plano]', err);
@@ -1673,7 +1673,7 @@ router.get('/config', requireAuth, async (req, res) => {
     } catch (_) { /* mantém valor da sessão se houver */ }
 
     res.render('pages/config', { user: req.session.user,
-        seo: { title: 'Configurações — GymBros', canonical: '/config', robots: 'noindex, nofollow', description: 'Configurações da conta GymBros.' },
+        seo: { title: 'Configurações — FitCrew', canonical: '/config', robots: 'noindex, nofollow', description: 'Configurações da conta FitCrew.' },
     });
 });
 
@@ -1711,7 +1711,7 @@ router.get('/imc-form', requirePlano, async (req, res) => {
     }
     res.render('pages/imc-form', { user: req.session.user, ultimoImc,
         primeiro: req.query.primeiro === '1',
-        seo: { title: 'Meu Perfil IMC — GymBros', canonical: '/imc-form', robots: 'noindex, nofollow', description: 'Perfil IMC personalizado GymBros.' },
+        seo: { title: 'Meu Perfil IMC — FitCrew', canonical: '/imc-form', robots: 'noindex, nofollow', description: 'Perfil IMC personalizado FitCrew.' },
     });
 });
 
@@ -1877,7 +1877,7 @@ router.get('/conquistas', requirePlano, async (req, res) => {
             lista,
             totalDesbloqueadas,
             total: lista.length,
-            seo: { title: 'Minhas Conquistas — GymBros', canonical: '/conquistas', robots: 'noindex, nofollow', description: 'Suas conquistas no GymBros.' },
+            seo: { title: 'Minhas Conquistas — FitCrew', canonical: '/conquistas', robots: 'noindex, nofollow', description: 'Suas conquistas no FitCrew.' },
         });
     } catch (err) {
         console.error('[conquistas]', err.message);
@@ -1908,7 +1908,7 @@ router.get('/perfil/editar', requireAuth, async (req, res) => {
             conquistas:     conquistasList,
             medalhasDestaque,
             query:          req.query,
-            seo: { title: 'Editar Perfil — GymBros', robots: 'noindex' },
+            seo: { title: 'Editar Perfil — FitCrew', robots: 'noindex' },
         });
     } catch (err) {
         console.error('[perfil/editar GET]', err.message);
@@ -2023,7 +2023,7 @@ router.get('/perfil/:id', async (req, res) => {
             totalSessoes,
             streak,
             isProprioPerfilId,
-            seo: { title: `Perfil de ${u.nome} — GymBros`, canonical: `/perfil/${u.id}`, description: `Veja as conquistas de ${u.nome} no GymBros.` },
+            seo: { title: `Perfil de ${u.nome} — FitCrew`, canonical: `/perfil/${u.id}`, description: `Veja as conquistas de ${u.nome} no FitCrew.` },
         });
     } catch (err) {
         console.error('[perfil]', err.message);
@@ -2034,8 +2034,8 @@ router.get('/perfil/:id', async (req, res) => {
 // Suporte (área do aluno)
 router.get('/suporte', requirePlano, (req, res) => {
     res.render('pages/suporte', { user: req.session.user, seo: {
-        title: 'Suporte — GymBros', canonical: '/suporte',
-        robots: 'noindex, nofollow', description: 'Central de suporte GymBros.',
+        title: 'Suporte — FitCrew', canonical: '/suporte',
+        robots: 'noindex, nofollow', description: 'Central de suporte FitCrew.',
     }});
 });
 
@@ -2636,7 +2636,7 @@ router.get('/nutricao', requirePlano, async (req, res) => {
         aderenciaSemanal,
         objetivoLabel,
         objetivoAtual: objetivoAtual || 'manutencao',
-        seo: { title: 'Nutrição — GymBros', canonical: '/nutricao', robots: 'noindex, nofollow', description: 'Acompanhe sua nutrição diária no GymBros.' },
+        seo: { title: 'Nutrição — FitCrew', canonical: '/nutricao', robots: 'noindex, nofollow', description: 'Acompanhe sua nutrição diária no FitCrew.' },
     });
 });
 

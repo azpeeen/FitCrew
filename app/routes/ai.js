@@ -105,7 +105,7 @@ function buildExerciseBlock(all, bodyParts) {
     return lines.join('\n');
 }
 
-const BASE_PROMPT = `Você é um personal trainer virtual chamado GymBot, assistente oficial do GymBros.
+const BASE_PROMPT = `Você é um personal trainer virtual chamado GymBot, assistente oficial do FitCrew.
 Você ajuda alunos com dúvidas sobre treinos, exercícios, nutrição básica e motivação.
 Seja direto, motivador e use linguagem acessível. Responda sempre em português.`;
 
@@ -348,7 +348,7 @@ function fuzzyMatchExercise(query, allExercises) {
 router.get('/chat', requireIA, (req, res) => {
     if (!req.session.user) return res.redirect('/login');
     res.render('pages/ai-chat', { user: req.session.user,
-        seo: { title: 'GymBot Personal Trainer IA — GymBros', canonical: '/ai/chat', robots: 'noindex, nofollow', description: 'Converse com o GymBot, seu personal trainer IA.' },
+        seo: { title: 'GymBot Personal Trainer IA — FitCrew', canonical: '/ai/chat', robots: 'noindex, nofollow', description: 'Converse com o GymBot, seu personal trainer IA.' },
     });
 });
 
@@ -356,7 +356,7 @@ router.get('/chat', requireIA, (req, res) => {
 router.get('/avaliacao', requireAvaliacao, (req, res) => {
     if (!req.session.user) return res.redirect('/login');
     res.render('pages/ai-avaliacao', { user: req.session.user,
-        seo: { title: 'Avaliação Corporal IA — GymBros', canonical: '/ai/avaliacao', robots: 'noindex, nofollow', description: 'Avaliação corporal por inteligência artificial GymBros.' },
+        seo: { title: 'Avaliação Corporal IA — FitCrew', canonical: '/ai/avaliacao', robots: 'noindex, nofollow', description: 'Avaliação corporal por inteligência artificial FitCrew.' },
     });
 });
 

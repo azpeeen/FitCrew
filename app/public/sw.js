@@ -1,17 +1,20 @@
-const CACHE_NAME = 'gymbros-v4';
+const CACHE_NAME = "gymbros-v4";
 
 // ── F11 / F13 — Lembretes de água e sono ─────────────────────────────────────
 let _aguaTimer = null;
 let _sonoTimer = null;
 
 function agendarAgua(intervaloMs) {
-  if (_aguaTimer) { clearTimeout(_aguaTimer); _aguaTimer = null; }
+  if (_aguaTimer) {
+    clearTimeout(_aguaTimer);
+    _aguaTimer = null;
+  }
   if (!intervaloMs || intervaloMs <= 0) return;
   function dispara() {
-    self.registration.showNotification('💧 Hora de beber água!', {
-      body: 'Manter-se hidratado é essencial para seu treino e saúde.',
-      icon: '/images/logo.png',
-      tag:  'agua-reminder',
+    self.registration.showNotification("💧 Hora de beber água!", {
+      body: "Manter-se hidratado é essencial para seu treino e saúde.",
+      icon: "/images/logo.png",
+      tag: "agua-reminder",
     });
     _aguaTimer = setTimeout(dispara, intervaloMs);
   }
@@ -19,117 +22,131 @@ function agendarAgua(intervaloMs) {
 }
 
 function agendarSono(horario) {
-  if (_sonoTimer) { clearTimeout(_sonoTimer); _sonoTimer = null; }
+  if (_sonoTimer) {
+    clearTimeout(_sonoTimer);
+    _sonoTimer = null;
+  }
   if (!horario) return;
-  const [hh, mm] = horario.split(':').map(Number);
+  const [hh, mm] = horario.split(":").map(Number);
   function proximoMs() {
     const agora = new Date();
-    const alvo  = new Date(agora);
+    const alvo = new Date(agora);
     alvo.setHours(hh, mm, 0, 0);
     if (alvo <= agora) alvo.setDate(alvo.getDate() + 1);
     return alvo - agora;
   }
   function dispara() {
-    self.registration.showNotification('😴 Hora de dormir!', {
-      body: 'Uma boa noite de sono é fundamental para sua recuperação muscular.',
-      icon: '/images/logo.png',
-      tag:  'sono-reminder',
+    self.registration.showNotification("😴 Hora de dormir!", {
+      body: "Uma boa noite de sono é fundamental para sua recuperação muscular.",
+      icon: "/images/logo.png",
+      tag: "sono-reminder",
     });
     _sonoTimer = setTimeout(dispara, proximoMs());
   }
   _sonoTimer = setTimeout(dispara, proximoMs());
 }
 
-self.addEventListener('message', event => {
+self.addEventListener("message", (event) => {
   const { type, payload } = event.data || {};
-  if (type === 'SCHEDULE_AGUA') {
-    agendarAgua(payload && payload.ativo ? (payload.intervaloH * 3600000) : 0);
-  } else if (type === 'SCHEDULE_SONO') {
+  if (type === "SCHEDULE_AGUA") {
+    agendarAgua(payload && payload.ativo ? payload.intervaloH * 3600000 : 0);
+  } else if (type === "SCHEDULE_SONO") {
     agendarSono(payload && payload.ativo ? payload.horario : null);
   }
 });
 // ── F10 — Web Push ───────────────────────────────────────────────────────────
-self.addEventListener('push', event => {
-  let data = { title: 'GymBros', body: 'Nova notificação', url: '/' };
-  try { if (event.data) data = { ...data, ...event.data.json() }; } catch {}
+self.addEventListener("push", (event) => {
+  let data = { title: "FitCrew", body: "Nova notificação", url: "/" };
+  try {
+    if (event.data) data = { ...data, ...event.data.json() };
+  } catch {}
   event.waitUntil(
     self.registration.showNotification(data.title, {
       body: data.body,
-      icon: '/images/logo.png',
-      badge: '/images/favicon.ico',
-      tag: 'gymbros-push',
+      icon: "/images/logo.png",
+      badge: "/images/favicon.ico",
+      tag: "gymbros-push",
       data: { url: data.url },
-    })
+    }),
   );
 });
 
-self.addEventListener('notificationclick', event => {
+self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const url = (event.notification.data && event.notification.data.url) || '/';
+  const url = (event.notification.data && event.notification.data.url) || "/";
   event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
-      const match = list.find(c => c.url.includes(url) && 'focus' in c);
-      if (match) return match.focus();
-      return clients.openWindow(url);
-    })
+    clients
+      .matchAll({ type: "window", includeUncontrolled: true })
+      .then((list) => {
+        const match = list.find((c) => c.url.includes(url) && "focus" in c);
+        if (match) return match.focus();
+        return clients.openWindow(url);
+      }),
   );
 });
 // ─────────────────────────────────────────────────────────────────────────────
 
 const STATIC_ASSETS = [
-  '/offline.html',
-  '/',
-  '/login',
-  '/planos',
-  '/about',
-  '/css/header.css',
-  '/css/footer.css',
-  '/css/area-aluno.css',
-  '/css/style.css',
-  '/css/planos.css',
-  '/css/pwa.css',
-  '/js/area-aluno.js',
-  '/js/header.js',
-  '/js/translate.js',
-  '/images/logo.png',
-  '/images/favicon.ico',
-  '/manifest.json',
+  "/offline.html",
+  "/",
+  "/login",
+  "/planos",
+  "/about",
+  "/css/header.css",
+  "/css/footer.css",
+  "/css/area-aluno.css",
+  "/css/style.css",
+  "/css/planos.css",
+  "/css/pwa.css",
+  "/js/area-aluno.js",
+  "/js/header.js",
+  "/js/translate.js",
+  "/images/logo.png",
+  "/images/favicon.ico",
+  "/manifest.json",
 ];
 
-self.addEventListener('install', event => {
+self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(STATIC_ASSETS))
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS)),
   );
   self.skipWaiting();
 });
 
-self.addEventListener('activate', event => {
+self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
-    )
+    caches
+      .keys()
+      .then((keys) =>
+        Promise.all(
+          keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)),
+        ),
+      ),
   );
   self.clients.claim();
 });
 
-self.addEventListener('fetch', event => {
-  if (event.request.method !== 'GET') return;
-  if (event.request.url.includes('/api/') || event.request.url.includes('/ai/')) return;
+self.addEventListener("fetch", (event) => {
+  if (event.request.method !== "GET") return;
+  if (event.request.url.includes("/api/") || event.request.url.includes("/ai/"))
+    return;
 
   event.respondWith(
     fetch(event.request)
-      .then(response => {
+      .then((response) => {
         const clone = response.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+        caches
+          .open(CACHE_NAME)
+          .then((cache) => cache.put(event.request, clone));
         return response;
       })
       .catch(() =>
-        caches.match(event.request).then(cached => {
+        caches.match(event.request).then((cached) => {
           if (cached) return cached;
-          if (event.request.mode === 'navigate') {
-            return caches.match('/offline.html');
+          if (event.request.mode === "navigate") {
+            return caches.match("/offline.html");
           }
-        })
-      )
+        }),
+      ),
   );
 });

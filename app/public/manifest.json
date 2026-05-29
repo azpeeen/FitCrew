@@ -1,6 +1,6 @@
 {
-  "name": "GymBros",
-  "short_name": "GymBros",
+  "name": "FitCrew",
+  "short_name": "FitCrew",
   "description": "Sua plataforma de academia ilimitada",
   "start_url": "/",
   "display": "standalone",

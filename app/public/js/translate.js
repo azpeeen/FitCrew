@@ -34,7 +34,7 @@ const dictionary = {
     'sidebar.scan':       { pt: 'Escanear equipamento', en: 'Scan equipment',     es: 'Escanear equipo' },
     'sidebar.conquistas': { pt: 'Conquistas',          en: 'Achievements',      es: 'Logros' },
     'sidebar.suporte':  { pt: 'Suporte',             en: 'Support',           es: 'Soporte' },
-    'sidebar.role':     { pt: 'Aluno GymBros',       en: 'GymBros Member',    es: 'Miembro GymBros' },
+    'sidebar.role':     { pt: 'Aluno FitCrew',       en: 'FitCrew Member',    es: 'Miembro FitCrew' },
 
     /* ── botões globais ─────────────────────────────────── */
     'btn.login':       { pt: 'Entrar',           en: 'Log in',        es: 'Ingresar' },
@@ -61,7 +61,7 @@ const dictionary = {
     'form.terms':      { pt: 'Aceito os termos de uso', en: 'I accept the terms of use', es: 'Acepto los términos de uso' },
 
     /* ── footer ─────────────────────────────────────────── */
-    'footer.copy':    { pt: '© 2026 GymBros. Todos os direitos reservados.', en: '© 2026 GymBros. All rights reserved.', es: '© 2026 GymBros. Todos los derechos reservados.' },
+    'footer.copy':    { pt: '© 2026 FitCrew. Todos os direitos reservados.', en: '© 2026 FitCrew. All rights reserved.', es: '© 2026 FitCrew. Todos los derechos reservados.' },
     'footer.privacy': { pt: 'Política de Privacidade', en: 'Privacy Policy',   es: 'Política de Privacidad' },
     'footer.terms':   { pt: 'Termos de Serviço',       en: 'Terms of Service', es: 'Términos de Servicio' },
     'footer.faq':     { pt: 'FAQ',                     en: 'FAQ',              es: 'Preguntas Frecuentes' },
@@ -73,9 +73,9 @@ const dictionary = {
         es: '¿POR QUÉ INSCRIBIRSE?'
     },
     'index.why.desc': {
-        pt: 'Atualmente, a rotina de exercícios físicos deixou de ser apenas uma questão de estética para tornar-se sinônimo de saúde e qualidade de vida. Entretanto, alguns experientes dificuldades para encontrar o espaço ou, até mesmo, a disposição adequada de exercitá-lo. Nessas situações, o GymBros é a melhor alternativa para quem deseja inverter seu paradigma com o exercício.',
-        en: 'Today, physical exercise has gone beyond aesthetics to become a synonym for health and quality of life. However, some people struggle to find the right space or motivation to work out. In these situations, GymBros is the best alternative for those who want to change their relationship with exercise.',
-        es: 'Hoy en día, la rutina de ejercicio físico ha dejado de ser solo una cuestión estética para convertirse en sinónimo de salud y calidad de vida. Sin embargo, algunas personas tienen dificultades para encontrar el espacio adecuado. En estas situaciones, GymBros es la mejor alternativa para quienes desean cambiar su relación con el ejercicio.'
+        pt: 'Atualmente, a rotina de exercícios físicos deixou de ser apenas uma questão de estética para tornar-se sinônimo de saúde e qualidade de vida. Entretanto, alguns experientes dificuldades para encontrar o espaço ou, até mesmo, a disposição adequada de exercitá-lo. Nessas situações, o FitCrew é a melhor alternativa para quem deseja inverter seu paradigma com o exercício.',
+        en: 'Today, physical exercise has gone beyond aesthetics to become a synonym for health and quality of life. However, some people struggle to find the right space or motivation to work out. In these situations, FitCrew is the best alternative for those who want to change their relationship with exercise.',
+        es: 'Hoy en día, la rutina de ejercicio físico ha dejado de ser solo una cuestión estética para convertirse en sinónimo de salud y calidad de vida. Sin embargo, algunas personas tienen dificultades para encontrar el espacio adecuado. En estas situaciones, FitCrew es la mejor alternativa para quienes desean cambiar su relación con el ejercicio.'
     },
     'index.why.btn': { pt: 'VEJA MAIS', en: 'LEARN MORE', es: 'VER MÁS' },
     'index.mod.aerobico':   { pt: 'AERÓBICO',      en: 'AEROBICS',      es: 'AERÓBICO' },
@@ -106,9 +106,9 @@ const dictionary = {
         es: 'ENTRENAMIENTO INTELIGENTE. IA PERSONALIZADA. A TU MANERA.'
     },
     'index.plans.desc': {
-        pt: 'Com o GymBros, você treina com inteligência artificial ao seu lado: planos de treino, dieta e acompanhamento personalizados. A gente cuida da tecnologia, você cuida da evolução. Conheça nossos planos e encontre o que combina com sua rotina.',
-        en: 'With GymBros, you train with artificial intelligence by your side: personalized workout plans, diet, and tracking. We handle the technology, you handle the progress. Explore our plans and find the one that fits your routine.',
-        es: 'Con GymBros, entrenas con inteligencia artificial a tu lado: planes de entrenamiento, dieta y seguimiento personalizados. Nosotros nos encargamos de la tecnología, tú del progreso. Conoce nuestros planes y encuentra el que se adapta a tu rutina.'
+        pt: 'Com o FitCrew, você treina com inteligência artificial ao seu lado: planos de treino, dieta e acompanhamento personalizados. A gente cuida da tecnologia, você cuida da evolução. Conheça nossos planos e encontre o que combina com sua rotina.',
+        en: 'With FitCrew, you train with artificial intelligence by your side: personalized workout plans, diet, and tracking. We handle the technology, you handle the progress. Explore our plans and find the one that fits your routine.',
+        es: 'Con FitCrew, entrenas con inteligencia artificial a tu lado: planes de entrenamiento, dieta y seguimiento personalizados. Nosotros nos encargamos de la tecnología, tú del progreso. Conoce nuestros planes y encuentra el que se adapta a tu rutina.'
     },
     'index.plans.btn': { pt: 'VER PLANOS', en: 'SEE PLANS', es: 'VER PLANES' },
 
@@ -122,9 +122,9 @@ const dictionary = {
     'index.ai.badge':   { pt: '✦ Inteligência Artificial', en: '✦ Artificial Intelligence', es: '✦ Inteligencia Artificial' },
     'index.ai.title':   { pt: 'Seu personal trainer está no app', en: 'Your personal trainer is in the app', es: 'Tu entrenador personal está en la app' },
     'index.ai.desc':    {
-        pt: 'A IA do GymBros analisa seu perfil, objetivos e histórico para criar planos de treino e dieta 100% personalizados. Basta conversar.',
-        en: 'GymBros AI analyzes your profile, goals and history to create 100% personalized workout and diet plans. Just chat.',
-        es: 'La IA de GymBros analiza tu perfil, objetivos e historial para crear planes de entrenamiento y dieta 100% personalizados. Solo conversa.'
+        pt: 'A IA do FitCrew analisa seu perfil, objetivos e histórico para criar planos de treino e dieta 100% personalizados. Basta conversar.',
+        en: 'FitCrew AI analyzes your profile, goals and history to create 100% personalized workout and diet plans. Just chat.',
+        es: 'La IA de FitCrew analiza tu perfil, objetivos e historial para crear planes de entrenamiento y dieta 100% personalizados. Solo conversa.'
     },
     'index.ai.bullet1': { pt: 'Plano de treino gerado em segundos',        en: 'Workout plan generated in seconds',        es: 'Plan de entrenamiento generado en segundos' },
     'index.ai.bullet2': { pt: 'Dieta adaptada ao seu objetivo',             en: 'Diet adapted to your goal',                es: 'Dieta adaptada a tu objetivo' },
@@ -160,22 +160,22 @@ const dictionary = {
     'about.hero.line1': { pt: 'Construído por', en: 'Built by', es: 'Construido por' },
     'about.hero.line2': { pt: 'quem treina.', en: 'those who train.', es: 'quienes entrenan.' },
     'about.hero.sub.v2': {
-        pt: 'GymBros é uma plataforma de treino inteligente que usa IA para personalizar cada aspecto da sua evolução física. Sem achismo. Sem plano genérico.',
-        en: 'GymBros is an intelligent training platform that uses AI to personalize every aspect of your physical progress. No guesswork. No generic plan.',
-        es: 'GymBros es una plataforma de entrenamiento inteligente que usa IA para personalizar cada aspecto de tu evolución física. Sin suposiciones. Sin plan genérico.'
+        pt: 'FitCrew é uma plataforma de treino inteligente que usa IA para personalizar cada aspecto da sua evolução física. Sem achismo. Sem plano genérico.',
+        en: 'FitCrew is an intelligent training platform that uses AI to personalize every aspect of your physical progress. No guesswork. No generic plan.',
+        es: 'FitCrew es una plataforma de entrenamiento inteligente que usa IA para personalizar cada aspecto de tu evolución física. Sin suposiciones. Sin plan genérico.'
     },
 
     /* manifesto */
     'about.history.title': { pt: 'Nossa História', en: 'Our Story', es: 'Nuestra Historia' },
     'about.manifesto.p1': {
-        pt: 'O GymBros nasceu dentro de uma sala de aula como projeto de conclusão de curso, e cresceu para além disso. Desde o início, a ideia era simples: e se a tecnologia pudesse fazer o que um personal trainer faz, mas acessível para qualquer pessoa?',
-        en: 'GymBros was born inside a classroom as a graduation project, and grew beyond that. From the start, the idea was simple: what if technology could do what a personal trainer does, but accessible to anyone?',
-        es: 'GymBros nació dentro de un aula como proyecto de fin de carrera, y creció más allá de eso. Desde el principio, la idea era simple: ¿y si la tecnología pudiera hacer lo que hace un entrenador personal, pero accesible para cualquier persona?'
+        pt: 'O FitCrew nasceu dentro de uma sala de aula como projeto de conclusão de curso, e cresceu para além disso. Desde o início, a ideia era simples: e se a tecnologia pudesse fazer o que um personal trainer faz, mas acessível para qualquer pessoa?',
+        en: 'FitCrew was born inside a classroom as a graduation project, and grew beyond that. From the start, the idea was simple: what if technology could do what a personal trainer does, but accessible to anyone?',
+        es: 'FitCrew nació dentro de un aula como proyecto de fin de carrera, y creció más allá de eso. Desde el principio, la idea era simple: ¿y si la tecnología pudiera hacer lo que hace un entrenador personal, pero accesible para cualquier persona?'
     },
     'about.manifesto.p2': {
-        pt: 'Hoje, a plataforma combina inteligência artificial, execução guiada com GIFs, notificações inteligentes e histórico de evolução, tudo num app que roda no celular sem precisar instalar nada. O GymBros é um produto real, construído com stack real, para pessoas reais que querem resultado.',
-        en: 'Today, the platform combines artificial intelligence, GIF-guided exercise execution, smart notifications and progress history, all in an app that runs on your phone without installing anything. GymBros is a real product, built with a real stack, for real people who want results.',
-        es: 'Hoy, la plataforma combina inteligencia artificial, ejecución guiada con GIFs, notificaciones inteligentes e historial de evolución, todo en una app que funciona en el celular sin necesidad de instalar nada. GymBros es un producto real, construido con stack real, para personas reales que quieren resultados.'
+        pt: 'Hoje, a plataforma combina inteligência artificial, execução guiada com GIFs, notificações inteligentes e histórico de evolução, tudo num app que roda no celular sem precisar instalar nada. O FitCrew é um produto real, construído com stack real, para pessoas reais que querem resultado.',
+        en: 'Today, the platform combines artificial intelligence, GIF-guided exercise execution, smart notifications and progress history, all in an app that runs on your phone without installing anything. FitCrew is a real product, built with a real stack, for real people who want results.',
+        es: 'Hoy, la plataforma combina inteligencia artificial, ejecución guiada con GIFs, notificaciones inteligentes e historial de evolución, todo en una app que funciona en el celular sin necesidad de instalar nada. FitCrew es un producto real, construido con stack real, para personas reales que quieren resultados.'
     },
 
     /* números */
@@ -196,9 +196,9 @@ const dictionary = {
     'about.trainer.label': { pt: 'PERSONAL TRAINER PARCEIRO', en: 'PARTNER PERSONAL TRAINER', es: 'PERSONAL TRAINER ASOCIADO' },
     'about.trainer.role':  { pt: 'Especialista em Performance Física', en: 'Physical Performance Specialist', es: 'Especialista en Rendimiento Físico' },
     'about.trainer.bio': {
-        pt: 'Mathias é o parceiro de performance física do GymBros. Com experiência em musculação e alto rendimento, ele garante que cada protocolo gerado pela IA esteja alinhado com as melhores práticas do mercado fitness.',
-        en: 'Mathias is GymBros\'s physical performance partner. With experience in bodybuilding and high performance, he ensures every AI-generated protocol aligns with the best practices in the fitness industry.',
-        es: 'Mathias es el socio de rendimiento físico de GymBros. Con experiencia en musculación y alto rendimiento, garantiza que cada protocolo generado por la IA esté alineado con las mejores prácticas del mercado fitness.'
+        pt: 'Mathias é o parceiro de performance física do FitCrew. Com experiência em musculação e alto rendimento, ele garante que cada protocolo gerado pela IA esteja alinhado com as melhores práticas do mercado fitness.',
+        en: 'Mathias is FitCrew\'s physical performance partner. With experience in bodybuilding and high performance, he ensures every AI-generated protocol aligns with the best practices in the fitness industry.',
+        es: 'Mathias es el socio de rendimiento físico de FitCrew. Con experiencia en musculación y alto rendimiento, garantiza que cada protocolo generado por la IA esté alineado con las mejores prácticas del mercado fitness.'
     },
 
     /* cta editorial */
@@ -210,9 +210,9 @@ const dictionary = {
         es: 'Crea tu cuenta y deja que la IA arme tu primer entrenamiento ahora.'
     },
     'about.history.desc': {
-        pt: 'Fundada com o objetivo de transformar a forma como as pessoas encaram o exercício físico, a GymBros nasceu da ideia de unir tecnologia, inteligência artificial e motivação. Queremos que cada treino seja uma experiência única e personalizada, que inspire nossos usuários a cuidar da saúde e se superar todos os dias.',
-        en: 'Founded with the goal of transforming how people approach physical exercise, GymBros was born from the idea of uniting technology, artificial intelligence and motivation. We want every workout to be a unique, personalized experience that inspires our users to take care of their health and surpass themselves every day.',
-        es: 'Fundada con el objetivo de transformar la forma en que las personas abordan el ejercicio físico, GymBros nació de la idea de unir tecnología, inteligencia artificial y motivación. Queremos que cada entrenamiento sea una experiencia única y personalizada que inspire a nuestros usuarios a cuidar su salud y superarse cada día.'
+        pt: 'Fundada com o objetivo de transformar a forma como as pessoas encaram o exercício físico, a FitCrew nasceu da ideia de unir tecnologia, inteligência artificial e motivação. Queremos que cada treino seja uma experiência única e personalizada, que inspire nossos usuários a cuidar da saúde e se superar todos os dias.',
+        en: 'Founded with the goal of transforming how people approach physical exercise, FitCrew was born from the idea of uniting technology, artificial intelligence and motivation. We want every workout to be a unique, personalized experience that inspires our users to take care of their health and surpass themselves every day.',
+        es: 'Fundada con el objetivo de transformar la forma en que las personas abordan el ejercicio físico, FitCrew nació de la idea de unir tecnología, inteligencia artificial y motivación. Queremos que cada entrenamiento sea una experiencia única y personalizada que inspire a nuestros usuarios a cuidar su salud y superarse cada día.'
     },
 
     /* ── about — hero ───────────────────────────────────── */
@@ -222,9 +222,9 @@ const dictionary = {
         es: 'Construido para quienes toman el entrenamiento en serio'
     },
     'about.hero.desc': {
-        pt: 'O GymBros nasceu da ideia de que tecnologia e saúde deveriam andar juntas. Somos uma plataforma de treino inteligente que usa IA para personalizar cada aspecto da sua jornada fitness.',
-        en: 'GymBros was born from the idea that technology and health should go hand in hand. We are a smart training platform that uses AI to personalize every aspect of your fitness journey.',
-        es: 'GymBros nació de la idea de que la tecnología y la salud deberían ir de la mano. Somos una plataforma de entrenamiento inteligente que usa IA para personalizar cada aspecto de tu jornada fitness.'
+        pt: 'O FitCrew nasceu da ideia de que tecnologia e saúde deveriam andar juntas. Somos uma plataforma de treino inteligente que usa IA para personalizar cada aspecto da sua jornada fitness.',
+        en: 'FitCrew was born from the idea that technology and health should go hand in hand. We are a smart training platform that uses AI to personalize every aspect of your fitness journey.',
+        es: 'FitCrew nació de la idea de que la tecnología y la salud deberían ir de la mano. Somos una plataforma de entrenamiento inteligente que usa IA para personalizar cada aspecto de tu jornada fitness.'
     },
 
     'about.mission.title': { pt: 'Missão',  en: 'Mission', es: 'Misión' },
@@ -245,14 +245,14 @@ const dictionary = {
         en: 'Commitment, Flexibility, Innovation, Respect and Passion for physical exercise.',
         es: 'Compromiso, Flexibilidad, Innovación, Respeto y Pasión por el ejercicio físico.'
     },
-    'about.team.title': { pt: 'Quem está por trás do GymBros', en: 'Who is behind GymBros', es: 'Quiénes están detrás de GymBros' },
+    'about.team.title': { pt: 'Quem está por trás do FitCrew', en: 'Who is behind FitCrew', es: 'Quiénes están detrás de FitCrew' },
 
     /* ── about — tecnologia ─────────────────────────────── */
     'about.tech.title':    { pt: 'Tecnologia de ponta, resultado real', en: 'Cutting-edge technology, real results', es: 'Tecnología de punta, resultados reales' },
     'about.tech.subtitle': {
-        pt: 'Cada feature do GymBros foi construída com as melhores ferramentas disponíveis',
-        en: 'Every GymBros feature was built with the best tools available',
-        es: 'Cada feature de GymBros fue construida con las mejores herramientas disponibles'
+        pt: 'Cada feature do FitCrew foi construída com as melhores ferramentas disponíveis',
+        en: 'Every FitCrew feature was built with the best tools available',
+        es: 'Cada feature de FitCrew fue construida con las mejores herramientas disponibles'
     },
     'about.tech.groq.name':       { pt: 'Groq AI',     en: 'Groq AI',     es: 'Groq AI' },
     'about.tech.groq.desc':       { pt: 'IA ultra-rápida para geração de treinos e dietas',    en: 'Ultra-fast AI for workout and diet generation',       es: 'IA ultra-rápida para generación de entrenamientos y dietas' },
@@ -270,9 +270,9 @@ const dictionary = {
     /* ── about — equipe ─────────────────────────────────── */
     'about.team.mathias.role': { pt: 'Personal Trainer Certificado ✦ Parceiro Oficial', en: 'Certified Personal Trainer ✦ Official Partner', es: 'Personal Trainer Certificado ✦ Socio Oficial' },
     'about.team.mathias.bio':  {
-        pt: 'Mathias é o especialista em performance física do GymBros. Com anos de experiência em musculação e alto rendimento, ele garante que cada treino gerado pela IA esteja alinhado com as melhores práticas do mercado fitness.',
-        en: 'Mathias is GymBros\'s physical performance specialist. With years of experience in bodybuilding and high performance, he ensures every AI-generated workout aligns with the best practices in the fitness industry.',
-        es: 'Mathias es el especialista en rendimiento físico de GymBros. Con años de experiencia en musculación y alto rendimiento, garantiza que cada entrenamiento generado por la IA esté alineado con las mejores prácticas del mercado fitness.'
+        pt: 'Mathias é o especialista em performance física do FitCrew. Com anos de experiência em musculação e alto rendimento, ele garante que cada treino gerado pela IA esteja alinhado com as melhores práticas do mercado fitness.',
+        en: 'Mathias is FitCrew\'s physical performance specialist. With years of experience in bodybuilding and high performance, he ensures every AI-generated workout aligns with the best practices in the fitness industry.',
+        es: 'Mathias es el especialista en rendimiento físico de FitCrew. Con años de experiencia en musculación y alto rendimiento, garantiza que cada entrenamiento generado por la IA esté alineado con las mejores prácticas del mercado fitness.'
     },
     'about.team.mathias.note': {
         pt: '* Mathias está em retiro espiritual e não atende mensagens no momento',
@@ -281,9 +281,9 @@ const dictionary = {
     },
     'about.team.davi.role': { pt: 'Fundador & Desenvolvedor Full Stack', en: 'Founder & Full Stack Developer', es: 'Fundador y Desarrollador Full Stack' },
     'about.team.davi.bio':  {
-        pt: 'Responsável por toda a arquitetura, frontend, backend e identidade visual do GymBros. Desenvolveu a plataforma do zero com Node.js, IA e muito café.',
-        en: 'Responsible for GymBros\'s full architecture, frontend, backend and visual identity. Built the platform from scratch with Node.js, AI and a lot of coffee.',
-        es: 'Responsable de toda la arquitectura, frontend, backend e identidad visual de GymBros. Desarrolló la plataforma desde cero con Node.js, IA y mucho café.'
+        pt: 'Responsável por toda a arquitetura, frontend, backend e identidade visual do FitCrew. Desenvolveu a plataforma do zero com Node.js, IA e muito café.',
+        en: 'Responsible for FitCrew\'s full architecture, frontend, backend and visual identity. Built the platform from scratch with Node.js, AI and a lot of coffee.',
+        es: 'Responsable de toda la arquitectura, frontend, backend e identidad visual de FitCrew. Desarrolló la plataforma desde cero con Node.js, IA y mucho café.'
     },
     'about.team.felippe.role': { pt: 'Co-fundador & Estratégia de Crescimento', en: 'Co-founder & Growth Strategy', es: 'Cofundador y Estrategia de Crecimiento' },
     'about.team.felippe.bio':  {

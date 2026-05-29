@@ -207,7 +207,7 @@ body.light-mode .chat-textarea  { background: #DEDAD6; border-color: #CCC9C5; co
                 <img id="sidebar-avatar" src="<%= user.profile_photo || '/images/avatar.png' %>" alt="Avatar do Aluno">
             </section>
             <h2><%= user.nome %></h2>
-            <p data-translate="sidebar.role">Aluno GymBros</p>
+            <p data-translate="sidebar.role">Aluno FitCrew</p>
         </section>
         <ul class="aluno-menu">
             <li><a href="/area-aluno" data-translate="sidebar.painel"><i class="fas fa-tachometer-alt"></i> Painel</a></li>
@@ -295,7 +295,7 @@ body.light-mode .chat-textarea  { background: #DEDAD6; border-color: #CCC9C5; co
                         <section class="chat-header-avatar" id="chat-avatar-letter">S</section>
                         <section>
                             <section class="chat-header-title" id="chat-ticket-title">Chat do Chamado</section>
-                            <section class="chat-header-sub" id="chat-ticket-status">suporte GymBros</section>
+                            <section class="chat-header-sub" id="chat-ticket-status">suporte FitCrew</section>
                         </section>
                     </section>
                     <button class="chat-close-btn" onclick="closeChat()"><i class="fas fa-times"></i></button>
@@ -443,7 +443,7 @@ function bubbleHtml(m) {
     const time = rawDate
         ? new Date(rawDate).toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' })
         : '--:--';
-    const sender = m.remetente === 'admin' ? 'Suporte GymBros' : 'Você';
+    const sender = m.remetente === 'admin' ? 'Suporte FitCrew' : 'Você';
     return `<section class="bubble ${m.remetente}"><section class="bubble-body">${escHtml(m.texto)}</section><section class="bubble-meta">${sender} · ${time}</section></section>`;
 }
 

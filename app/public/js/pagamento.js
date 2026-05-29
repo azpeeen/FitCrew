@@ -1,5 +1,5 @@
 // ==============================
-// pagamento.js — GymBros Payment Flow
+// pagamento.js — FitCrew Payment Flow
 // ==============================
 
 let metodoSelecionado = null;

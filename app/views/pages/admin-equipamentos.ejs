@@ -1,375 +1,742 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Equipamentos — GymBros Admin</title>
-    <meta name="robots" content="noindex, nofollow">
-    <link rel="icon" href="/images/favicon.ico">
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
-    <link rel="stylesheet" href="/css/admin.css">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Equipamentos — FitCrew Admin</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="icon" href="/images/favicon.ico" />
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+    <link
+      rel="preload"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      as="style"
+      onload="
+        this.onload = null;
+        this.rel = 'stylesheet';
+      "
+    />
+    <noscript
+      ><link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    /></noscript>
+    <link rel="stylesheet" href="/css/admin.css" />
     <style>
-    .eq-badge {
-        display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: .72rem;
-        font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
-    }
-    .eq-badge-ativo   { background: rgba(34,197,94,.12); color: #22c55e; border: 1px solid rgba(34,197,94,.25); }
-    .eq-badge-inativo { background: rgba(156,163,175,.1); color: #9ca3af; border: 1px solid rgba(156,163,175,.2); }
-    .eq-grupo {
-        padding: 2px 8px; border-radius: 8px; font-size: .72rem; font-weight: 600;
-        background: rgba(255,215,0,.1); color: #FFD700; border: 1px solid rgba(255,215,0,.2);
+      .eq-badge {
+        display: inline-block;
+        padding: 2px 10px;
+        border-radius: 12px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .eq-badge-ativo {
+        background: rgba(34, 197, 94, 0.12);
+        color: #22c55e;
+        border: 1px solid rgba(34, 197, 94, 0.25);
+      }
+      .eq-badge-inativo {
+        background: rgba(156, 163, 175, 0.1);
+        color: #9ca3af;
+        border: 1px solid rgba(156, 163, 175, 0.2);
+      }
+      .eq-grupo {
+        padding: 2px 8px;
+        border-radius: 8px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        background: rgba(255, 215, 0, 0.1);
+        color: #ffd700;
+        border: 1px solid rgba(255, 215, 0, 0.2);
         text-transform: capitalize;
-    }
-    .eq-actions { display: flex; gap: 6px; flex-wrap: wrap; }
-    .btn-qr { background: #FFD700; color: #000; border: none; padding: 5px 10px; border-radius: 7px; font-size: .75rem; font-weight: 700; cursor: pointer; }
-    .btn-qr:hover { background: #f0c800; }
-    .btn-metricas { background: rgba(99,102,241,.15); color: #818cf8; border: 1px solid rgba(99,102,241,.3); padding: 5px 10px; border-radius: 7px; font-size: .75rem; cursor: pointer; }
-    .btn-metricas:hover { background: rgba(99,102,241,.25); }
-    .btn-editar { background: rgba(255,255,255,.06); color: #ccc; border: 1px solid #333; padding: 5px 10px; border-radius: 7px; font-size: .75rem; cursor: pointer; }
-    .btn-editar:hover { background: rgba(255,255,255,.12); }
-    .btn-toggle { background: none; border: none; cursor: pointer; font-size: .9rem; padding: 4px 6px; border-radius: 6px; }
-    .btn-toggle:hover { background: rgba(255,255,255,.08); }
+      }
+      .eq-actions {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+      .btn-qr {
+        background: #ffd700;
+        color: #000;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 7px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .btn-qr:hover {
+        background: #f0c800;
+      }
+      .btn-metricas {
+        background: rgba(99, 102, 241, 0.15);
+        color: #818cf8;
+        border: 1px solid rgba(99, 102, 241, 0.3);
+        padding: 5px 10px;
+        border-radius: 7px;
+        font-size: 0.75rem;
+        cursor: pointer;
+      }
+      .btn-metricas:hover {
+        background: rgba(99, 102, 241, 0.25);
+      }
+      .btn-editar {
+        background: rgba(255, 255, 255, 0.06);
+        color: #ccc;
+        border: 1px solid #333;
+        padding: 5px 10px;
+        border-radius: 7px;
+        font-size: 0.75rem;
+        cursor: pointer;
+      }
+      .btn-editar:hover {
+        background: rgba(255, 255, 255, 0.12);
+      }
+      .btn-toggle {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 0.9rem;
+        padding: 4px 6px;
+        border-radius: 6px;
+      }
+      .btn-toggle:hover {
+        background: rgba(255, 255, 255, 0.08);
+      }
 
-    /* Modal overlay */
-    .eq-modal-overlay {
-        display: none; position: fixed; inset: 0; z-index: 1000;
-        background: rgba(0,0,0,.7); align-items: center; justify-content: center;
-    }
-    .eq-modal-overlay.open { display: flex; }
-    .eq-modal {
-        background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px;
-        padding: 28px; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto;
+      /* Modal overlay */
+      .eq-modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 1000;
+        background: rgba(0, 0, 0, 0.7);
+        align-items: center;
+        justify-content: center;
+      }
+      .eq-modal-overlay.open {
+        display: flex;
+      }
+      .eq-modal {
+        background: #1a1a1a;
+        border: 1px solid #2a2a2a;
+        border-radius: 16px;
+        padding: 28px;
+        width: 100%;
+        max-width: 520px;
+        max-height: 90vh;
+        overflow-y: auto;
         position: relative;
-    }
-    .eq-modal-title {
-        font-size: 1.1rem; font-weight: 800; color: #fff; margin: 0 0 20px;
-        display: flex; align-items: center; gap: 10px;
-    }
-    .eq-modal-title i { color: #FFD700; }
-    .eq-modal-close {
-        position: absolute; top: 16px; right: 16px;
-        background: none; border: none; color: #666; font-size: 1.1rem; cursor: pointer;
-    }
-    .eq-modal-close:hover { color: #fff; }
-    .eq-field { margin-bottom: 14px; }
-    .eq-field label { display: block; font-size: .8rem; color: #aaa; margin-bottom: 5px; font-weight: 600; }
-    .eq-field input, .eq-field select, .eq-field textarea {
-        width: 100%; background: #111; border: 1px solid #333; border-radius: 8px;
-        color: #fff; padding: 9px 12px; font-size: .88rem; box-sizing: border-box;
-    }
-    .eq-field input:focus, .eq-field select:focus, .eq-field textarea:focus {
-        outline: none; border-color: #FFD700;
-    }
-    .eq-field select option { background: #1a1a1a; }
+      }
+      .eq-modal-title {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: #fff;
+        margin: 0 0 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .eq-modal-title i {
+        color: #ffd700;
+      }
+      .eq-modal-close {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        background: none;
+        border: none;
+        color: #666;
+        font-size: 1.1rem;
+        cursor: pointer;
+      }
+      .eq-modal-close:hover {
+        color: #fff;
+      }
+      .eq-field {
+        margin-bottom: 14px;
+      }
+      .eq-field label {
+        display: block;
+        font-size: 0.8rem;
+        color: #aaa;
+        margin-bottom: 5px;
+        font-weight: 600;
+      }
+      .eq-field input,
+      .eq-field select,
+      .eq-field textarea {
+        width: 100%;
+        background: #111;
+        border: 1px solid #333;
+        border-radius: 8px;
+        color: #fff;
+        padding: 9px 12px;
+        font-size: 0.88rem;
+        box-sizing: border-box;
+      }
+      .eq-field input:focus,
+      .eq-field select:focus,
+      .eq-field textarea:focus {
+        outline: none;
+        border-color: #ffd700;
+      }
+      .eq-field select option {
+        background: #1a1a1a;
+      }
 
-    /* Busca de exercícios */
-    .ex-search-results {
-        max-height: 180px; overflow-y: auto; background: #111; border: 1px solid #333;
-        border-radius: 8px; margin-top: 4px;
-    }
-    .ex-result-item {
-        padding: 8px 12px; cursor: pointer; font-size: .83rem; color: #ccc;
-        display: flex; align-items: center; justify-content: space-between;
+      /* Busca de exercícios */
+      .ex-search-results {
+        max-height: 180px;
+        overflow-y: auto;
+        background: #111;
+        border: 1px solid #333;
+        border-radius: 8px;
+        margin-top: 4px;
+      }
+      .ex-result-item {
+        padding: 8px 12px;
+        cursor: pointer;
+        font-size: 0.83rem;
+        color: #ccc;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
         border-bottom: 1px solid #1e1e1e;
-    }
-    .ex-result-item:hover { background: rgba(255,215,0,.08); color: #fff; }
-    .ex-result-item:last-child { border-bottom: none; }
-    .ex-selecionados {
-        display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px;
-    }
-    .ex-tag {
-        background: rgba(255,215,0,.12); border: 1px solid rgba(255,215,0,.25);
-        color: #FFD700; padding: 3px 10px; border-radius: 20px; font-size: .75rem;
-        display: flex; align-items: center; gap: 6px;
-    }
-    .ex-tag button { background: none; border: none; color: #FFD700; cursor: pointer; font-size: .75rem; padding: 0; }
+      }
+      .ex-result-item:hover {
+        background: rgba(255, 215, 0, 0.08);
+        color: #fff;
+      }
+      .ex-result-item:last-child {
+        border-bottom: none;
+      }
+      .ex-selecionados {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 8px;
+      }
+      .ex-tag {
+        background: rgba(255, 215, 0, 0.12);
+        border: 1px solid rgba(255, 215, 0, 0.25);
+        color: #ffd700;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .ex-tag button {
+        background: none;
+        border: none;
+        color: #ffd700;
+        cursor: pointer;
+        font-size: 0.75rem;
+        padding: 0;
+      }
 
-    /* Métricas */
-    .metricas-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px; }
-    .metrica-box {
-        background: #111; border: 1px solid #2a2a2a; border-radius: 10px;
-        padding: 14px; text-align: center;
-    }
-    .metrica-num { font-size: 1.8rem; font-weight: 800; color: #FFD700; }
-    .metrica-label { font-size: .75rem; color: #888; margin-top: 2px; }
-    .chart-container { position: relative; height: 180px; }
-    .top-horas { margin-top: 14px; }
-    .top-hora-row {
-        display: flex; align-items: center; gap: 10px; padding: 6px 0;
-        border-bottom: 1px solid #1e1e1e; font-size: .83rem;
-    }
-    .top-hora-row:last-child { border-bottom: none; }
-    .top-hora-num { color: #FFD700; font-weight: 700; min-width: 36px; }
-    .top-hora-bar-wrap { flex: 1; background: #222; border-radius: 4px; height: 6px; overflow: hidden; }
-    .top-hora-bar { height: 100%; background: #FFD700; border-radius: 4px; }
-    .top-hora-scans { color: #888; min-width: 30px; text-align: right; font-size: .75rem; }
+      /* Métricas */
+      .metricas-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 18px;
+      }
+      .metrica-box {
+        background: #111;
+        border: 1px solid #2a2a2a;
+        border-radius: 10px;
+        padding: 14px;
+        text-align: center;
+      }
+      .metrica-num {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: #ffd700;
+      }
+      .metrica-label {
+        font-size: 0.75rem;
+        color: #888;
+        margin-top: 2px;
+      }
+      .chart-container {
+        position: relative;
+        height: 180px;
+      }
+      .top-horas {
+        margin-top: 14px;
+      }
+      .top-hora-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 6px 0;
+        border-bottom: 1px solid #1e1e1e;
+        font-size: 0.83rem;
+      }
+      .top-hora-row:last-child {
+        border-bottom: none;
+      }
+      .top-hora-num {
+        color: #ffd700;
+        font-weight: 700;
+        min-width: 36px;
+      }
+      .top-hora-bar-wrap {
+        flex: 1;
+        background: #222;
+        border-radius: 4px;
+        height: 6px;
+        overflow: hidden;
+      }
+      .top-hora-bar {
+        height: 100%;
+        background: #ffd700;
+        border-radius: 4px;
+      }
+      .top-hora-scans {
+        color: #888;
+        min-width: 30px;
+        text-align: right;
+        font-size: 0.75rem;
+      }
 
-    /* ─── Autocomplete de aparelhos ─── */
-    .eq-sugestao-item {
-        padding: 10px 14px; cursor: pointer; font-size: .88rem; color: #fff;
-        border-bottom: 1px solid #2a2a2a; transition: background .15s;
-    }
-    .eq-sugestao-item:hover { background: rgba(255,215,0,.08); }
-    .eq-ex-header {
-        display: flex; align-items: center; justify-content: space-between;
-        gap: 12px; font-size: .82rem; color: #888; margin-bottom: 12px; flex-wrap: wrap;
-    }
-    .btn-eq-sm {
-        padding: 4px 10px; border-radius: 6px; font-size: .75rem;
-        background: rgba(255,215,0,.12); border: 1px solid rgba(255,215,0,.3);
-        color: #FFD700; cursor: pointer; font-weight: 600;
-    }
-    .btn-eq-sm-outline { background: transparent; border-color: #444; color: #888; }
-    .eq-grupo-card { margin-bottom: 12px; border: 1px solid #2a2a2a; border-radius: 10px; overflow: hidden; }
-    .eq-grupo-header {
-        display: flex; align-items: center; justify-content: space-between;
-        padding: 10px 14px; background: #1a1a1a; cursor: pointer;
-        font-size: .85rem; font-weight: 700; color: #FFD700; user-select: none;
-    }
-    .eq-grupo-header .fa-chevron-down { transition: transform .2s; margin-right: 6px; }
-    .eq-grupo-lista { padding: 8px 14px 10px; max-height: 280px; overflow-y: auto; }
-    .eq-ex-item { display: flex; align-items: center; gap: 10px; padding: 6px 0; cursor: pointer; font-size: .82rem; }
-    .eq-ex-item input[type="checkbox"] { accent-color: #FFD700; width: 16px; height: 16px; flex-shrink: 0; }
-    .eq-ex-nome { color: #fff; flex: 1; }
-    .eq-ex-musculo { color: #555; font-size: .72rem; white-space: nowrap; }
+      /* ─── Autocomplete de aparelhos ─── */
+      .eq-sugestao-item {
+        padding: 10px 14px;
+        cursor: pointer;
+        font-size: 0.88rem;
+        color: #fff;
+        border-bottom: 1px solid #2a2a2a;
+        transition: background 0.15s;
+      }
+      .eq-sugestao-item:hover {
+        background: rgba(255, 215, 0, 0.08);
+      }
+      .eq-ex-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        font-size: 0.82rem;
+        color: #888;
+        margin-bottom: 12px;
+        flex-wrap: wrap;
+      }
+      .btn-eq-sm {
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        background: rgba(255, 215, 0, 0.12);
+        border: 1px solid rgba(255, 215, 0, 0.3);
+        color: #ffd700;
+        cursor: pointer;
+        font-weight: 600;
+      }
+      .btn-eq-sm-outline {
+        background: transparent;
+        border-color: #444;
+        color: #888;
+      }
+      .eq-grupo-card {
+        margin-bottom: 12px;
+        border: 1px solid #2a2a2a;
+        border-radius: 10px;
+        overflow: hidden;
+      }
+      .eq-grupo-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 14px;
+        background: #1a1a1a;
+        cursor: pointer;
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #ffd700;
+        user-select: none;
+      }
+      .eq-grupo-header .fa-chevron-down {
+        transition: transform 0.2s;
+        margin-right: 6px;
+      }
+      .eq-grupo-lista {
+        padding: 8px 14px 10px;
+        max-height: 280px;
+        overflow-y: auto;
+      }
+      .eq-ex-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 6px 0;
+        cursor: pointer;
+        font-size: 0.82rem;
+      }
+      .eq-ex-item input[type="checkbox"] {
+        accent-color: #ffd700;
+        width: 16px;
+        height: 16px;
+        flex-shrink: 0;
+      }
+      .eq-ex-nome {
+        color: #fff;
+        flex: 1;
+      }
+      .eq-ex-musculo {
+        color: #555;
+        font-size: 0.72rem;
+        white-space: nowrap;
+      }
     </style>
-</head>
-<body class="admin-body">
-<section class="admin-wrapper">
-    <%- include('../partials/admin-sidebar') %>
-    <section class="admin-content">
+  </head>
+  <body class="admin-body">
+    <section class="admin-wrapper">
+      <%- include('../partials/admin-sidebar') %>
+      <section class="admin-content">
         <%- include('../partials/admin-topbar') %>
         <main class="admin-main">
-            <section class="admin-page-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:24px">
-                <section>
-                    <h1 class="admin-page-title">Equipamentos</h1>
-                    <p class="admin-page-subtitle">Gerencie QR Codes dos equipamentos da academia</p>
-                </section>
-                <button class="admin-btn admin-btn-primary" onclick="abrirModalNovo()">
-                    <i class="fas fa-plus"></i> Novo equipamento
-                </button>
+          <section
+            class="admin-page-header"
+            style="
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              flex-wrap: wrap;
+              gap: 12px;
+              margin-bottom: 24px;
+            "
+          >
+            <section>
+              <h1 class="admin-page-title">Equipamentos</h1>
+              <p class="admin-page-subtitle">
+                Gerencie QR Codes dos equipamentos da academia
+              </p>
             </section>
+            <button
+              class="admin-btn admin-btn-primary"
+              onclick="abrirModalNovo()"
+            >
+              <i class="fas fa-plus"></i> Novo equipamento
+            </button>
+          </section>
 
-            <section class="admin-card">
-                <section class="admin-card-body no-pad">
-                    <section class="admin-table-wrap">
-                        <table class="admin-table" id="tabelaEquipamentos">
-                            <thead>
-                                <tr>
-                                    <th>Nome</th>
-                                    <th>Grupo</th>
-                                    <th>Academia</th>
-                                    <th>Exercícios</th>
-                                    <th>Scans</th>
-                                    <th>Status</th>
-                                    <th>Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tbodyEquipamentos">
-                                <tr><td colspan="7" class="text-center text-muted" style="padding:24px">
-                                    <i class="fas fa-spinner fa-spin"></i> Carregando...
-                                </td></tr>
-                            </tbody>
-                        </table>
-                    </section>
-                </section>
+          <section class="admin-card">
+            <section class="admin-card-body no-pad">
+              <section class="admin-table-wrap">
+                <table class="admin-table" id="tabelaEquipamentos">
+                  <thead>
+                    <tr>
+                      <th>Nome</th>
+                      <th>Grupo</th>
+                      <th>Academia</th>
+                      <th>Exercícios</th>
+                      <th>Scans</th>
+                      <th>Status</th>
+                      <th>Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbodyEquipamentos">
+                    <tr>
+                      <td
+                        colspan="7"
+                        class="text-center text-muted"
+                        style="padding: 24px"
+                      >
+                        <i class="fas fa-spinner fa-spin"></i> Carregando...
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </section>
             </section>
+          </section>
         </main>
+      </section>
     </section>
-</section>
 
-<!-- Modal: Criar / Editar equipamento -->
-<section class="eq-modal-overlay" id="modalEquip">
-    <section class="eq-modal">
-        <button class="eq-modal-close" onclick="fecharModal('modalEquip')"><i class="fas fa-times"></i></button>
-        <h2 class="eq-modal-title"><i class="fas fa-dumbbell"></i> <span id="modalEquipTitulo">Novo equipamento</span></h2>
-        <input type="hidden" id="editId">
+    <!-- Modal: Criar / Editar equipamento -->
+    <section class="eq-modal-overlay" id="modalEquip">
+      <section class="eq-modal">
+        <button class="eq-modal-close" onclick="fecharModal('modalEquip')">
+          <i class="fas fa-times"></i>
+        </button>
+        <h2 class="eq-modal-title">
+          <i class="fas fa-dumbbell"></i>
+          <span id="modalEquipTitulo">Novo equipamento</span>
+        </h2>
+        <input type="hidden" id="editId" />
 
         <section class="eq-field">
-            <label>Nome *</label>
-            <input type="text" id="fNome" placeholder="Ex: Leg Press 45°">
+          <label>Nome *</label>
+          <input type="text" id="fNome" placeholder="Ex: Leg Press 45°" />
         </section>
         <section class="eq-field">
-            <label>Descrição</label>
-            <input type="text" id="fDesc" placeholder="Opcional">
+          <label>Descrição</label>
+          <input type="text" id="fDesc" placeholder="Opcional" />
         </section>
         <section class="eq-field">
-            <label>Grupo muscular</label>
-            <select id="fGrupo">
-                <option value="outro">Outro</option>
-                <option value="peito">Peito</option>
-                <option value="costas">Costas</option>
-                <option value="ombro">Ombro</option>
-                <option value="braco">Braço</option>
-                <option value="perna">Perna</option>
-                <option value="core">Core</option>
-                <option value="cardio">Cardio</option>
-            </select>
+          <label>Grupo muscular</label>
+          <select id="fGrupo">
+            <option value="outro">Outro</option>
+            <option value="peito">Peito</option>
+            <option value="costas">Costas</option>
+            <option value="ombro">Ombro</option>
+            <option value="braco">Braço</option>
+            <option value="perna">Perna</option>
+            <option value="core">Core</option>
+            <option value="cardio">Cardio</option>
+          </select>
         </section>
         <section class="eq-field">
-            <label>Academia</label>
-            <select id="fAcademia">
-                <option value="">— Nenhuma —</option>
-            </select>
+          <label>Academia</label>
+          <select id="fAcademia">
+            <option value="">— Nenhuma —</option>
+          </select>
         </section>
         <section class="eq-field">
-            <label>Exercícios vinculados</label>
-            <input type="text" id="fExBusca" placeholder="Buscar exercício..." oninput="buscarExercicios()">
-            <section class="ex-search-results" id="exResultados" style="display:none"></section>
-            <section class="ex-selecionados" id="exSelecionados"></section>
+          <label>Exercícios vinculados</label>
+          <input
+            type="text"
+            id="fExBusca"
+            placeholder="Buscar exercício..."
+            oninput="buscarExercicios()"
+          />
+          <section
+            class="ex-search-results"
+            id="exResultados"
+            style="display: none"
+          ></section>
+          <section class="ex-selecionados" id="exSelecionados"></section>
         </section>
 
-        <section style="display:flex;gap:10px;margin-top:20px">
-            <button class="admin-btn admin-btn-primary" style="flex:1" onclick="salvarEquipamento()" id="btnSalvar">
-                <i class="fas fa-save"></i> Salvar
-            </button>
-            <button class="admin-btn" onclick="fecharModal('modalEquip')" style="background:#2a2a2a;color:#ccc">
-                Cancelar
-            </button>
+        <section style="display: flex; gap: 10px; margin-top: 20px">
+          <button
+            class="admin-btn admin-btn-primary"
+            style="flex: 1"
+            onclick="salvarEquipamento()"
+            id="btnSalvar"
+          >
+            <i class="fas fa-save"></i> Salvar
+          </button>
+          <button
+            class="admin-btn"
+            onclick="fecharModal('modalEquip')"
+            style="background: #2a2a2a; color: #ccc"
+          >
+            Cancelar
+          </button>
         </section>
+      </section>
     </section>
-</section>
 
-<!-- Modal: Métricas -->
-<section class="eq-modal-overlay" id="modalMetricas">
-    <section class="eq-modal">
-        <button class="eq-modal-close" onclick="fecharModal('modalMetricas')"><i class="fas fa-times"></i></button>
-        <h2 class="eq-modal-title"><i class="fas fa-chart-bar"></i> <span id="metNome">Métricas</span></h2>
+    <!-- Modal: Métricas -->
+    <section class="eq-modal-overlay" id="modalMetricas">
+      <section class="eq-modal">
+        <button class="eq-modal-close" onclick="fecharModal('modalMetricas')">
+          <i class="fas fa-times"></i>
+        </button>
+        <h2 class="eq-modal-title">
+          <i class="fas fa-chart-bar"></i> <span id="metNome">Métricas</span>
+        </h2>
 
         <section class="metricas-grid">
-            <section class="metrica-box">
-                <section class="metrica-num" id="metTotal">—</section>
-                <section class="metrica-label">Total de scans</section>
-            </section>
-            <section class="metrica-box">
-                <section class="metrica-num" id="metSemana">—</section>
-                <section class="metrica-label">Última semana</section>
-            </section>
+          <section class="metrica-box">
+            <section class="metrica-num" id="metTotal">—</section>
+            <section class="metrica-label">Total de scans</section>
+          </section>
+          <section class="metrica-box">
+            <section class="metrica-num" id="metSemana">—</section>
+            <section class="metrica-label">Última semana</section>
+          </section>
         </section>
 
-        <section style="font-size:.8rem;color:#aaa;margin-bottom:8px;font-weight:600">Scans por dia (últimos 7 dias)</section>
+        <section
+          style="
+            font-size: 0.8rem;
+            color: #aaa;
+            margin-bottom: 8px;
+            font-weight: 600;
+          "
+        >
+          Scans por dia (últimos 7 dias)
+        </section>
         <section class="chart-container">
-            <canvas id="chartScans"></canvas>
+          <canvas id="chartScans"></canvas>
         </section>
 
         <section class="top-horas">
-            <section style="font-size:.8rem;color:#aaa;font-weight:600;margin-bottom:10px">Top horários</section>
-            <section id="topHorasLista"></section>
+          <section
+            style="
+              font-size: 0.8rem;
+              color: #aaa;
+              font-weight: 600;
+              margin-bottom: 10px;
+            "
+          >
+            Top horários
+          </section>
+          <section id="topHorasLista"></section>
         </section>
+      </section>
     </section>
-</section>
 
-<!-- Modal: Novo equipamento (autocomplete) -->
-<section class="eq-modal-overlay" id="modalNovoEquip">
-    <section class="eq-modal" style="max-width:560px">
-        <button class="eq-modal-close" onclick="fecharModal('modalNovoEquip')"><i class="fas fa-times"></i></button>
-        <h2 class="eq-modal-title"><i class="fas fa-dumbbell"></i> Novo Equipamento</h2>
+    <!-- Modal: Novo equipamento (autocomplete) -->
+    <section class="eq-modal-overlay" id="modalNovoEquip">
+      <section class="eq-modal" style="max-width: 560px">
+        <button class="eq-modal-close" onclick="fecharModal('modalNovoEquip')">
+          <i class="fas fa-times"></i>
+        </button>
+        <h2 class="eq-modal-title">
+          <i class="fas fa-dumbbell"></i> Novo Equipamento
+        </h2>
 
-        <section class="eq-field" style="position:relative">
-            <label>Nome do aparelho *</label>
-            <input type="text" id="eq-nome-input"
-                   placeholder="Ex: Polia, Leg press, Supino..." autocomplete="off">
-            <section id="eq-nome-sugestoes" style="
-                display:none; position:absolute; top:100%; left:0; right:0; z-index:999;
-                background:#1a1a1a; border:1px solid #2a2a2a; border-radius:8px;
-                max-height:220px; overflow-y:auto; margin-top:4px;
-            "></section>
+        <section class="eq-field" style="position: relative">
+          <label>Nome do aparelho *</label>
+          <input
+            type="text"
+            id="eq-nome-input"
+            placeholder="Ex: Polia, Leg press, Supino..."
+            autocomplete="off"
+          />
+          <section
+            id="eq-nome-sugestoes"
+            style="
+              display: none;
+              position: absolute;
+              top: 100%;
+              left: 0;
+              right: 0;
+              z-index: 999;
+              background: #1a1a1a;
+              border: 1px solid #2a2a2a;
+              border-radius: 8px;
+              max-height: 220px;
+              overflow-y: auto;
+              margin-top: 4px;
+            "
+          ></section>
         </section>
 
         <section class="eq-field">
-            <label>Grupo muscular principal</label>
-            <select id="eq-grupo-novo">
-                <option value="outro">Outro</option>
-                <option value="peito">Peito</option>
-                <option value="costas">Costas</option>
-                <option value="ombro">Ombro</option>
-                <option value="braco">Braço</option>
-                <option value="perna">Perna</option>
-                <option value="core">Core</option>
-                <option value="cardio">Cardio</option>
-            </select>
+          <label>Grupo muscular principal</label>
+          <select id="eq-grupo-novo">
+            <option value="outro">Outro</option>
+            <option value="peito">Peito</option>
+            <option value="costas">Costas</option>
+            <option value="ombro">Ombro</option>
+            <option value="braco">Braço</option>
+            <option value="perna">Perna</option>
+            <option value="core">Core</option>
+            <option value="cardio">Cardio</option>
+          </select>
         </section>
 
         <section class="eq-field">
-            <label>Academia (opcional)</label>
-            <select id="eq-academia-novo">
-                <option value="">— Nenhuma —</option>
-            </select>
+          <label>Academia (opcional)</label>
+          <select id="eq-academia-novo">
+            <option value="">— Nenhuma —</option>
+          </select>
         </section>
 
-        <section id="eq-exercicios-preview" style="
-            max-height: 360px; overflow-y: auto;
-            border: 1px solid #2a2a2a; border-radius: 10px;
-            padding: 14px; margin-top: 8px;
-            font-size: .82rem; color: #555;
-        ">
-            <p>Digite o nome do aparelho acima para carregar os exercícios automaticamente.</p>
+        <section
+          id="eq-exercicios-preview"
+          style="
+            max-height: 360px;
+            overflow-y: auto;
+            border: 1px solid #2a2a2a;
+            border-radius: 10px;
+            padding: 14px;
+            margin-top: 8px;
+            font-size: 0.82rem;
+            color: #555;
+          "
+        >
+          <p>
+            Digite o nome do aparelho acima para carregar os exercícios
+            automaticamente.
+          </p>
         </section>
 
-        <section style="display:flex;gap:10px;margin-top:20px">
-            <button class="admin-btn admin-btn-primary" style="flex:1" onclick="salvarNovoEquipamento()" id="btnSalvarNovo">
-                <i class="fas fa-save"></i> Salvar
-            </button>
-            <button class="admin-btn" onclick="fecharModal('modalNovoEquip')" style="background:#2a2a2a;color:#ccc">
-                Cancelar
-            </button>
+        <section style="display: flex; gap: 10px; margin-top: 20px">
+          <button
+            class="admin-btn admin-btn-primary"
+            style="flex: 1"
+            onclick="salvarNovoEquipamento()"
+            id="btnSalvarNovo"
+          >
+            <i class="fas fa-save"></i> Salvar
+          </button>
+          <button
+            class="admin-btn"
+            onclick="fecharModal('modalNovoEquip')"
+            style="background: #2a2a2a; color: #ccc"
+          >
+            Cancelar
+          </button>
         </section>
+      </section>
     </section>
-</section>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script>
-let _equipamentos  = [];
-let _academias     = [];
-let _exSelecionados = [];
-let _chartScans    = null;
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+      let _equipamentos = [];
+      let _academias = [];
+      let _exSelecionados = [];
+      let _chartScans = null;
 
-// ── Carregar dados iniciais ──────────────────────────────────────────────────
-async function carregarEquipamentos() {
-    const resp = await fetch('/api/admin/equipamentos');
-    _equipamentos = await resp.json();
-    renderTabela();
-}
+      // ── Carregar dados iniciais ──────────────────────────────────────────────────
+      async function carregarEquipamentos() {
+        const resp = await fetch("/api/admin/equipamentos");
+        _equipamentos = await resp.json();
+        renderTabela();
+      }
 
-async function carregarAcademias() {
-    try {
-        const r = await fetch('/api/admin/academias');
-        _academias = await r.json();
-        ['fAcademia', 'eq-academia-novo'].forEach(selId => {
+      async function carregarAcademias() {
+        try {
+          const r = await fetch("/api/admin/academias");
+          _academias = await r.json();
+          ["fAcademia", "eq-academia-novo"].forEach((selId) => {
             const sel = document.getElementById(selId);
             if (!sel) return;
-            _academias.forEach(a => {
-                const opt = document.createElement('option');
-                opt.value = a.id; opt.textContent = a.nome;
-                sel.appendChild(opt);
+            _academias.forEach((a) => {
+              const opt = document.createElement("option");
+              opt.value = a.id;
+              opt.textContent = a.nome;
+              sel.appendChild(opt);
             });
-        });
-    } catch (_) {}
-}
+          });
+        } catch (_) {}
+      }
 
-function renderTabela() {
-    const tbody = document.getElementById('tbodyEquipamentos');
-    if (!_equipamentos.length) {
-        tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted" style="padding:24px">
+      function renderTabela() {
+        const tbody = document.getElementById("tbodyEquipamentos");
+        if (!_equipamentos.length) {
+          tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted" style="padding:24px">
             Nenhum equipamento cadastrado.</td></tr>`;
-        return;
-    }
-    tbody.innerHTML = _equipamentos.map(eq => `
+          return;
+        }
+        tbody.innerHTML = _equipamentos
+          .map(
+            (eq) => `
         <tr>
             <td class="fw-600">${eq.nome}</td>
             <td><span class="eq-grupo">${eq.grupo_muscular}</span></td>
-            <td class="text-muted">${eq.academia_nome || '—'}</td>
+            <td class="text-muted">${eq.academia_nome || "—"}</td>
             <td><span class="badge badge-muted">${eq.total_exercicios}</span></td>
             <td><span class="badge badge-muted">${eq.total_scans}</span></td>
             <td>
-                <span class="eq-badge ${eq.ativo ? 'eq-badge-ativo' : 'eq-badge-inativo'}">
-                    ${eq.ativo ? 'Ativo' : 'Inativo'}
+                <span class="eq-badge ${eq.ativo ? "eq-badge-ativo" : "eq-badge-inativo"}">
+                    ${eq.ativo ? "Ativo" : "Inativo"}
                 </span>
             </td>
             <td>
                 <section class="eq-actions">
-                    <button class="btn-qr" onclick="baixarQR(${eq.id}, '${eq.nome.replace(/'/g,"\\'")}')">
+                    <button class="btn-qr" onclick="baixarQR(${eq.id}, '${eq.nome.replace(/'/g, "\\'")}')">
                         <i class="fas fa-qrcode"></i> QR
                     </button>
                     <button class="btn-metricas" onclick="verMetricas(${eq.id})">
@@ -379,354 +746,571 @@ function renderTabela() {
                         <i class="fas fa-pen"></i>
                     </button>
                     <button class="btn-toggle" onclick="toggleAtivo(${eq.id}, ${eq.ativo})"
-                            title="${eq.ativo ? 'Desativar' : 'Ativar'}">
-                        <i class="fas fa-${eq.ativo ? 'toggle-on' : 'toggle-off'}"
-                           style="color:${eq.ativo ? '#22c55e' : '#666'}"></i>
+                            title="${eq.ativo ? "Desativar" : "Ativar"}">
+                        <i class="fas fa-${eq.ativo ? "toggle-on" : "toggle-off"}"
+                           style="color:${eq.ativo ? "#22c55e" : "#666"}"></i>
                     </button>
                 </section>
             </td>
         </tr>
-    `).join('');
-}
+    `,
+          )
+          .join("");
+      }
 
-// ── QR Code download ─────────────────────────────────────────────────────────
-function baixarQR(id, nome) {
-    const a = document.createElement('a');
-    a.href = `/api/admin/equipamentos/${id}/qr`;
-    a.download = `qr-${nome}.png`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-}
+      // ── QR Code download ─────────────────────────────────────────────────────────
+      function baixarQR(id, nome) {
+        const a = document.createElement("a");
+        a.href = `/api/admin/equipamentos/${id}/qr`;
+        a.download = `qr-${nome}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
 
-// ── Toggle ativo ─────────────────────────────────────────────────────────────
-async function toggleAtivo(id, ativoAtual) {
-    const eq = _equipamentos.find(e => e.id === id);
-    if (!eq) return;
-    const novoAtivo = ativoAtual ? 0 : 1;
-    await fetch(`/api/admin/equipamentos/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...eq, ativo: novoAtivo }),
-    });
-    await carregarEquipamentos();
-}
+      // ── Toggle ativo ─────────────────────────────────────────────────────────────
+      async function toggleAtivo(id, ativoAtual) {
+        const eq = _equipamentos.find((e) => e.id === id);
+        if (!eq) return;
+        const novoAtivo = ativoAtual ? 0 : 1;
+        await fetch(`/api/admin/equipamentos/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...eq, ativo: novoAtivo }),
+        });
+        await carregarEquipamentos();
+      }
 
-// ── Métricas ─────────────────────────────────────────────────────────────────
-async function verMetricas(id) {
-    const r = await fetch(`/api/admin/equipamentos/${id}/metricas`);
-    const data = await r.json();
+      // ── Métricas ─────────────────────────────────────────────────────────────────
+      async function verMetricas(id) {
+        const r = await fetch(`/api/admin/equipamentos/${id}/metricas`);
+        const data = await r.json();
 
-    document.getElementById('metNome').textContent = data.equipamento.nome;
-    document.getElementById('metTotal').textContent = data.total_scans;
+        document.getElementById("metNome").textContent = data.equipamento.nome;
+        document.getElementById("metTotal").textContent = data.total_scans;
 
-    const semana = data.por_dia.reduce((s, d) => s + Number(d.scans), 0);
-    document.getElementById('metSemana').textContent = semana;
+        const semana = data.por_dia.reduce((s, d) => s + Number(d.scans), 0);
+        document.getElementById("metSemana").textContent = semana;
 
-    // Chart
-    if (_chartScans) _chartScans.destroy();
-    const labels = [], valores = [];
-    const hoje = new Date();
-    for (let i = 6; i >= 0; i--) {
-        const d = new Date(hoje); d.setDate(d.getDate() - i);
-        const iso = d.toISOString().split('T')[0];
-        labels.push(iso.slice(5));
-        const found = data.por_dia.find(p => p.dia === iso);
-        valores.push(found ? Number(found.scans) : 0);
-    }
-    _chartScans = new Chart(document.getElementById('chartScans'), {
-        type: 'bar',
-        data: {
+        // Chart
+        if (_chartScans) _chartScans.destroy();
+        const labels = [],
+          valores = [];
+        const hoje = new Date();
+        for (let i = 6; i >= 0; i--) {
+          const d = new Date(hoje);
+          d.setDate(d.getDate() - i);
+          const iso = d.toISOString().split("T")[0];
+          labels.push(iso.slice(5));
+          const found = data.por_dia.find((p) => p.dia === iso);
+          valores.push(found ? Number(found.scans) : 0);
+        }
+        _chartScans = new Chart(document.getElementById("chartScans"), {
+          type: "bar",
+          data: {
             labels,
-            datasets: [{ data: valores, backgroundColor: 'rgba(255,215,0,.7)', borderRadius: 6 }],
-        },
-        options: {
+            datasets: [
+              {
+                data: valores,
+                backgroundColor: "rgba(255,215,0,.7)",
+                borderRadius: 6,
+              },
+            ],
+          },
+          options: {
             plugins: { legend: { display: false } },
             scales: {
-                x: { ticks: { color: '#888' }, grid: { color: '#222' } },
-                y: { ticks: { color: '#888', stepSize: 1 }, grid: { color: '#222' }, beginAtZero: true },
+              x: { ticks: { color: "#888" }, grid: { color: "#222" } },
+              y: {
+                ticks: { color: "#888", stepSize: 1 },
+                grid: { color: "#222" },
+                beginAtZero: true,
+              },
             },
-        },
-    });
+          },
+        });
 
-    // Top horários
-    const maxScans = data.top_horarios[0]?.scans || 1;
-    document.getElementById('topHorasLista').innerHTML = data.top_horarios.length
-        ? data.top_horarios.map(h => `
+        // Top horários
+        const maxScans = data.top_horarios[0]?.scans || 1;
+        document.getElementById("topHorasLista").innerHTML = data.top_horarios
+          .length
+          ? data.top_horarios
+              .map(
+                (h) => `
             <section class="top-hora-row">
-                <span class="top-hora-num">${String(h.hora).padStart(2,'0')}h</span>
+                <span class="top-hora-num">${String(h.hora).padStart(2, "0")}h</span>
                 <section class="top-hora-bar-wrap">
-                    <section class="top-hora-bar" style="width:${Math.round(h.scans/maxScans*100)}%"></section>
+                    <section class="top-hora-bar" style="width:${Math.round((h.scans / maxScans) * 100)}%"></section>
                 </section>
                 <span class="top-hora-scans">${h.scans}</span>
-            </section>`).join('')
-        : '<p style="color:#555;font-size:.83rem">Sem dados ainda.</p>';
+            </section>`,
+              )
+              .join("")
+          : '<p style="color:#555;font-size:.83rem">Sem dados ainda.</p>';
 
-    document.getElementById('modalMetricas').classList.add('open');
-}
+        document.getElementById("modalMetricas").classList.add("open");
+      }
 
-// ── Busca de exercícios ───────────────────────────────────────────────────────
-let _exBuscaTimer = null;
-function buscarExercicios() {
-    clearTimeout(_exBuscaTimer);
-    const q = document.getElementById('fExBusca').value.trim();
-    if (q.length < 2) { document.getElementById('exResultados').style.display = 'none'; return; }
-    _exBuscaTimer = setTimeout(async () => {
-        const r = await fetch(`/api/admin/exercicios?q=${encodeURIComponent(q)}`);
-        const lista = await r.json();
-        const ctn = document.getElementById('exResultados');
-        if (!lista.length) { ctn.style.display = 'none'; return; }
-        ctn.style.display = 'block';
-        ctn.innerHTML = lista.map(ex => `
-            <section class="ex-result-item" onclick="adicionarExercicio(${ex.id}, '${(ex.name_pt || ex.name).replace(/'/g,"\\'")}')">
+      // ── Busca de exercícios ───────────────────────────────────────────────────────
+      let _exBuscaTimer = null;
+      function buscarExercicios() {
+        clearTimeout(_exBuscaTimer);
+        const q = document.getElementById("fExBusca").value.trim();
+        if (q.length < 2) {
+          document.getElementById("exResultados").style.display = "none";
+          return;
+        }
+        _exBuscaTimer = setTimeout(async () => {
+          const r = await fetch(
+            `/api/admin/exercicios?q=${encodeURIComponent(q)}`,
+          );
+          const lista = await r.json();
+          const ctn = document.getElementById("exResultados");
+          if (!lista.length) {
+            ctn.style.display = "none";
+            return;
+          }
+          ctn.style.display = "block";
+          ctn.innerHTML = lista
+            .map(
+              (ex) => `
+            <section class="ex-result-item" onclick="adicionarExercicio(${ex.id}, '${(ex.name_pt || ex.name).replace(/'/g, "\\'")}')">
                 <span>${ex.name_pt || ex.name}</span>
-                <small style="color:#555">${ex.target_muscle || ''}</small>
+                <small style="color:#555">${ex.target_muscle || ""}</small>
             </section>
-        `).join('');
-    }, 300);
-}
+        `,
+            )
+            .join("");
+        }, 300);
+      }
 
-function adicionarExercicio(id, nome) {
-    if (_exSelecionados.find(e => e.id === id)) return;
-    _exSelecionados.push({ id, nome });
-    renderExSelecionados();
-    document.getElementById('fExBusca').value = '';
-    document.getElementById('exResultados').style.display = 'none';
-}
+      function adicionarExercicio(id, nome) {
+        if (_exSelecionados.find((e) => e.id === id)) return;
+        _exSelecionados.push({ id, nome });
+        renderExSelecionados();
+        document.getElementById("fExBusca").value = "";
+        document.getElementById("exResultados").style.display = "none";
+      }
 
-function removerExercicio(id) {
-    _exSelecionados = _exSelecionados.filter(e => e.id !== id);
-    renderExSelecionados();
-}
+      function removerExercicio(id) {
+        _exSelecionados = _exSelecionados.filter((e) => e.id !== id);
+        renderExSelecionados();
+      }
 
-function renderExSelecionados() {
-    document.getElementById('exSelecionados').innerHTML = _exSelecionados.map(e => `
+      function renderExSelecionados() {
+        document.getElementById("exSelecionados").innerHTML = _exSelecionados
+          .map(
+            (e) => `
         <span class="ex-tag">
             ${e.nome}
             <button onclick="removerExercicio(${e.id})"><i class="fas fa-times"></i></button>
         </span>
-    `).join('');
-}
+    `,
+          )
+          .join("");
+      }
 
-// ── Modal Novo ────────────────────────────────────────────────────────────────
-function abrirModalNovo() {
-    document.getElementById('eq-nome-input').value = '';
-    document.getElementById('eq-nome-sugestoes').style.display = 'none';
-    document.getElementById('eq-grupo-novo').value = 'outro';
-    document.getElementById('eq-academia-novo').value = '';
-    document.getElementById('eq-exercicios-preview').innerHTML =
-        '<p>Digite o nome do aparelho acima para carregar os exercícios automaticamente.</p>';
-    document.getElementById('modalNovoEquip').classList.add('open');
-}
+      // ── Modal Novo ────────────────────────────────────────────────────────────────
+      function abrirModalNovo() {
+        document.getElementById("eq-nome-input").value = "";
+        document.getElementById("eq-nome-sugestoes").style.display = "none";
+        document.getElementById("eq-grupo-novo").value = "outro";
+        document.getElementById("eq-academia-novo").value = "";
+        document.getElementById("eq-exercicios-preview").innerHTML =
+          "<p>Digite o nome do aparelho acima para carregar os exercícios automaticamente.</p>";
+        document.getElementById("modalNovoEquip").classList.add("open");
+      }
 
-// ── Modal Editar ─────────────────────────────────────────────────────────────
-async function abrirModalEditar(id) {
-    const eq = _equipamentos.find(e => e.id === id);
-    if (!eq) return;
-    document.getElementById('editId').value = eq.id;
-    document.getElementById('modalEquipTitulo').textContent = 'Editar equipamento';
-    document.getElementById('fNome').value  = eq.nome;
-    document.getElementById('fDesc').value  = eq.descricao || '';
-    document.getElementById('fGrupo').value = eq.grupo_muscular;
-    document.getElementById('fAcademia').value = eq.academia_id || '';
+      // ── Modal Editar ─────────────────────────────────────────────────────────────
+      async function abrirModalEditar(id) {
+        const eq = _equipamentos.find((e) => e.id === id);
+        if (!eq) return;
+        document.getElementById("editId").value = eq.id;
+        document.getElementById("modalEquipTitulo").textContent =
+          "Editar equipamento";
+        document.getElementById("fNome").value = eq.nome;
+        document.getElementById("fDesc").value = eq.descricao || "";
+        document.getElementById("fGrupo").value = eq.grupo_muscular;
+        document.getElementById("fAcademia").value = eq.academia_id || "";
 
-    // Carregar exercícios vinculados
-    try {
-        const r = await fetch(`/api/admin/exercicios?equipamento_id=${eq.id}`);
-        const lista = await r.json();
-        _exSelecionados = lista.map(ex => ({ id: ex.id, nome: ex.name_pt || ex.name }));
-    } catch (_) { _exSelecionados = []; }
-    renderExSelecionados();
-    document.getElementById('exResultados').style.display = 'none';
-    document.getElementById('modalEquip').classList.add('open');
-}
+        // Carregar exercícios vinculados
+        try {
+          const r = await fetch(
+            `/api/admin/exercicios?equipamento_id=${eq.id}`,
+          );
+          const lista = await r.json();
+          _exSelecionados = lista.map((ex) => ({
+            id: ex.id,
+            nome: ex.name_pt || ex.name,
+          }));
+        } catch (_) {
+          _exSelecionados = [];
+        }
+        renderExSelecionados();
+        document.getElementById("exResultados").style.display = "none";
+        document.getElementById("modalEquip").classList.add("open");
+      }
 
-async function salvarEquipamento() {
-    const nome = document.getElementById('fNome').value.trim();
-    if (!nome) { alert('Nome obrigatório.'); return; }
-    const btn = document.getElementById('btnSalvar');
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+      async function salvarEquipamento() {
+        const nome = document.getElementById("fNome").value.trim();
+        if (!nome) {
+          alert("Nome obrigatório.");
+          return;
+        }
+        const btn = document.getElementById("btnSalvar");
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
 
-    const id = document.getElementById('editId').value;
-    const payload = {
-        nome,
-        descricao:      document.getElementById('fDesc').value.trim() || null,
-        grupo_muscular: document.getElementById('fGrupo').value,
-        academia_id:    document.getElementById('fAcademia').value || null,
-        exercise_ids:   _exSelecionados.map(e => e.id),
-    };
+        const id = document.getElementById("editId").value;
+        const payload = {
+          nome,
+          descricao: document.getElementById("fDesc").value.trim() || null,
+          grupo_muscular: document.getElementById("fGrupo").value,
+          academia_id: document.getElementById("fAcademia").value || null,
+          exercise_ids: _exSelecionados.map((e) => e.id),
+        };
 
-    const method = id ? 'PUT' : 'POST';
-    const url    = id ? `/api/admin/equipamentos/${id}` : '/api/admin/equipamentos';
+        const method = id ? "PUT" : "POST";
+        const url = id
+          ? `/api/admin/equipamentos/${id}`
+          : "/api/admin/equipamentos";
 
-    const r = await fetch(url, {
-        method, headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-    });
-    const data = await r.json();
-    btn.disabled = false;
-    btn.innerHTML = '<i class="fas fa-save"></i> Salvar';
+        const r = await fetch(url, {
+          method,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const data = await r.json();
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-save"></i> Salvar';
 
-    if (r.ok) {
-        fecharModal('modalEquip');
-        await carregarEquipamentos();
-    } else {
-        alert(data.erro || 'Erro ao salvar.');
-    }
-}
+        if (r.ok) {
+          fecharModal("modalEquip");
+          await carregarEquipamentos();
+        } else {
+          alert(data.erro || "Erro ao salvar.");
+        }
+      }
 
-function fecharModal(id) {
-    document.getElementById(id).classList.remove('open');
-}
+      function fecharModal(id) {
+        document.getElementById(id).classList.remove("open");
+      }
 
-// Fechar ao clicar fora
-document.querySelectorAll('.eq-modal-overlay').forEach(el => {
-    el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open'); });
-});
+      // Fechar ao clicar fora
+      document.querySelectorAll(".eq-modal-overlay").forEach((el) => {
+        el.addEventListener("click", (e) => {
+          if (e.target === el) el.classList.remove("open");
+        });
+      });
 
-// ── APARELHOS_MAP ─────────────────────────────────────────────────────────────
-const APARELHOS_MAP = [
-    { nome: 'Polia alta',              equipment: ['cable'],                                  label: 'Polia / Cable' },
-    { nome: 'Polia baixa',             equipment: ['cable'],                                  label: 'Polia / Cable' },
-    { nome: 'Polia média',             equipment: ['cable'],                                  label: 'Polia / Cable' },
-    { nome: 'Cross over',              equipment: ['cable'],                                  label: 'Polia / Cable' },
-    { nome: 'Polia',                   equipment: ['cable'],                                  label: 'Polia / Cable' },
-    { nome: 'Cable',                   equipment: ['cable'],                                  label: 'Polia / Cable' },
-    { nome: 'Puxador',                 equipment: ['cable'],                                  label: 'Polia / Cable' },
-    { nome: 'Voador de cabo',          equipment: ['cable'],                                  label: 'Polia / Cable' },
-    { nome: 'Barra',                   equipment: ['barbell'],                                label: 'Barra' },
-    { nome: 'Barra reta',              equipment: ['barbell'],                                label: 'Barra' },
-    { nome: 'Barra W',                 equipment: ['barbell'],                                label: 'Barra' },
-    { nome: 'Barra EZ',                equipment: ['barbell'],                                label: 'Barra' },
-    { nome: 'Supino',                  equipment: ['barbell', 'dumbbell', 'smith machine'],   label: 'Supino' },
-    { nome: 'Supino reto',             equipment: ['barbell', 'dumbbell', 'smith machine'],   label: 'Supino' },
-    { nome: 'Supino inclinado',        equipment: ['barbell', 'dumbbell', 'smith machine'],   label: 'Supino' },
-    { nome: 'Supino declinado',        equipment: ['barbell', 'dumbbell', 'smith machine'],   label: 'Supino' },
-    { nome: 'Agachamento livre',       equipment: ['barbell', 'smith machine'],               label: 'Agachamento' },
-    { nome: 'Levantamento terra',      equipment: ['barbell'],                                label: 'Terra' },
-    { nome: 'Remada curvada',          equipment: ['barbell', 'dumbbell'],                    label: 'Remada' },
-    { nome: 'Haltere',                 equipment: ['dumbbell'],                               label: 'Haltere' },
-    { nome: 'Halter',                  equipment: ['dumbbell'],                               label: 'Haltere' },
-    { nome: 'Dumbbell',                equipment: ['dumbbell'],                               label: 'Haltere' },
-    { nome: 'Rosca alternada',         equipment: ['dumbbell', 'barbell', 'cable'],           label: 'Rosca' },
-    { nome: 'Rosca direta',            equipment: ['barbell', 'dumbbell', 'cable'],           label: 'Rosca' },
-    { nome: 'Rosca martelo',           equipment: ['dumbbell', 'cable'],                      label: 'Rosca' },
-    { nome: 'Desenvolvimento',         equipment: ['barbell', 'dumbbell', 'smith machine'],   label: 'Desenvolvimento' },
-    { nome: 'Elevação lateral',        equipment: ['dumbbell', 'cable'],                      label: 'Elevação' },
-    { nome: 'Leg press',               equipment: ['leverage machine', 'sled machine'],       label: 'Leg Press' },
-    { nome: 'Cadeira extensora',       equipment: ['leverage machine'],                       label: 'Extensora' },
-    { nome: 'Mesa flexora',            equipment: ['leverage machine'],                       label: 'Flexora' },
-    { nome: 'Cadeira flexora',         equipment: ['leverage machine'],                       label: 'Flexora' },
-    { nome: 'Hack machine',            equipment: ['leverage machine', 'sled machine'],       label: 'Hack' },
-    { nome: 'Remada máquina',          equipment: ['leverage machine'],                       label: 'Remada Máquina' },
-    { nome: 'Voador',                  equipment: ['leverage machine'],                       label: 'Voador' },
-    { nome: 'Peck deck',               equipment: ['leverage machine'],                       label: 'Peck Deck' },
-    { nome: 'Fly máquina',             equipment: ['leverage machine'],                       label: 'Fly' },
-    { nome: 'Desenvolvimento máquina', equipment: ['leverage machine'],                       label: 'Desenvolvimento Máquina' },
-    { nome: 'Pulldown máquina',        equipment: ['leverage machine'],                       label: 'Pulldown' },
-    { nome: 'Panturrilha máquina',     equipment: ['leverage machine', 'sled machine'],       label: 'Panturrilha' },
-    { nome: 'Abdutor',                 equipment: ['leverage machine'],                       label: 'Abdutor' },
-    { nome: 'Adutor',                  equipment: ['leverage machine'],                       label: 'Adutor' },
-    { nome: 'Glúteo máquina',          equipment: ['leverage machine'],                       label: 'Glúteo' },
-    { nome: 'Lombar máquina',          equipment: ['leverage machine'],                       label: 'Lombar' },
-    { nome: 'Abdominal máquina',       equipment: ['leverage machine'],                       label: 'Abdominal' },
-    { nome: 'Máquina',                 equipment: ['leverage machine'],                       label: 'Máquina' },
-    { nome: 'Smith',                   equipment: ['smith machine'],                          label: 'Smith' },
-    { nome: 'Smith machine',           equipment: ['smith machine'],                          label: 'Smith' },
-    { nome: 'Agachamento smith',       equipment: ['smith machine'],                          label: 'Smith' },
-    { nome: 'Trenó',                   equipment: ['sled machine'],                           label: 'Trenó' },
-    { nome: 'Sled',                    equipment: ['sled machine'],                           label: 'Trenó' },
-    { nome: 'Leg press 45',            equipment: ['sled machine'],                           label: 'Leg Press 45' },
-    { nome: 'Barra fixa',              equipment: ['body weight', 'assisted'],                label: 'Barra Fixa' },
-    { nome: 'Paralela',                equipment: ['body weight', 'assisted'],                label: 'Paralela' },
-    { nome: 'Graviton',                equipment: ['assisted'],                               label: 'Graviton' },
-    { nome: 'Pull up',                 equipment: ['body weight', 'assisted'],                label: 'Pull Up' },
-    { nome: 'Dip',                     equipment: ['body weight', 'assisted'],                label: 'Dip' },
-    { nome: 'Peso corporal',           equipment: ['body weight'],                            label: 'Peso Corporal' },
-    { nome: 'Flexão',                  equipment: ['body weight'],                            label: 'Peso Corporal' },
-    { nome: 'Abdominal',               equipment: ['body weight'],                            label: 'Abdominal' },
-    { nome: 'Prancha',                 equipment: ['body weight'],                            label: 'Core' },
-    { nome: 'Elástico',                equipment: ['resistance band'],                        label: 'Elástico' },
-    { nome: 'Resistance band',         equipment: ['resistance band'],                        label: 'Elástico' },
-    { nome: 'Faixa elástica',          equipment: ['resistance band'],                        label: 'Elástico' },
-    { nome: 'Rolo de espuma',          equipment: ['roller'],                                 label: 'Foam Roller' },
-    { nome: 'Medicine ball',           equipment: ['medicine ball'],                          label: 'Medicine Ball' },
-    { nome: 'Bola medicinal',          equipment: ['medicine ball'],                          label: 'Medicine Ball' },
-    { nome: 'Corda',                   equipment: ['assisted (towel)', 'cable'],              label: 'Corda' },
-    { nome: 'Cardio',                  equipment: ['body weight'],                            label: 'Cardio' },
-    { nome: 'Esteira',                 equipment: ['body weight'],                            label: 'Cardio' },
-    { nome: 'Bicicleta',               equipment: ['body weight'],                            label: 'Cardio' },
-];
+      // ── APARELHOS_MAP ─────────────────────────────────────────────────────────────
+      const APARELHOS_MAP = [
+        { nome: "Polia alta", equipment: ["cable"], label: "Polia / Cable" },
+        { nome: "Polia baixa", equipment: ["cable"], label: "Polia / Cable" },
+        { nome: "Polia média", equipment: ["cable"], label: "Polia / Cable" },
+        { nome: "Cross over", equipment: ["cable"], label: "Polia / Cable" },
+        { nome: "Polia", equipment: ["cable"], label: "Polia / Cable" },
+        { nome: "Cable", equipment: ["cable"], label: "Polia / Cable" },
+        { nome: "Puxador", equipment: ["cable"], label: "Polia / Cable" },
+        {
+          nome: "Voador de cabo",
+          equipment: ["cable"],
+          label: "Polia / Cable",
+        },
+        { nome: "Barra", equipment: ["barbell"], label: "Barra" },
+        { nome: "Barra reta", equipment: ["barbell"], label: "Barra" },
+        { nome: "Barra W", equipment: ["barbell"], label: "Barra" },
+        { nome: "Barra EZ", equipment: ["barbell"], label: "Barra" },
+        {
+          nome: "Supino",
+          equipment: ["barbell", "dumbbell", "smith machine"],
+          label: "Supino",
+        },
+        {
+          nome: "Supino reto",
+          equipment: ["barbell", "dumbbell", "smith machine"],
+          label: "Supino",
+        },
+        {
+          nome: "Supino inclinado",
+          equipment: ["barbell", "dumbbell", "smith machine"],
+          label: "Supino",
+        },
+        {
+          nome: "Supino declinado",
+          equipment: ["barbell", "dumbbell", "smith machine"],
+          label: "Supino",
+        },
+        {
+          nome: "Agachamento livre",
+          equipment: ["barbell", "smith machine"],
+          label: "Agachamento",
+        },
+        { nome: "Levantamento terra", equipment: ["barbell"], label: "Terra" },
+        {
+          nome: "Remada curvada",
+          equipment: ["barbell", "dumbbell"],
+          label: "Remada",
+        },
+        { nome: "Haltere", equipment: ["dumbbell"], label: "Haltere" },
+        { nome: "Halter", equipment: ["dumbbell"], label: "Haltere" },
+        { nome: "Dumbbell", equipment: ["dumbbell"], label: "Haltere" },
+        {
+          nome: "Rosca alternada",
+          equipment: ["dumbbell", "barbell", "cable"],
+          label: "Rosca",
+        },
+        {
+          nome: "Rosca direta",
+          equipment: ["barbell", "dumbbell", "cable"],
+          label: "Rosca",
+        },
+        {
+          nome: "Rosca martelo",
+          equipment: ["dumbbell", "cable"],
+          label: "Rosca",
+        },
+        {
+          nome: "Desenvolvimento",
+          equipment: ["barbell", "dumbbell", "smith machine"],
+          label: "Desenvolvimento",
+        },
+        {
+          nome: "Elevação lateral",
+          equipment: ["dumbbell", "cable"],
+          label: "Elevação",
+        },
+        {
+          nome: "Leg press",
+          equipment: ["leverage machine", "sled machine"],
+          label: "Leg Press",
+        },
+        {
+          nome: "Cadeira extensora",
+          equipment: ["leverage machine"],
+          label: "Extensora",
+        },
+        {
+          nome: "Mesa flexora",
+          equipment: ["leverage machine"],
+          label: "Flexora",
+        },
+        {
+          nome: "Cadeira flexora",
+          equipment: ["leverage machine"],
+          label: "Flexora",
+        },
+        {
+          nome: "Hack machine",
+          equipment: ["leverage machine", "sled machine"],
+          label: "Hack",
+        },
+        {
+          nome: "Remada máquina",
+          equipment: ["leverage machine"],
+          label: "Remada Máquina",
+        },
+        { nome: "Voador", equipment: ["leverage machine"], label: "Voador" },
+        {
+          nome: "Peck deck",
+          equipment: ["leverage machine"],
+          label: "Peck Deck",
+        },
+        { nome: "Fly máquina", equipment: ["leverage machine"], label: "Fly" },
+        {
+          nome: "Desenvolvimento máquina",
+          equipment: ["leverage machine"],
+          label: "Desenvolvimento Máquina",
+        },
+        {
+          nome: "Pulldown máquina",
+          equipment: ["leverage machine"],
+          label: "Pulldown",
+        },
+        {
+          nome: "Panturrilha máquina",
+          equipment: ["leverage machine", "sled machine"],
+          label: "Panturrilha",
+        },
+        { nome: "Abdutor", equipment: ["leverage machine"], label: "Abdutor" },
+        { nome: "Adutor", equipment: ["leverage machine"], label: "Adutor" },
+        {
+          nome: "Glúteo máquina",
+          equipment: ["leverage machine"],
+          label: "Glúteo",
+        },
+        {
+          nome: "Lombar máquina",
+          equipment: ["leverage machine"],
+          label: "Lombar",
+        },
+        {
+          nome: "Abdominal máquina",
+          equipment: ["leverage machine"],
+          label: "Abdominal",
+        },
+        { nome: "Máquina", equipment: ["leverage machine"], label: "Máquina" },
+        { nome: "Smith", equipment: ["smith machine"], label: "Smith" },
+        { nome: "Smith machine", equipment: ["smith machine"], label: "Smith" },
+        {
+          nome: "Agachamento smith",
+          equipment: ["smith machine"],
+          label: "Smith",
+        },
+        { nome: "Trenó", equipment: ["sled machine"], label: "Trenó" },
+        { nome: "Sled", equipment: ["sled machine"], label: "Trenó" },
+        {
+          nome: "Leg press 45",
+          equipment: ["sled machine"],
+          label: "Leg Press 45",
+        },
+        {
+          nome: "Barra fixa",
+          equipment: ["body weight", "assisted"],
+          label: "Barra Fixa",
+        },
+        {
+          nome: "Paralela",
+          equipment: ["body weight", "assisted"],
+          label: "Paralela",
+        },
+        { nome: "Graviton", equipment: ["assisted"], label: "Graviton" },
+        {
+          nome: "Pull up",
+          equipment: ["body weight", "assisted"],
+          label: "Pull Up",
+        },
+        { nome: "Dip", equipment: ["body weight", "assisted"], label: "Dip" },
+        {
+          nome: "Peso corporal",
+          equipment: ["body weight"],
+          label: "Peso Corporal",
+        },
+        { nome: "Flexão", equipment: ["body weight"], label: "Peso Corporal" },
+        { nome: "Abdominal", equipment: ["body weight"], label: "Abdominal" },
+        { nome: "Prancha", equipment: ["body weight"], label: "Core" },
+        { nome: "Elástico", equipment: ["resistance band"], label: "Elástico" },
+        {
+          nome: "Resistance band",
+          equipment: ["resistance band"],
+          label: "Elástico",
+        },
+        {
+          nome: "Faixa elástica",
+          equipment: ["resistance band"],
+          label: "Elástico",
+        },
+        { nome: "Rolo de espuma", equipment: ["roller"], label: "Foam Roller" },
+        {
+          nome: "Medicine ball",
+          equipment: ["medicine ball"],
+          label: "Medicine Ball",
+        },
+        {
+          nome: "Bola medicinal",
+          equipment: ["medicine ball"],
+          label: "Medicine Ball",
+        },
+        {
+          nome: "Corda",
+          equipment: ["assisted (towel)", "cable"],
+          label: "Corda",
+        },
+        { nome: "Cardio", equipment: ["body weight"], label: "Cardio" },
+        { nome: "Esteira", equipment: ["body weight"], label: "Cardio" },
+        { nome: "Bicicleta", equipment: ["body weight"], label: "Cardio" },
+      ];
 
-// ── Autocomplete de aparelhos ─────────────────────────────────────────────────
-(function initAutocompletAparelho() {
-    const inputAparelho = document.getElementById('eq-nome-input');
-    const sugestoesEl   = document.getElementById('eq-nome-sugestoes');
+      // ── Autocomplete de aparelhos ─────────────────────────────────────────────────
+      (function initAutocompletAparelho() {
+        const inputAparelho = document.getElementById("eq-nome-input");
+        const sugestoesEl = document.getElementById("eq-nome-sugestoes");
 
-    inputAparelho.addEventListener('input', () => {
-        const q = inputAparelho.value.toLowerCase().trim();
-        sugestoesEl.innerHTML = '';
-        if (q.length < 2) { sugestoesEl.style.display = 'none'; return; }
+        inputAparelho.addEventListener("input", () => {
+          const q = inputAparelho.value.toLowerCase().trim();
+          sugestoesEl.innerHTML = "";
+          if (q.length < 2) {
+            sugestoesEl.style.display = "none";
+            return;
+          }
 
-        const matches = APARELHOS_MAP.filter(a => a.nome.toLowerCase().includes(q)).slice(0, 8);
-        if (!matches.length) { sugestoesEl.style.display = 'none'; return; }
+          const matches = APARELHOS_MAP.filter((a) =>
+            a.nome.toLowerCase().includes(q),
+          ).slice(0, 8);
+          if (!matches.length) {
+            sugestoesEl.style.display = "none";
+            return;
+          }
 
-        matches.forEach(aparelho => {
-            const item = document.createElement('section');
-            item.className = 'eq-sugestao-item';
+          matches.forEach((aparelho) => {
+            const item = document.createElement("section");
+            item.className = "eq-sugestao-item";
             item.textContent = aparelho.nome;
             item.onclick = () => selecionarAparelho(aparelho);
             sugestoesEl.appendChild(item);
+          });
+          sugestoesEl.style.display = "block";
         });
-        sugestoesEl.style.display = 'block';
-    });
 
-    document.addEventListener('click', e => {
-        if (!inputAparelho.contains(e.target) && !sugestoesEl.contains(e.target)) {
-            sugestoesEl.style.display = 'none';
+        document.addEventListener("click", (e) => {
+          if (
+            !inputAparelho.contains(e.target) &&
+            !sugestoesEl.contains(e.target)
+          ) {
+            sugestoesEl.style.display = "none";
+          }
+        });
+      })();
+
+      async function selecionarAparelho(aparelho) {
+        const inputAparelho = document.getElementById("eq-nome-input");
+        const sugestoesEl = document.getElementById("eq-nome-sugestoes");
+        const exerciciosEl = document.getElementById("eq-exercicios-preview");
+        inputAparelho.value = aparelho.nome;
+        sugestoesEl.style.display = "none";
+        exerciciosEl.innerHTML =
+          '<p style="color:#888;font-size:.82rem"><i class="fas fa-spinner fa-spin"></i> Buscando exercícios...</p>';
+        try {
+          const params = new URLSearchParams();
+          aparelho.equipment.forEach((eq) => params.append("equipment", eq));
+          const res = await fetch(
+            `/api/admin/equipamentos/exercicios?${params}`,
+          );
+          const data = await res.json();
+          renderizarExercicios(data.exercicios, aparelho);
+        } catch (err) {
+          exerciciosEl.innerHTML =
+            '<p style="color:#e74c3c">Erro ao buscar exercícios.</p>';
         }
-    });
-})();
+      }
 
-async function selecionarAparelho(aparelho) {
-    const inputAparelho = document.getElementById('eq-nome-input');
-    const sugestoesEl   = document.getElementById('eq-nome-sugestoes');
-    const exerciciosEl  = document.getElementById('eq-exercicios-preview');
-    inputAparelho.value = aparelho.nome;
-    sugestoesEl.style.display = 'none';
-    exerciciosEl.innerHTML = '<p style="color:#888;font-size:.82rem"><i class="fas fa-spinner fa-spin"></i> Buscando exercícios...</p>';
-    try {
-        const params = new URLSearchParams();
-        aparelho.equipment.forEach(eq => params.append('equipment', eq));
-        const res  = await fetch(`/api/admin/equipamentos/exercicios?${params}`);
-        const data = await res.json();
-        renderizarExercicios(data.exercicios, aparelho);
-    } catch (err) {
-        exerciciosEl.innerHTML = '<p style="color:#e74c3c">Erro ao buscar exercícios.</p>';
-    }
-}
+      const BODY_PART_LABELS = {
+        back: "Costas",
+        chest: "Peito",
+        shoulders: "Ombro",
+        "upper arms": "Braço",
+        "lower arms": "Antebraço",
+        "upper legs": "Perna",
+        "lower legs": "Panturrilha",
+        waist: "Core / Abdômen",
+        cardio: "Cardio",
+        outros: "Outros",
+      };
 
-const BODY_PART_LABELS = {
-    back: 'Costas', chest: 'Peito', shoulders: 'Ombro',
-    'upper arms': 'Braço', 'lower arms': 'Antebraço',
-    'upper legs': 'Perna', 'lower legs': 'Panturrilha',
-    waist: 'Core / Abdômen', cardio: 'Cardio', outros: 'Outros',
-};
-
-function renderizarExercicios(exercicios, aparelho) {
-    const exerciciosEl = document.getElementById('eq-exercicios-preview');
-    if (!exercicios || !exercicios.length) {
-        exerciciosEl.innerHTML = '<p style="color:#888;font-size:.82rem">Nenhum exercício encontrado.</p>';
-        return;
-    }
-    const grupos = {};
-    exercicios.forEach(ex => {
-        const g = ex.body_part || 'outros';
-        if (!grupos[g]) grupos[g] = [];
-        grupos[g].push(ex);
-    });
-    let html = `
+      function renderizarExercicios(exercicios, aparelho) {
+        const exerciciosEl = document.getElementById("eq-exercicios-preview");
+        if (!exercicios || !exercicios.length) {
+          exerciciosEl.innerHTML =
+            '<p style="color:#888;font-size:.82rem">Nenhum exercício encontrado.</p>';
+          return;
+        }
+        const grupos = {};
+        exercicios.forEach((ex) => {
+          const g = ex.body_part || "outros";
+          if (!grupos[g]) grupos[g] = [];
+          grupos[g].push(ex);
+        });
+        let html = `
         <section class="eq-ex-header">
             <span>${exercicios.length} exercícios para <strong>${aparelho.nome}</strong></span>
             <section>
@@ -735,9 +1319,9 @@ function renderizarExercicios(exercicios, aparelho) {
             </section>
         </section>
     `;
-    Object.entries(grupos).forEach(([grupo, exs]) => {
-        const grupoId = 'grp-' + grupo.replace(/\s+/g, '-');
-        html += `
+        Object.entries(grupos).forEach(([grupo, exs]) => {
+          const grupoId = "grp-" + grupo.replace(/\s+/g, "-");
+          html += `
             <section class="eq-grupo-card">
                 <section class="eq-grupo-header" onclick="toggleGrupo('${grupoId}')">
                     <span><i class="fas fa-chevron-down"></i> ${BODY_PART_LABELS[grupo] || grupo} (${exs.length})</span>
@@ -747,79 +1331,97 @@ function renderizarExercicios(exercicios, aparelho) {
                     </section>
                 </section>
                 <section class="eq-grupo-lista" id="${grupoId}">
-                    ${exs.map(ex => `
+                    ${exs
+                      .map(
+                        (ex) => `
                         <label class="eq-ex-item">
                             <input type="checkbox" name="exercise_ids[]" value="${ex.id}" checked>
                             <span class="eq-ex-nome">${ex.name_pt || ex.name}</span>
-                            <span class="eq-ex-musculo">${ex.target_muscle || ''}</span>
+                            <span class="eq-ex-musculo">${ex.target_muscle || ""}</span>
                         </label>
-                    `).join('')}
+                    `,
+                      )
+                      .join("")}
                 </section>
             </section>
         `;
-    });
-    exerciciosEl.innerHTML = html;
-}
-
-function toggleTodos(marcar) {
-    document.querySelectorAll('#eq-exercicios-preview input[type="checkbox"]')
-        .forEach(cb => cb.checked = marcar);
-}
-
-function toggleGrupo(grupoId) {
-    const lista = document.getElementById(grupoId);
-    if (!lista) return;
-    const isVisible = lista.style.display !== 'none';
-    lista.style.display = isVisible ? 'none' : '';
-    const header = lista.previousElementSibling;
-    if (header) {
-        const icon = header.querySelector('.fa-chevron-down');
-        if (icon) icon.style.transform = isVisible ? 'rotate(-90deg)' : '';
-    }
-}
-
-function toggleGrupoCheck(grupoId, marcar) {
-    const lista = document.getElementById(grupoId);
-    if (!lista) return;
-    lista.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = marcar);
-}
-
-async function salvarNovoEquipamento() {
-    const nome        = document.getElementById('eq-nome-input').value.trim();
-    const grupo       = document.getElementById('eq-grupo-novo').value;
-    const academia_id = document.getElementById('eq-academia-novo').value || null;
-    if (!nome) { alert('Digite o nome do aparelho.'); return; }
-
-    const checkboxes   = document.querySelectorAll('#eq-exercicios-preview input[type="checkbox"]:checked');
-    const exercise_ids = [...checkboxes].map(cb => cb.value);
-
-    const btn = document.getElementById('btnSalvarNovo');
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
-    try {
-        const res  = await fetch('/api/admin/equipamentos', {
-            method:  'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body:    JSON.stringify({ nome, grupo_muscular: grupo, academia_id, exercise_ids }),
         });
-        const data = await res.json();
-        if (res.ok) {
-            fecharModal('modalNovoEquip');
-            await carregarEquipamentos();
-        } else {
-            alert(data.erro || 'Erro ao salvar.');
-        }
-    } catch (err) {
-        alert('Erro ao salvar equipamento.');
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-save"></i> Salvar';
-    }
-}
+        exerciciosEl.innerHTML = html;
+      }
 
-// ── Init ──────────────────────────────────────────────────────────────────────
-carregarEquipamentos();
-carregarAcademias();
-</script>
-</body>
+      function toggleTodos(marcar) {
+        document
+          .querySelectorAll('#eq-exercicios-preview input[type="checkbox"]')
+          .forEach((cb) => (cb.checked = marcar));
+      }
+
+      function toggleGrupo(grupoId) {
+        const lista = document.getElementById(grupoId);
+        if (!lista) return;
+        const isVisible = lista.style.display !== "none";
+        lista.style.display = isVisible ? "none" : "";
+        const header = lista.previousElementSibling;
+        if (header) {
+          const icon = header.querySelector(".fa-chevron-down");
+          if (icon) icon.style.transform = isVisible ? "rotate(-90deg)" : "";
+        }
+      }
+
+      function toggleGrupoCheck(grupoId, marcar) {
+        const lista = document.getElementById(grupoId);
+        if (!lista) return;
+        lista
+          .querySelectorAll('input[type="checkbox"]')
+          .forEach((cb) => (cb.checked = marcar));
+      }
+
+      async function salvarNovoEquipamento() {
+        const nome = document.getElementById("eq-nome-input").value.trim();
+        const grupo = document.getElementById("eq-grupo-novo").value;
+        const academia_id =
+          document.getElementById("eq-academia-novo").value || null;
+        if (!nome) {
+          alert("Digite o nome do aparelho.");
+          return;
+        }
+
+        const checkboxes = document.querySelectorAll(
+          '#eq-exercicios-preview input[type="checkbox"]:checked',
+        );
+        const exercise_ids = [...checkboxes].map((cb) => cb.value);
+
+        const btn = document.getElementById("btnSalvarNovo");
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+        try {
+          const res = await fetch("/api/admin/equipamentos", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              nome,
+              grupo_muscular: grupo,
+              academia_id,
+              exercise_ids,
+            }),
+          });
+          const data = await res.json();
+          if (res.ok) {
+            fecharModal("modalNovoEquip");
+            await carregarEquipamentos();
+          } else {
+            alert(data.erro || "Erro ao salvar.");
+          }
+        } catch (err) {
+          alert("Erro ao salvar equipamento.");
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fas fa-save"></i> Salvar';
+        }
+      }
+
+      // ── Init ──────────────────────────────────────────────────────────────────────
+      carregarEquipamentos();
+      carregarAcademias();
+    </script>
+  </body>
 </html>

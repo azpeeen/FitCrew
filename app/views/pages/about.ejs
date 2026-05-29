@@ -1,149 +1,240 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <%- include('../partials/seo') %>
-    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
-    <link rel="stylesheet" href="/css/header.css">
-    <link rel="stylesheet" href="/css/sobre.css">
-    <link rel="stylesheet" href="/css/sobre-mobile.css" media="only screen and (max-width: 768px)">
-    <link rel="stylesheet" href="/css/footer.css">
-</head>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico" />
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+    <link
+      rel="preload"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      as="style"
+      onload="
+        this.onload = null;
+        this.rel = 'stylesheet';
+      "
+    />
+    <noscript
+      ><link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    /></noscript>
+    <link rel="stylesheet" href="/css/header.css" />
+    <link rel="stylesheet" href="/css/sobre.css" />
+    <link
+      rel="stylesheet"
+      href="/css/sobre-mobile.css"
+      media="only screen and (max-width: 768px)"
+    />
+    <link rel="stylesheet" href="/css/footer.css" />
+  </head>
 
-<body>
+  <body>
     <%- include('../partials/header') %>
 
     <section class="side-menu" id="sideMenu">
-        <span class="close-menu" id="closeMenu"><i class="fas fa-times"></i></span>
-        <ul class="menu-items">
-            <li><a href="/" data-translate="nav.home"><i class="fas fa-home"></i> Home</a></li>
-            <li><a href="/academias" data-translate="nav.academias"><i class="fas fa-dumbbell"></i> Academias</a></li>
-            <li><a href="/about" data-translate="nav.about"><i class="fas fa-info-circle"></i> Sobre nós</a></li>
-            <li><a href="/planos" data-translate="nav.planos"><i class="fas fa-tags"></i> Planos e Preços</a></li>
-        </ul>
+      <span class="close-menu" id="closeMenu"
+        ><i class="fas fa-times"></i
+      ></span>
+      <ul class="menu-items">
+        <li>
+          <a href="/" data-translate="nav.home"
+            ><i class="fas fa-home"></i> Home</a
+          >
+        </li>
+        <li>
+          <a href="/academias" data-translate="nav.academias"
+            ><i class="fas fa-dumbbell"></i> Academias</a
+          >
+        </li>
+        <li>
+          <a href="/about" data-translate="nav.about"
+            ><i class="fas fa-info-circle"></i> Sobre nós</a
+          >
+        </li>
+        <li>
+          <a href="/planos" data-translate="nav.planos"
+            ><i class="fas fa-tags"></i> Planos e Preços</a
+          >
+        </li>
+      </ul>
     </section>
 
     <section class="menu-overlay" id="menuOverlay"></section>
 
     <main>
-
-        <!-- SEÇÃO 1: Hero editorial -->
-        <section class="about-hero-ed">
-            <section class="hero-content">
-                <span class="hero-accent-bar" aria-hidden="true"></span>
-                <h1 class="hero-title">
-                    <span data-translate="about.hero.line1">Construído por</span>
-                    <span data-translate="about.hero.line2">quem treina.</span>
-                </h1>
-                <p class="hero-sub" data-translate="about.hero.sub.v2">GymBros é uma plataforma de treino inteligente que usa IA para personalizar cada aspecto da sua evolução física. Sem achismo. Sem plano genérico.</p>
-            </section>
-            <section class="hero-visual">
-                <img src="images/logo-form2.png" alt="GymBros" width="500px">
-            </section>
+      <!-- SEÇÃO 1: Hero editorial -->
+      <section class="about-hero-ed">
+        <section class="hero-content">
+          <span class="hero-accent-bar" aria-hidden="true"></span>
+          <h1 class="hero-title">
+            <span data-translate="about.hero.line1">Construído por</span>
+            <span data-translate="about.hero.line2">quem treina.</span>
+          </h1>
+          <p class="hero-sub" data-translate="about.hero.sub.v2">
+            FitCrew é uma plataforma de treino inteligente que usa IA para
+            personalizar cada aspecto da sua evolução física. Sem achismo. Sem
+            plano genérico.
+          </p>
         </section>
-
-        <!-- SEÇÃO 2: Manifesto -->
-        <section class="about-manifesto animate-in">
-            <section class="manifesto-inner">
-                <section class="manifesto-left">
-                    <span class="section-label" data-translate="about.history.title">NOSSA HISTÓRIA</span>
-                </section>
-                <section class="manifesto-right">
-                    <p data-translate="about.manifesto.p1">O GymBros nasceu dentro de uma sala de aula como projeto de conclusão de curso, e cresceu para além disso. Desde o início, a ideia era simples: e se a tecnologia pudesse fazer o que um personal trainer faz, mas acessível para qualquer pessoa?</p>
-                    <p data-translate="about.manifesto.p2">Hoje, a plataforma combina inteligência artificial, execução guiada com GIFs, notificações inteligentes e histórico de evolução, tudo num app que roda no celular sem precisar instalar nada. O GymBros é um produto real, construído com stack real, para pessoas reais que querem resultado.</p>
-                </section>
-            </section>
+        <section class="hero-visual">
+          <img src="images/logo-form2.png" alt="FitCrew" width="500px" />
         </section>
+      </section>
 
-        <!-- SEÇÃO 3: Números -->
-        <section class="about-numbers animate-in">
-            <section class="numbers-row">
-                <section class="num-item">
-                    <span class="num-value">1.321</span>
-                    <span class="num-label" data-translate="about.num.exercises">exercícios catalogados</span>
-                </section>
-                <span class="num-sep" aria-hidden="true"></span>
-                <section class="num-item">
-                    <span class="num-value">235+</span>
-                    <span class="num-label" data-translate="about.num.gifs">GIFs de execução</span>
-                </section>
-                <span class="num-sep" aria-hidden="true"></span>
-                <section class="num-item">
-                    <span class="num-value">3</span>
-                    <span class="num-label" data-translate="about.num.langs">idiomas suportados</span>
-                </section>
-            </section>
+      <!-- SEÇÃO 2: Manifesto -->
+      <section class="about-manifesto animate-in">
+        <section class="manifesto-inner">
+          <section class="manifesto-left">
+            <span class="section-label" data-translate="about.history.title"
+              >NOSSA HISTÓRIA</span
+            >
+          </section>
+          <section class="manifesto-right">
+            <p data-translate="about.manifesto.p1">
+              O FitCrew nasceu dentro de uma sala de aula como projeto de
+              conclusão de curso, e cresceu para além disso. Desde o início, a
+              ideia era simples: e se a tecnologia pudesse fazer o que um
+              personal trainer faz, mas acessível para qualquer pessoa?
+            </p>
+            <p data-translate="about.manifesto.p2">
+              Hoje, a plataforma combina inteligência artificial, execução
+              guiada com GIFs, notificações inteligentes e histórico de
+              evolução, tudo num app que roda no celular sem precisar instalar
+              nada. O FitCrew é um produto real, construído com stack real, para
+              pessoas reais que querem resultado.
+            </p>
+          </section>
         </section>
+      </section>
 
-        <!-- SEÇÃO 4: Stack & Tecnologia -->
-        <section class="about-stack animate-in">
-            <span class="section-label" data-translate="about.stack.label">STACK &amp; TECNOLOGIA</span>
-            <h2 class="stack-title" data-translate="about.stack.title">Cada decisão técnica foi intencional.</h2>
-            <ul class="stack-list">
-                <li class="stack-item">
-                    <strong class="stack-name">Groq AI</strong>
-                    <span class="stack-sep" aria-hidden="true">—</span>
-                    <span class="stack-desc" data-translate="about.tech.groq.desc">Inferência ultra-rápida para geração de treinos e dieta personalizada</span>
-                </li>
-                <li class="stack-item">
-                    <strong class="stack-name">Cloudinary</strong>
-                    <span class="stack-sep" aria-hidden="true">—</span>
-                    <span class="stack-desc" data-translate="about.tech.cloudinary.desc">Armazenamento e entrega de 235+ GIFs de exercícios</span>
-                </li>
-                <li class="stack-item">
-                    <strong class="stack-name">Web Push VAPID</strong>
-                    <span class="stack-sep" aria-hidden="true">—</span>
-                    <span class="stack-desc" data-translate="about.tech.push.desc">Notificações nativas de treino, água e sono</span>
-                </li>
-                <li class="stack-item">
-                    <strong class="stack-name">MySQL</strong>
-                    <span class="stack-sep" aria-hidden="true">—</span>
-                    <span class="stack-desc" data-translate="about.tech.mysql.desc">Persistência de sessões, histórico e evolução</span>
-                </li>
-                <li class="stack-item">
-                    <strong class="stack-name">PWA</strong>
-                    <span class="stack-sep" aria-hidden="true">—</span>
-                    <span class="stack-desc" data-translate="about.tech.pwa.desc">Instalação nativa no celular, suporte offline</span>
-                </li>
-                <li class="stack-item">
-                    <strong class="stack-name">i18n</strong>
-                    <span class="stack-sep" aria-hidden="true">—</span>
-                    <span class="stack-desc" data-translate="about.tech.i18n.desc">Interface em português, inglês e espanhol</span>
-                </li>
-            </ul>
+      <!-- SEÇÃO 3: Números -->
+      <section class="about-numbers animate-in">
+        <section class="numbers-row">
+          <section class="num-item">
+            <span class="num-value">1.321</span>
+            <span class="num-label" data-translate="about.num.exercises"
+              >exercícios catalogados</span
+            >
+          </section>
+          <span class="num-sep" aria-hidden="true"></span>
+          <section class="num-item">
+            <span class="num-value">235+</span>
+            <span class="num-label" data-translate="about.num.gifs"
+              >GIFs de execução</span
+            >
+          </section>
+          <span class="num-sep" aria-hidden="true"></span>
+          <section class="num-item">
+            <span class="num-value">3</span>
+            <span class="num-label" data-translate="about.num.langs"
+              >idiomas suportados</span
+            >
+          </section>
         </section>
+      </section>
 
-        <!-- SEÇÃO 5: Personal Trainer -->
-        <section class="about-trainer">
-            <section class="trainer-image">
-                <img src="/images/treinador3.png" alt="Mathias Almeida, Personal Trainer" loading="lazy">
-            </section>
-            <section class="trainer-info">
-                <span class="trainer-label" data-translate="about.trainer.label">PERSONAL TRAINER PARCEIRO</span>
-                <h2 class="trainer-name">Mathias Almeida</h2>
-                <p class="trainer-role" data-translate="about.trainer.role">Especialista em Performance Física</p>
-                <span class="trainer-divider" aria-hidden="true"></span>
-                <p class="trainer-bio" data-translate="about.trainer.bio">Mathias é o parceiro de performance física do GymBros. Com experiência em musculação e alto rendimento, ele garante que cada protocolo gerado pela IA esteja alinhado com as melhores práticas do mercado fitness.</p>
-                <em class="trainer-note" data-translate="about.team.mathias.note">* Mathias está em retiro espiritual e não atende mensagens no momento.</em>
-            </section>
+      <!-- SEÇÃO 4: Stack & Tecnologia -->
+      <section class="about-stack animate-in">
+        <span class="section-label" data-translate="about.stack.label"
+          >STACK &amp; TECNOLOGIA</span
+        >
+        <h2 class="stack-title" data-translate="about.stack.title">
+          Cada decisão técnica foi intencional.
+        </h2>
+        <ul class="stack-list">
+          <li class="stack-item">
+            <strong class="stack-name">Groq AI</strong>
+            <span class="stack-sep" aria-hidden="true">—</span>
+            <span class="stack-desc" data-translate="about.tech.groq.desc"
+              >Inferência ultra-rápida para geração de treinos e dieta
+              personalizada</span
+            >
+          </li>
+          <li class="stack-item">
+            <strong class="stack-name">Cloudinary</strong>
+            <span class="stack-sep" aria-hidden="true">—</span>
+            <span class="stack-desc" data-translate="about.tech.cloudinary.desc"
+              >Armazenamento e entrega de 235+ GIFs de exercícios</span
+            >
+          </li>
+          <li class="stack-item">
+            <strong class="stack-name">Web Push VAPID</strong>
+            <span class="stack-sep" aria-hidden="true">—</span>
+            <span class="stack-desc" data-translate="about.tech.push.desc"
+              >Notificações nativas de treino, água e sono</span
+            >
+          </li>
+          <li class="stack-item">
+            <strong class="stack-name">MySQL</strong>
+            <span class="stack-sep" aria-hidden="true">—</span>
+            <span class="stack-desc" data-translate="about.tech.mysql.desc"
+              >Persistência de sessões, histórico e evolução</span
+            >
+          </li>
+          <li class="stack-item">
+            <strong class="stack-name">PWA</strong>
+            <span class="stack-sep" aria-hidden="true">—</span>
+            <span class="stack-desc" data-translate="about.tech.pwa.desc"
+              >Instalação nativa no celular, suporte offline</span
+            >
+          </li>
+          <li class="stack-item">
+            <strong class="stack-name">i18n</strong>
+            <span class="stack-sep" aria-hidden="true">—</span>
+            <span class="stack-desc" data-translate="about.tech.i18n.desc"
+              >Interface em português, inglês e espanhol</span
+            >
+          </li>
+        </ul>
+      </section>
+
+      <!-- SEÇÃO 5: Personal Trainer -->
+      <section class="about-trainer">
+        <section class="trainer-image">
+          <img
+            src="/images/treinador3.png"
+            alt="Mathias Almeida, Personal Trainer"
+            loading="lazy"
+          />
         </section>
-
-        <!-- SEÇÃO 6: CTA Final -->
-        <section class="about-cta-ed">
-            <h2 class="cta-title">
-                <span data-translate="about.cta.line1">Pronto para</span>
-                <span data-translate="about.cta.line2">evoluir de verdade?</span>
-            </h2>
-            <p class="cta-sub" data-translate="about.cta.sub.v2">Crie sua conta e deixa a IA montar seu primeiro treino agora.</p>
-            <a href="/register" class="btn-cta-solid" data-translate="about.cta.btn">Começar agora →</a>
+        <section class="trainer-info">
+          <span class="trainer-label" data-translate="about.trainer.label"
+            >PERSONAL TRAINER PARCEIRO</span
+          >
+          <h2 class="trainer-name">Mathias Almeida</h2>
+          <p class="trainer-role" data-translate="about.trainer.role">
+            Especialista em Performance Física
+          </p>
+          <span class="trainer-divider" aria-hidden="true"></span>
+          <p class="trainer-bio" data-translate="about.trainer.bio">
+            Mathias é o parceiro de performance física do FitCrew. Com
+            experiência em musculação e alto rendimento, ele garante que cada
+            protocolo gerado pela IA esteja alinhado com as melhores práticas do
+            mercado fitness.
+          </p>
+          <em class="trainer-note" data-translate="about.team.mathias.note"
+            >* Mathias está em retiro espiritual e não atende mensagens no
+            momento.</em
+          >
         </section>
+      </section>
 
+      <!-- SEÇÃO 6: CTA Final -->
+      <section class="about-cta-ed">
+        <h2 class="cta-title">
+          <span data-translate="about.cta.line1">Pronto para</span>
+          <span data-translate="about.cta.line2">evoluir de verdade?</span>
+        </h2>
+        <p class="cta-sub" data-translate="about.cta.sub.v2">
+          Crie sua conta e deixa a IA montar seu primeiro treino agora.
+        </p>
+        <a href="/register" class="btn-cta-solid" data-translate="about.cta.btn"
+          >Começar agora →</a
+        >
+      </section>
     </main>
 
     <%- include('../partials/footer') %>
@@ -151,21 +242,23 @@
     <script src="/js/menu.js"></script>
     <script src="/js/header.js"></script>
     <script>
-    (function () {
-        var observer = new IntersectionObserver(function (entries) {
+      (function () {
+        var observer = new IntersectionObserver(
+          function (entries) {
             entries.forEach(function (entry) {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                    observer.unobserve(entry.target);
-                }
+              if (entry.isIntersecting) {
+                entry.target.classList.add("visible");
+                observer.unobserve(entry.target);
+              }
             });
-        }, { threshold: 0.1 });
+          },
+          { threshold: 0.1 },
+        );
 
-        document.querySelectorAll('.animate-in').forEach(function (el) {
-            observer.observe(el);
+        document.querySelectorAll(".animate-in").forEach(function (el) {
+          observer.observe(el);
         });
-    }());
+      })();
     </script>
-</body>
-
+  </body>
 </html>

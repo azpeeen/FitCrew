@@ -1,115 +1,197 @@
 ﻿<!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Relatórios — GymBros Admin</title>
-    <meta name="robots" content="noindex, nofollow">
-    <link rel="icon" href="/images/favicon.ico">
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
-    <link rel="stylesheet" href="/css/admin.css">
-</head>
-<body class="admin-body">
-<section class="admin-wrapper">
-    <%- include('../partials/admin-sidebar') %>
-    <section class="admin-content">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Relatórios — FitCrew Admin</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="icon" href="/images/favicon.ico" />
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+    <link
+      rel="preload"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      as="style"
+      onload="
+        this.onload = null;
+        this.rel = 'stylesheet';
+      "
+    />
+    <noscript
+      ><link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    /></noscript>
+    <link rel="stylesheet" href="/css/admin.css" />
+  </head>
+  <body class="admin-body">
+    <section class="admin-wrapper">
+      <%- include('../partials/admin-sidebar') %>
+      <section class="admin-content">
         <%- include('../partials/admin-topbar') %>
         <main class="admin-main">
-            <h1 class="admin-page-title">Relatórios</h1>
-            <p class="admin-page-subtitle">Análises e métricas de crescimento da plataforma</p>
+          <h1 class="admin-page-title">Relatórios</h1>
+          <p class="admin-page-subtitle">
+            Análises e métricas de crescimento da plataforma
+          </p>
 
-            <!-- Crescimento + Distribuição -->
-            <section class="admin-2col" style="margin-bottom:20px">
-                <section class="admin-card">
-                    <section class="admin-card-header">
-                        <span class="admin-card-title"><i class="fas fa-chart-line text-gold"></i> Crescimento de Usuários</span>
-                        <span class="text-muted" style="font-size:.78rem">Últimos 6 meses</span>
-                    </section>
-                    <section class="admin-card-body">
-                        <section class="chart-wrap"><canvas id="chartCrescimento"></canvas></section>
-                    </section>
-                </section>
-                <section class="admin-card">
-                    <section class="admin-card-header">
-                        <span class="admin-card-title"><i class="fas fa-chart-pie text-gold"></i> Distribuição por Plano</span>
-                    </section>
-                    <section class="admin-card-body">
-                        <section class="chart-wrap-sm"><canvas id="chartPlanos"></canvas></section>
-                    </section>
-                </section>
-            </section>
-
-            <!-- Academias mais ativas -->
-            <section class="admin-card" style="margin-bottom:20px">
-                <section class="admin-card-header">
-                    <span class="admin-card-title"><i class="fas fa-dumbbell text-gold"></i> Academias Mais Ativas (Check-ins)</span>
-                </section>
-                <section class="admin-card-body">
-                    <section class="chart-wrap"><canvas id="chartAcademias"></canvas></section>
-                </section>
-            </section>
-
-            <!-- Tabela resumo -->
+          <!-- Crescimento + Distribuição -->
+          <section class="admin-2col" style="margin-bottom: 20px">
             <section class="admin-card">
-                <section class="admin-card-header">
-                    <span class="admin-card-title">Resumo Executivo</span>
-                    <button class="btn btn-outline btn-sm" onclick="window.print()"><i class="fas fa-print"></i> Imprimir</button>
+              <section class="admin-card-header">
+                <span class="admin-card-title"
+                  ><i class="fas fa-chart-line text-gold"></i> Crescimento de
+                  Usuários</span
+                >
+                <span class="text-muted" style="font-size: 0.78rem"
+                  >Últimos 6 meses</span
+                >
+              </section>
+              <section class="admin-card-body">
+                <section class="chart-wrap">
+                  <canvas id="chartCrescimento"></canvas>
                 </section>
-                <section class="admin-card-body">
-                    <section class="admin-3col">
-                        <section style="text-align:center;padding:16px">
-                            <section class="text-muted" style="font-size:.75rem;margin-bottom:4px">NOVOS USUÁRIOS (6 MES)</section>
-                            <section style="font-size:2rem;font-weight:700;color:var(--gold)"><%= JSON.parse(crescimento).reduce((a,b)=>a+b,0) %></section>
-                        </section>
-                        <section style="text-align:center;padding:16px;border-left:1px solid var(--border);border-right:1px solid var(--border)">
-                            <section class="text-muted" style="font-size:.75rem;margin-bottom:4px">TOTAL CHECK-INS</section>
-                            <section style="font-size:2rem;font-weight:700;color:var(--gold)"><%= JSON.parse(acadAtivas).reduce((a,b)=>a+b.count,0) %></section>
-                        </section>
-                        <section style="text-align:center;padding:16px">
-                            <section class="text-muted" style="font-size:.75rem;margin-bottom:4px">PLANO MAIS POPULAR</section>
-                            <section style="font-size:1.2rem;font-weight:700;color:var(--gold)"><%= JSON.parse(distPlano).sort((a,b)=>b.count-a.count)[0]?.nome || '—' %></section>
-                        </section>
-                    </section>
-                </section>
+              </section>
             </section>
+            <section class="admin-card">
+              <section class="admin-card-header">
+                <span class="admin-card-title"
+                  ><i class="fas fa-chart-pie text-gold"></i> Distribuição por
+                  Plano</span
+                >
+              </section>
+              <section class="admin-card-body">
+                <section class="chart-wrap-sm">
+                  <canvas id="chartPlanos"></canvas>
+                </section>
+              </section>
+            </section>
+          </section>
+
+          <!-- Academias mais ativas -->
+          <section class="admin-card" style="margin-bottom: 20px">
+            <section class="admin-card-header">
+              <span class="admin-card-title"
+                ><i class="fas fa-dumbbell text-gold"></i> Academias Mais Ativas
+                (Check-ins)</span
+              >
+            </section>
+            <section class="admin-card-body">
+              <section class="chart-wrap">
+                <canvas id="chartAcademias"></canvas>
+              </section>
+            </section>
+          </section>
+
+          <!-- Tabela resumo -->
+          <section class="admin-card">
+            <section class="admin-card-header">
+              <span class="admin-card-title">Resumo Executivo</span>
+              <button class="btn btn-outline btn-sm" onclick="window.print()">
+                <i class="fas fa-print"></i> Imprimir
+              </button>
+            </section>
+            <section class="admin-card-body">
+              <section class="admin-3col">
+                <section style="text-align: center; padding: 16px">
+                  <section
+                    class="text-muted"
+                    style="font-size: 0.75rem; margin-bottom: 4px"
+                  >
+                    NOVOS USUÁRIOS (6 MES)
+                  </section>
+                  <section
+                    style="
+                      font-size: 2rem;
+                      font-weight: 700;
+                      color: var(--gold);
+                    "
+                  >
+                    <%= JSON.parse(crescimento).reduce((a,b)=>a+b,0) %>
+                  </section>
+                </section>
+                <section
+                  style="
+                    text-align: center;
+                    padding: 16px;
+                    border-left: 1px solid var(--border);
+                    border-right: 1px solid var(--border);
+                  "
+                >
+                  <section
+                    class="text-muted"
+                    style="font-size: 0.75rem; margin-bottom: 4px"
+                  >
+                    TOTAL CHECK-INS
+                  </section>
+                  <section
+                    style="
+                      font-size: 2rem;
+                      font-weight: 700;
+                      color: var(--gold);
+                    "
+                  >
+                    <%= JSON.parse(acadAtivas).reduce((a,b)=>a+b.count,0) %>
+                  </section>
+                </section>
+                <section style="text-align: center; padding: 16px">
+                  <section
+                    class="text-muted"
+                    style="font-size: 0.75rem; margin-bottom: 4px"
+                  >
+                    PLANO MAIS POPULAR
+                  </section>
+                  <section
+                    style="
+                      font-size: 1.2rem;
+                      font-weight: 700;
+                      color: var(--gold);
+                    "
+                  >
+                    <%=
+                    JSON.parse(distPlano).sort((a,b)=>b.count-a.count)[0]?.nome
+                    || '—' %>
+                  </section>
+                </section>
+              </section>
+            </section>
+          </section>
         </main>
+      </section>
     </section>
-</section>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script src="/js/admin.js"></script>
-<script>
-const baseOpts = { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#9A9A9A', font: { size: 11 } } } }, scales: { x: { grid: { color: '#2A2A2A' }, ticks: { color: '#9A9A9A' } }, y: { grid: { color: '#2A2A2A' }, ticks: { color: '#9A9A9A' }, beginAtZero: true } } };
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="/js/admin.js"></script>
+    <script>
+      const baseOpts = { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#9A9A9A', font: { size: 11 } } } }, scales: { x: { grid: { color: '#2A2A2A' }, ticks: { color: '#9A9A9A' } }, y: { grid: { color: '#2A2A2A' }, ticks: { color: '#9A9A9A' }, beginAtZero: true } } };
 
-const crescData = <%- crescimento %>;
-Chart.getChart(document.getElementById('chartCrescimento'))?.destroy();
-new Chart(document.getElementById('chartCrescimento'), {
-    type: 'line',
-    data: { labels: <%- meses %>, datasets: [{ label: 'Novos usuários', data: crescData, borderColor: '#C98B1D', backgroundColor: 'rgba(201,139,29,0.1)', tension: 0.4, fill: true }] },
-    options: { ...baseOpts, plugins: { legend: { display: false } } }
-});
+      const crescData = <%- crescimento %>;
+      Chart.getChart(document.getElementById('chartCrescimento'))?.destroy();
+      new Chart(document.getElementById('chartCrescimento'), {
+          type: 'line',
+          data: { labels: <%- meses %>, datasets: [{ label: 'Novos usuários', data: crescData, borderColor: '#C98B1D', backgroundColor: 'rgba(201,139,29,0.1)', tension: 0.4, fill: true }] },
+          options: { ...baseOpts, plugins: { legend: { display: false } } }
+      });
 
-const distData = <%- distPlano %>;
-Chart.getChart(document.getElementById('chartPlanos'))?.destroy();
-new Chart(document.getElementById('chartPlanos'), {
-    type: 'doughnut',
-    data: {
-        labels: distData.map(d => d.nome),
-        datasets: [{ data: distData.map(d => d.count), backgroundColor: ['#C98B1D','#E0A835','rgba(201,139,29,0.4)'], borderWidth: 0 }]
-    },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#9A9A9A', padding: 12 } } } }
-});
+      const distData = <%- distPlano %>;
+      Chart.getChart(document.getElementById('chartPlanos'))?.destroy();
+      new Chart(document.getElementById('chartPlanos'), {
+          type: 'doughnut',
+          data: {
+              labels: distData.map(d => d.nome),
+              datasets: [{ data: distData.map(d => d.count), backgroundColor: ['#C98B1D','#E0A835','rgba(201,139,29,0.4)'], borderWidth: 0 }]
+          },
+          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#9A9A9A', padding: 12 } } } }
+      });
 
-const acadData = <%- acadAtivas %>;
-Chart.getChart(document.getElementById('chartAcademias'))?.destroy();
-new Chart(document.getElementById('chartAcademias'), {
-    type: 'bar',
-    data: {
-        labels: acadData.map(a => a.nome.substring(0,18)),
-        datasets: [{ label: 'Check-ins', data: acadData.map(a => a.count), backgroundColor: 'rgba(201,139,29,0.7)', borderRadius: 5 }]
-    },
-    options: baseOpts
-});
-</script>
-</body>
+      const acadData = <%- acadAtivas %>;
+      Chart.getChart(document.getElementById('chartAcademias'))?.destroy();
+      new Chart(document.getElementById('chartAcademias'), {
+          type: 'bar',
+          data: {
+              labels: acadData.map(a => a.nome.substring(0,18)),
+              datasets: [{ label: 'Check-ins', data: acadData.map(a => a.count), backgroundColor: 'rgba(201,139,29,0.7)', borderRadius: 5 }]
+          },
+          options: baseOpts
+      });
+    </script>
+  </body>
 </html>
