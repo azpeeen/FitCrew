@@ -2097,7 +2097,13 @@ router.post('/api/suporte/tickets', requireAuth, [
              VALUES (?, ?, ?, ?, 'aberto', NOW())`,
             [user.id, assunto, descricao, tipo || 'Outro']
         );
-        broadcast('novo_ticket', { userId: user.id, nome: user.nome, assunto });
+        broadcast('new_ticket', {
+            ticketId: result.insertId,
+            userId:   user.id,
+            userName: user.nome,
+            assunto,
+            tipo:     tipo || 'Outro',
+        });
         return res.json({ ok: true, mensagem: 'Ticket enviado com sucesso!', ticket: { id: result.insertId, assunto, status: 'aberto' } });
     } catch (err) {
         console.error('[suporte/tickets]', err.message);
