@@ -530,7 +530,7 @@ router.get('/equipamentos/:id/qr', async (req, res) => {
     try {
         const [[eq]] = await db.execute('SELECT qr_token, nome FROM equipamento WHERE id=?', [req.params.id]);
         if (!eq) return res.status(404).json({ erro: 'Equipamento não encontrado.' });
-        const url = `${process.env.WEBAUTHN_ORIGIN || 'https://gymbros.app.br'}/equipamento/${eq.qr_token}`;
+        const url = `${process.env.APP_URL || 'https://fitcrew-ywo5.onrender.com'}/equipamento/${eq.qr_token}`;
         const QRCode = require('qrcode');
         const png = await QRCode.toBuffer(url, {
             width: 400, margin: 2,
