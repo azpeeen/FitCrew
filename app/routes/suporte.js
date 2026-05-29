@@ -22,7 +22,7 @@ router.post('/tickets',
   [
     body('assunto').trim().notEmpty().withMessage('Assunto obrigatório.').isLength({ max: 200 }).withMessage('Assunto muito longo.'),
     body('tipo').notEmpty().withMessage('Tipo obrigatório.'),
-    body('descricao').trim().notEmpty().withMessage('Descrição obrigatória.').isLength({ min: 10 }).withMessage('Descrição muito curta (mín. 10 caracteres).'),
+    body('descricao').trim().notEmpty().withMessage('Descrição obrigatória.'),
   ],
   async (req, res) => {
     const errors = validationResult(req);

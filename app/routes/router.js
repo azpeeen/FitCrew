@@ -2080,113 +2080,6 @@ router.get('/suporte', requirePlano, (req, res) => {
     }});
 });
 
-router.post('/api/suporte/tickets', requireAuth, [
-    body('assunto').trim().notEmpty().withMessage('Assunto obrigatório.').isLength({ max: 150 }),
-    body('descricao').trim().notEmpty().withMessage('Descrição obrigatória.').isLength({ max: 2000 }),
-    body('tipo').optional().isLength({ max: 100 }),
-], async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) return res.status(400).json({ erros: errors.array() });
-
-    const { assunto, descricao, tipo } = req.body;
-    const user = req.session.user;
-
-    try {
-        const [result] = await db.execute(
-            `INSERT INTO ticket (user_id, assunto, mensagem, tipo, status, created_at)
-             VALUES (?, ?, ?, ?, 'aberto', NOW())`,
-            [user.id, assunto, descricao, tipo || 'Outro']
-        );
-        broadcast('new_ticket', {
-            ticketId: result.insertId,
-            userId:   user.id,
-            userName: user.nome,
-            assunto,
-            tipo:     tipo || 'Outro',
-        });
-        return res.json({ ok: true, mensagem: 'Ticket enviado com sucesso!', ticket: { id: result.insertId, assunto, status: 'aberto' } });
-    } catch (err) {
-        console.error('[suporte/tickets]', err.message);
-        return res.status(500).json({ erro: 'Erro ao enviar ticket.' });
-    }
-});
-
-router.get('/api/suporte/tickets', requireAuth, async (req, res) => {
-    try {
-        const [tickets] = await db.execute(
-            'SELECT id, assunto, tipo, status, created_at FROM ticket WHERE user_id = ? ORDER BY created_at DESC',
-            [req.session.user.id]
-        );
-        res.json(tickets);
-    } catch (err) {
-        console.error('[suporte/tickets/list]', err.message);
-        res.status(500).json({ erro: 'Erro ao buscar tickets.' });
-    }
-});
-
-router.get('/api/suporte/tickets/:id', requireAuth, async (req, res) => {
-    const userId = req.session.user.id;
-    try {
-        const [[ticket]] = await db.execute(
-            'SELECT id, assunto, tipo, status FROM ticket WHERE id = ? AND user_id = ?',
-            [req.params.id, userId]
-        );
-        if (!ticket) return res.status(404).json({ erro: 'Ticket não encontrado.' });
-        const [mensagens] = await db.execute(
-            'SELECT id, remetente, texto, created_at FROM ticket_mensagem WHERE ticket_id = ? ORDER BY created_at ASC',
-            [ticket.id]
-        );
-        res.json({ ...ticket, mensagens });
-    } catch (err) {
-        console.error('[suporte/tickets/get]', err.message);
-        res.status(500).json({ erro: 'Erro ao buscar ticket.' });
-    }
-});
-
-router.post('/api/suporte/tickets/:id/mensagem', requireAuth, async (req, res) => {
-    const userId = req.session.user.id;
-    const { texto } = req.body;
-    if (!texto?.trim()) return res.status(400).json({ erro: 'Texto obrigatório.' });
-    try {
-        const [[ticket]] = await db.execute(
-            "SELECT id FROM ticket WHERE id = ? AND user_id = ? AND status != 'fechado'",
-            [req.params.id, userId]
-        );
-        if (!ticket) return res.status(404).json({ erro: 'Ticket não encontrado ou fechado.' });
-        const [result] = await db.execute(
-            "INSERT INTO ticket_mensagem (ticket_id, remetente, texto) VALUES (?, 'usuario', ?)",
-            [ticket.id, texto.trim()]
-        );
-        const [[msg]] = await db.execute(
-            'SELECT id, remetente, texto, created_at FROM ticket_mensagem WHERE id = ?',
-            [result.insertId]
-        );
-        broadcastTicket(ticket.id, 'ticket_mensagem', { ticketId: ticket.id, msg });
-        res.json({ ...msg, criadaEm: msg.created_at });
-    } catch (err) {
-        console.error('[suporte/tickets/mensagem]', err.message);
-        res.status(500).json({ erro: 'Erro ao enviar mensagem.' });
-    }
-});
-
-router.get('/api/suporte/tickets/:id/stream', requireAuth, async (req, res) => {
-    const userId   = req.session.user.id;
-    const ticketId = parseInt(req.params.id, 10);
-    try {
-        const [[ticket]] = await db.execute(
-            'SELECT id FROM ticket WHERE id = ? AND user_id = ?',
-            [ticketId, userId]
-        );
-        if (!ticket) return res.status(404).end();
-    } catch { return res.status(500).end(); }
-
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection', 'keep-alive');
-    res.flushHeaders();
-
-    addTicketClient(ticketId, res);
-});
 
 //Administração
 router.get('/admin-dashboard', (req, res) => {
@@ -2277,7 +2170,7 @@ router.get('/admin-suporte-chat', (req, res) => {
 router.get('/admin-suporte', (req, res) => {
     if (!req.session.user) return res.redirect('/login');
 
-    res.render('pages/admin-suporte', { user: req.session.user });
+    res.render('pages/admin-suporte', { user: req.session.user, title: 'Suporte' });
 });
 
 //Administração Usuário Perfil
