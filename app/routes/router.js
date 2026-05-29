@@ -429,6 +429,24 @@ function safeJson(str, fallback) {
             [gymbroBen]
         );
     } catch (err) { console.error('[migration] gymbro_beneficios:', err.message); }
+
+    // 19. Tabela de tickets de suporte
+    try {
+        await db.execute(`
+            CREATE TABLE IF NOT EXISTS ticket (
+                id         INT UNSIGNED NOT NULL AUTO_INCREMENT,
+                user_id    INT UNSIGNED NOT NULL,
+                assunto    VARCHAR(150) NOT NULL,
+                mensagem   TEXT NOT NULL,
+                categoria  ENUM('bug','duvida','pagamento','outro') NOT NULL DEFAULT 'outro',
+                status     ENUM('aberto','em_atendimento','fechado') NOT NULL DEFAULT 'aberto',
+                created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (id),
+                INDEX idx_ticket_user (user_id),
+                CONSTRAINT fk_ticket_user FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
+            ) ENGINE=InnoDB
+        `);
+    } catch (err) { if (err.errno !== 1050) console.error('[migration] ticket:', err.message); }
 })();
 
 // Soft delete cron — anonimiza contas com deletion_scheduled_at vencido (a cada 24h)
@@ -2037,6 +2055,31 @@ router.get('/suporte', requirePlano, (req, res) => {
         title: 'Suporte — FitCrew', canonical: '/suporte',
         robots: 'noindex, nofollow', description: 'Central de suporte FitCrew.',
     }});
+});
+
+router.post('/api/suporte/tickets', requireAuth, [
+    body('assunto').trim().notEmpty().withMessage('Assunto obrigatório.').isLength({ max: 150 }),
+    body('descricao').trim().notEmpty().withMessage('Descrição obrigatória.').isLength({ max: 2000 }),
+    body('tipo').optional().isLength({ max: 100 }),
+], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(400).json({ erros: errors.array() });
+
+    const { assunto, descricao, tipo } = req.body;
+    const user = req.session.user;
+
+    try {
+        const [result] = await db.execute(
+            `INSERT INTO ticket (user_id, assunto, mensagem, tipo, status, created_at)
+             VALUES (?, ?, ?, ?, 'aberto', NOW())`,
+            [user.id, assunto, descricao, tipo || 'Outro']
+        );
+        broadcast('novo_ticket', { userId: user.id, nome: user.nome, assunto });
+        return res.json({ ok: true, mensagem: 'Ticket enviado com sucesso!', ticket: { id: result.insertId, assunto, status: 'aberto' } });
+    } catch (err) {
+        console.error('[suporte/tickets]', err.message);
+        return res.status(500).json({ erro: 'Erro ao enviar ticket.' });
+    }
 });
 
 //Administração
