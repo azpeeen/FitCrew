@@ -60,6 +60,13 @@
     transform: translateY(-2px);
     box-shadow: 0 4px 20px rgba(245, 197, 24, 0.2);
 }
+.achievement-card.tier-diamante {
+    border-color: #89CFF0;
+    box-shadow: 0 0 12px rgba(137, 207, 240, 0.2);
+}
+.achievement-card.tier-diamante:hover {
+    box-shadow: 0 4px 20px rgba(137, 207, 240, 0.35);
+}
 .achievement-card.locked {
     opacity: 0.35;
     filter: grayscale(1);
@@ -157,6 +164,28 @@
     align-items: center;
     gap: 12px;
     position: relative;
+}
+
+.conquista-fechar {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+.conquista-fechar:hover {
+    background: rgba(255, 255, 255, 0.2);
 }
 
 .conquista-badge-anim {

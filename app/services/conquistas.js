@@ -24,27 +24,39 @@ async function desbloquearSeNecessario(userId, slug) {
 }
 
 async function verificarPeso(userId, bodyPart, pesoKg) {
-    const categoria = BODY_PART_MAP[bodyPart?.toLowerCase()];
-    if (!categoria || categoria === 'cardio') return [];
+    const categoriaMap = {
+        'upper arms': 'braco',
+        'lower arms': 'braco',
+        'chest':      'peito',
+        'back':       'costas',
+        'shoulders':  'ombro',
+        'waist':      'core',
+        'upper legs': 'perna',
+        'lower legs': 'perna',
+        'cardio':     'cardio',
+    };
+    const categoria = categoriaMap[(bodyPart || '').toLowerCase()];
+    if (!categoria) return [];
 
-    const slugs = [
-        `${categoria}-bronze`, `${categoria}-prata`, `${categoria}-ouro`,
-        `${categoria}-platina`, `${categoria}-diamante`,
-    ];
+    const [conquistas] = await db.execute(`
+        SELECT c.id, c.slug, c.meta_valor FROM conquistas c
+        WHERE c.categoria = ?
+          AND c.meta_tipo = 'peso'
+          AND c.meta_valor <= ?
+        ORDER BY c.meta_valor ASC
+    `, [categoria, pesoKg]);
 
-    const [conquistas] = await db.execute(
-        'SELECT slug, meta_valor FROM conquistas WHERE slug IN (?) AND meta_tipo = "peso" ORDER BY meta_valor ASC',
-        [slugs]
-    );
+    if (!conquistas.length) return [];
 
-    const desbloqueadas = [];
+    const slugs = [];
     for (const c of conquistas) {
-        if (pesoKg >= Number(c.meta_valor)) {
-            const ok = await desbloquearSeNecessario(userId, c.slug);
-            if (ok) desbloqueadas.push(c.slug);
-        }
+        await db.execute(
+            'INSERT IGNORE INTO usuario_conquistas (user_id, conquista_id) VALUES (?, ?)',
+            [userId, c.id]
+        );
+        slugs.push(c.slug);
     }
-    return desbloqueadas;
+    return slugs;
 }
 
 async function verificarCardio(userId, duracaoMinutos) {
