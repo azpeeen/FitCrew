@@ -8,8 +8,8 @@ const {
 } = require('@simplewebauthn/server');
 
 const RP_NAME = 'FitCrew';
-const RP_ID  = process.env.WEBAUTHN_RP_ID  || 'gymbros.app.br';
-const ORIGIN = process.env.WEBAUTHN_ORIGIN || 'https://gymbros.app.br';
+const RP_ID  = process.env.WEBAUTHN_RP_ID  || 'fitcrew-ywo5.onrender.com';
+const ORIGIN = process.env.WEBAUTHN_ORIGIN || 'https://fitcrew-ywo5.onrender.com';
 
 // base64 → base64url
 function toBase64URL(b64) {
