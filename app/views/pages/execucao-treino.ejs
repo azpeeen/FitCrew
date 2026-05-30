@@ -7,6 +7,7 @@
 <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
 <link rel="stylesheet" href="/css/execucao-treino.css">
 <link rel="stylesheet" href="/css/conquistas.css">
+<script src="/js/conquistas.js"></script>
 </head>
 <body class="exec-page">
 
@@ -147,7 +148,6 @@
 
 <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
-<script src="/js/conquistas.js"></script>
 <script>
 // ── Dados do servidor ─────────────────────────────────────
 const PLANO           = <%- JSON.stringify(plano) %>;
@@ -314,7 +314,6 @@ function marcarSerie(idx, serieIdx) {
     const nSeries   = Number(EXERCICIOS[idx].series) || 3;
     const doneSeries = seriesDone[idx].filter(Boolean).length;
     const descanso   = Number(EXERCICIOS[idx].descanso_segundos) || 60;
-
     if (doneSeries >= nSeries) {
         // Exercício completo
         document.getElementById('btnRealizado').className = 'exec-btn-realizado concluido';
@@ -363,7 +362,7 @@ async function persistExercicio(idx) {
     if (!sessaoId) return;
     const ex = EXERCICIOS[idx];
     try {
-        const r = await fetch('/treinos/sessao/exercicio/concluir', {
+        await fetch('/treinos/sessao/exercicio/concluir', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -373,13 +372,6 @@ async function persistExercicio(idx) {
                 carga_usada:       cargas[idx] || null,
             }),
         });
-        const data = await r.json();
-        if (data.novasConquistas?.length) {
-            for (const c of data.novasConquistas) {
-                await mostrarAnimacaoConquista(c);
-                await sleep(400);
-            }
-        }
     } catch {}
 }
 
@@ -464,24 +456,6 @@ async function mostrarConclusao() {
         </button>
     `;
 
-    // Persiste finalização e verifica conquistas
-    if (sessaoId) {
-        try {
-            const r = await fetch('/treinos/sessao/finalizar', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ sessao_id: sessaoId }),
-            });
-            const data = await r.json();
-            if (data.novasConquistas?.length) {
-                await sleep(600);
-                for (const c of data.novasConquistas) {
-                    await mostrarAnimacaoConquista(c);
-                    await sleep(400);
-                }
-            }
-        } catch {}
-    }
 }
 
 // ── Event listeners ───────────────────────────────────────
@@ -511,6 +485,7 @@ document.getElementById('btnContinuarLista').addEventListener('click', () => {
 
 document.getElementById('btnFim').addEventListener('click', async () => {
     if (countdownId) { clearInterval(countdownId); countdownActive = false; }
+
     // Persiste todos os exercícios feitos mas não sincronizados
     for (let i = 0; i < EXERCICIOS.length; i++) {
         if (seriesDone[i].some(Boolean) && sessaoId) {
@@ -522,6 +497,29 @@ document.getElementById('btnFim').addEventListener('click', async () => {
             });
         }
     }
+
+    // Finaliza sessão e mostra conquistas ANTES da tela de conclusão
+    if (sessaoId) {
+        try {
+            const r = await fetch('/treinos/sessao/finalizar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sessao_id: sessaoId }),
+            });
+            const data = await r.json();
+            if (data.novasConquistas && data.novasConquistas.length > 0) {
+                const tierOrder = { bronze: 1, prata: 2, ouro: 3, platina: 4, diamante: 5 };
+                const ordenadas = [...data.novasConquistas].sort(
+                    (a, b) => (tierOrder[a.tier] || 0) - (tierOrder[b.tier] || 0)
+                );
+                for (const c of ordenadas) {
+                    await mostrarAnimacaoConquista(c);
+                    await sleep(300);
+                }
+            }
+        } catch (e) { console.error('[conquista exibir]', e); }
+    }
+
     mostrarConclusao();
 });
 

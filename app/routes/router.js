@@ -1369,7 +1369,31 @@ router.post('/treinos/sessao/exercicio/concluir', requireAuth, async (req, res) 
                 'SELECT body_part FROM exercises WHERE LOWER(name) = LOWER(?) LIMIT 1',
                 [exercise_query]
             );
-            const bodyPart = exRows[0]?.body_part || null;
+            let bodyPart = exRows[0]?.body_part || null;
+
+            // Fallback por nome se body_part estiver null
+            if (!bodyPart && exercise_query) {
+                const nome = exercise_query.toLowerCase();
+                if (nome.includes('bench') || nome.includes('chest') || nome.includes('pec') || nome.includes('fly'))
+                    bodyPart = 'chest';
+                else if (nome.includes('curl') || nome.includes('bicep'))
+                    bodyPart = 'upper arms';
+                else if (nome.includes('tricep') || nome.includes('pushdown') || nome.includes('extension'))
+                    bodyPart = 'upper arms';
+                else if (nome.includes('squat') || nome.includes('leg press') || nome.includes('lunge') || nome.includes('quad'))
+                    bodyPart = 'upper legs';
+                else if (nome.includes('row') || nome.includes('pulldown') || nome.includes('lat') || nome.includes('pull-up') || nome.includes('pullup'))
+                    bodyPart = 'back';
+                else if (nome.includes('shoulder') || nome.includes('delt') || nome.includes('overhead press') || nome.includes('lateral raise'))
+                    bodyPart = 'shoulders';
+                else if (nome.includes('ab') || nome.includes('crunch') || nome.includes('plank') || nome.includes('core'))
+                    bodyPart = 'waist';
+                else if (nome.includes('calf') || nome.includes('panturrilha'))
+                    bodyPart = 'lower legs';
+                else if (nome.includes('deadlift') || nome.includes('rdl'))
+                    bodyPart = 'back';
+            }
+
             const pesoKg   = parseFloat(String(carga_usada || '').replace(/[^\d.]/g, '')) || 0;
             if (bodyPart) {
                 if (bodyPart === 'cardio' && pesoKg > 0) {
@@ -1445,15 +1469,59 @@ router.post('/treinos/sessao/finalizar', requireAuth, async (req, res) => {
         // Verificar conquistas: peso/cardio de todos os exercícios + consistência
         const novasSlugs = [];
         try {
-            const [exRows] = await db.execute(
-                `SELECT tse.carga_usada, e.body_part
-                 FROM treino_sessao_exercicio tse
-                 LEFT JOIN exercises e ON LOWER(e.name) = LOWER(tse.exercise_query)
-                 WHERE tse.sessao_id = ? AND tse.concluido = 1`,
-                [sessao_id]
-            );
+            const [exRows] = await db.execute(`
+                SELECT tse.carga_usada, tse.exercise_query,
+                       COALESCE(e.body_part,
+                           CASE
+                               -- inglês
+                               WHEN LOWER(tse.exercise_query) LIKE '%squat%'        THEN 'upper legs'
+                               WHEN LOWER(tse.exercise_query) LIKE '%leg press%'    THEN 'upper legs'
+                               WHEN LOWER(tse.exercise_query) LIKE '%lunge%'        THEN 'upper legs'
+                               WHEN LOWER(tse.exercise_query) LIKE '%bench%'        THEN 'chest'
+                               WHEN LOWER(tse.exercise_query) LIKE '%curl%'         THEN 'upper arms'
+                               WHEN LOWER(tse.exercise_query) LIKE '%tricep%'       THEN 'upper arms'
+                               WHEN LOWER(tse.exercise_query) LIKE '%pulldown%'     THEN 'back'
+                               WHEN LOWER(tse.exercise_query) LIKE '%deadlift%'     THEN 'back'
+                               WHEN LOWER(tse.exercise_query) LIKE '%row%'          THEN 'back'
+                               WHEN LOWER(tse.exercise_query) LIKE '%shoulder%'     THEN 'shoulders'
+                               WHEN LOWER(tse.exercise_query) LIKE '%calf%'         THEN 'lower legs'
+                               WHEN LOWER(tse.exercise_query) LIKE '%crunch%'       THEN 'waist'
+                               WHEN LOWER(tse.exercise_query) LIKE '%press%'        THEN 'chest'
+                               -- português
+                               WHEN LOWER(tse.exercise_query) LIKE '%supino%'       THEN 'chest'
+                               WHEN LOWER(tse.exercise_query) LIKE '%crucifixo%'    THEN 'chest'
+                               WHEN LOWER(tse.exercise_query) LIKE '%peck%'         THEN 'chest'
+                               WHEN LOWER(tse.exercise_query) LIKE '%voador%'       THEN 'chest'
+                               WHEN LOWER(tse.exercise_query) LIKE '%rosca%'        THEN 'upper arms'
+                               WHEN LOWER(tse.exercise_query) LIKE '%tr_ceps%'      THEN 'upper arms'
+                               WHEN LOWER(tse.exercise_query) LIKE '%triceps%'      THEN 'upper arms'
+                               WHEN LOWER(tse.exercise_query) LIKE '%extensao%'     THEN 'upper arms'
+                               WHEN LOWER(tse.exercise_query) LIKE '%agachamento%'  THEN 'upper legs'
+                               WHEN LOWER(tse.exercise_query) LIKE '%cadeira%'      THEN 'upper legs'
+                               WHEN LOWER(tse.exercise_query) LIKE '%leg%'          THEN 'upper legs'
+                               WHEN LOWER(tse.exercise_query) LIKE '%stiff%'        THEN 'upper legs'
+                               WHEN LOWER(tse.exercise_query) LIKE '%avanço%'       THEN 'upper legs'
+                               WHEN LOWER(tse.exercise_query) LIKE '%avanco%'       THEN 'upper legs'
+                               WHEN LOWER(tse.exercise_query) LIKE '%remada%'       THEN 'back'
+                               WHEN LOWER(tse.exercise_query) LIKE '%puxada%'       THEN 'back'
+                               WHEN LOWER(tse.exercise_query) LIKE '%levantamento%' THEN 'back'
+                               WHEN LOWER(tse.exercise_query) LIKE '%desenvolvimento%' THEN 'shoulders'
+                               WHEN LOWER(tse.exercise_query) LIKE '%eleva%'        THEN 'shoulders'
+                               WHEN LOWER(tse.exercise_query) LIKE '%ombro%'        THEN 'shoulders'
+                               WHEN LOWER(tse.exercise_query) LIKE '%panturrilha%'  THEN 'lower legs'
+                               WHEN LOWER(tse.exercise_query) LIKE '%abdominal%'    THEN 'waist'
+                               WHEN LOWER(tse.exercise_query) LIKE '%prancha%'      THEN 'waist'
+                           END
+                       ) AS body_part
+                FROM treino_sessao_exercicio tse
+                LEFT JOIN exercises e ON LOWER(e.name) = LOWER(tse.exercise_query)
+                WHERE tse.sessao_id = ?
+                  AND tse.carga_usada IS NOT NULL
+                  AND tse.carga_usada != ''
+                  AND (tse.carga_usada + 0) > 0
+            `, [sessao_id]);
             for (const ex of exRows) {
-                const grupo  = ex.body_part;
+                const grupo = ex.body_part;
                 const pesoKg = parseFloat(String(ex.carga_usada || '').replace(/[^\d.]/g, '')) || 0;
                 if (grupo && pesoKg > 0) {
                     const nc = grupo === 'cardio'

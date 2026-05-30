@@ -2,7 +2,27 @@
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
+const _conquistaFila = [];
+let _conquistaRodando = false;
+
 async function mostrarAnimacaoConquista(conquista) {
+    return new Promise(resolve => {
+        _conquistaFila.push({ conquista, resolve });
+        if (!_conquistaRodando) _processarFila();
+    });
+}
+
+async function _processarFila() {
+    if (_conquistaFila.length === 0) { _conquistaRodando = false; return; }
+    _conquistaRodando = true;
+    const { conquista, resolve } = _conquistaFila.shift();
+    await _exibirConquista(conquista);
+    await sleep(300);
+    resolve();
+    _processarFila();
+}
+
+async function _exibirConquista(conquista) {
     return new Promise(resolve => {
         const overlay = document.createElement('section');
         overlay.className = 'conquista-overlay';
@@ -19,6 +39,7 @@ async function mostrarAnimacaoConquista(conquista) {
 
         overlay.innerHTML = `
           <section class="conquista-animation-box">
+            <button class="conquista-fechar" onclick="this.closest('.conquista-overlay').click()">✕</button>
             <section class="conquista-particles" id="conquistaParticles"></section>
             <section class="conquista-badge-anim" style="--tier-color:${cor.primary};--tier-glow:${cor.glow}">
               <section class="conquista-badge-ring"></section>
