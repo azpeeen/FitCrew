@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="./app/public/images/logo-readme.png" alt="FitCrew Logo" width="320"/>
+  <img src="./app/public/images/logo-form2.png" alt="FitCrew Logo" width="320"/>
 
   <h1>FitCrew</h1>
 
