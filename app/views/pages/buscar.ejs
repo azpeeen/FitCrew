@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<%- include('../partials/seo') %>
+<link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+<link rel="stylesheet" href="/css/header.css">
+<link rel="stylesheet" href="/css/footer.css">
+<link rel="stylesheet" href="/css/area-aluno.css">
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin></head>
+<body>
+
+<%- include('../partials/header-aluno') %>
+
+<section class="aluno-dashboard">
+    <section class="sidebar-overlay" id="sidebarOverlay"></section>
+
+    <%- include('../partials/sidebar-aluno') %>
+
+    <section class="aluno-main">
+        <section class="buscar-layout">
+
+            <!-- Coluna Principal -->
+            <section class="buscar-col">
+
+                <!-- Barra de busca -->
+                <section class="buscar-search-wrap">
+                    <i class="fas fa-search buscar-search-icon"></i>
+                    <input type="text" id="busca-input"
+                        class="buscar-search-input"
+                        value="<%= q || '' %>"
+                        placeholder="Buscar pessoas ou treinos"
+                        autocomplete="off">
+                </section>
+
+                <!-- Abas -->
+                <section class="buscar-abas">
+                    <button class="buscar-aba" id="aba-pessoas">
+                        <i class="fas fa-users"></i> Pessoas
+                    </button>
+                    <button class="buscar-aba" id="aba-treinos">
+                        <i class="fas fa-dumbbell"></i> Treinos
+                    </button>
+                    <button class="buscar-aba" id="aba-assuntos">
+                        <i class="fas fa-fire"></i> Para você
+                    </button>
+                </section>
+
+                <!-- Resultados Pessoas -->
+                <section id="resultados-pessoas" class="buscar-resultados"></section>
+
+                <!-- Resultados Treinos -->
+                <section id="resultados-treinos" class="buscar-resultados" style="display:none"></section>
+
+                <!-- Assuntos para você -->
+                <section id="resultados-assuntos" class="buscar-resultados" style="display:none"></section>
+
+            </section>
+
+            <!-- Coluna Direita -->
+            <section class="buscar-sidebar">
+                <section class="feed-widget">
+                    <h3 class="feed-widget-title">Pessoas que você talvez conheça</h3>
+                    <section id="sugestoes-sidebar">
+                        <section class="feed-widget-loading"><i class="fas fa-spinner fa-spin"></i></section>
+                    </section>
+                </section>
+            </section>
+
+        </section>
+    </section>
+</section>
+
+<script>
+window._queryAtual = <%- JSON.stringify(q || '') %>;
+let abaAtual = <%- JSON.stringify(aba || 'pessoas') %>;
+
+// ── Helper: negrito no termo buscado ─────────────────────────────────────────
+function destacar(texto, termo) {
+    if (!texto || !termo) return texto || '';
+    const re = new RegExp('(' + termo.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+    return texto.replace(re, '<strong style="color:#f0f0f0">$1</strong>');
+}
+
+// ── Abas ─────────────────────────────────────────────────────────────────────
+function mudarAba(aba) {
+    abaAtual = aba;
+    ['pessoas', 'treinos', 'assuntos'].forEach(a => {
+        document.getElementById('aba-' + a).classList.toggle('buscar-aba-ativa', a === aba);
+        document.getElementById('resultados-' + a).style.display = a === aba ? 'block' : 'none';
+    });
+    if (aba === 'pessoas'  && !window._pessoasCarregadas)  carregarPessoas();
+    if (aba === 'treinos'  && !window._treinosCarregados)  carregarTreinos();
+    if (aba === 'assuntos' && !window._assuntosCarregados) carregarAssuntos();
+}
+
+function irParaBusca() {
+    const q = document.getElementById('busca-input').value.trim();
+    if (q) window.location.href = '/buscar?q=' + encodeURIComponent(q) + '&aba=' + abaAtual;
+}
+
+// ── Pessoas ───────────────────────────────────────────────────────────────────
+async function carregarPessoas() {
+    window._pessoasCarregadas = true;
+    const q  = window._queryAtual;
+    const el = document.getElementById('resultados-pessoas');
+    if (!q) {
+        el.innerHTML = '<section class="buscar-empty">Digite algo para buscar pessoas</section>';
+        return;
+    }
+    el.innerHTML = '<section class="buscar-loading"><i class="fas fa-spinner fa-spin"></i></section>';
+    try {
+        const r = await fetch('/api/usuarios/buscar?q=' + encodeURIComponent(q) + '&limit=20');
+        const d = await r.json();
+        if (!d.usuarios?.length) {
+            el.innerHTML = '<section class="buscar-empty">Nenhuma pessoa encontrada para "<strong>' + q + '</strong>"</section>';
+            return;
+        }
+        el.innerHTML = d.usuarios.map(u => `
+            <a href="/u/${u.username}" class="buscar-card-pessoa">
+                <img src="${u.foto_perfil || '/images/avatar.png'}" class="buscar-pessoa-avatar" alt="${u.nome}">
+                <section class="buscar-pessoa-info">
+                    <section class="buscar-pessoa-nome">${destacar(u.nome, q)}</section>
+                    <section class="buscar-pessoa-username">@${destacar(u.username, q)}</section>
+                    ${u.bio ? `<section class="buscar-pessoa-bio">${u.bio.slice(0, 80)}</section>` : ''}
+                    <section class="buscar-pessoa-meta">
+                        ${u.nivel ? `<span>Nível ${u.nivel}</span>` : ''}
+                        ${u.streak_atual > 0 ? `<span>🔥 ${u.streak_atual} dias</span>` : ''}
+                    </section>
+                </section>
+            </a>
+        `).join('');
+    } catch (_) {
+        el.innerHTML = '<section class="buscar-empty">Erro ao carregar resultados</section>';
+    }
+}
+
+// ── Treinos ───────────────────────────────────────────────────────────────────
+async function carregarTreinos() {
+    window._treinosCarregados = true;
+    const q  = window._queryAtual;
+    const el = document.getElementById('resultados-treinos');
+    if (!q) {
+        el.innerHTML = '<section class="buscar-empty">Digite algo para buscar treinos</section>';
+        return;
+    }
+    el.innerHTML = '<section class="buscar-loading"><i class="fas fa-spinner fa-spin"></i></section>';
+    try {
+        const r = await fetch('/api/treinos/buscar?q=' + encodeURIComponent(q) + '&limit=20');
+        const d = await r.json();
+        if (!d.treinos?.length) {
+            el.innerHTML = '<section class="buscar-empty">Nenhum treino encontrado para "<strong>' + q + '</strong>"</section>';
+            return;
+        }
+        el.innerHTML = d.treinos.map(t => `
+            <a href="/treinos/${t.id}" class="buscar-card-treino">
+                <section class="buscar-treino-icon"><i class="fas fa-dumbbell"></i></section>
+                <section class="buscar-treino-info">
+                    <section class="buscar-treino-nome">${destacar(t.nome, q)}</section>
+                    <section class="buscar-treino-criador">
+                        por ${destacar(t.criador_username ? '@' + t.criador_username : t.criador_nome, q)}
+                    </section>
+                    <section class="buscar-treino-meta">
+                        <span><i class="fas fa-list"></i> ${t.total_exercicios} exercícios</span>
+                        <span><i class="fas fa-play"></i> ${t.total_execucoes} execuções</span>
+                    </section>
+                </section>
+            </a>
+        `).join('');
+    } catch (_) {
+        el.innerHTML = '<section class="buscar-empty">Erro ao carregar resultados</section>';
+    }
+}
+
+// ── Assuntos para você ────────────────────────────────────────────────────────
+async function carregarAssuntos() {
+    window._assuntosCarregados = true;
+    const el = document.getElementById('resultados-assuntos');
+    el.innerHTML = '<section class="buscar-loading"><i class="fas fa-spinner fa-spin"></i></section>';
+    try {
+        const r = await fetch('/api/buscar/assuntos');
+        const d = await r.json();
+
+        if (d.semHistorico || !d.treinos?.length) {
+            el.innerHTML = `
+                <section class="buscar-empty">
+                    <i class="fas fa-dumbbell" style="font-size:2rem;opacity:.15;display:block;margin-bottom:12px"></i>
+                    Complete alguns treinos para ver sugestões personalizadas
+                </section>`;
+            return;
+        }
+
+        const gruposHtml = d.grupos.map(g => `<span class="buscar-grupo-tag">${g}</span>`).join('');
+
+        el.innerHTML = `
+            <section class="buscar-assuntos-header">
+                <section style="font-size:0.8rem;color:#888;margin-bottom:10px">
+                    Baseado nos seus treinos: ${gruposHtml}
+                </section>
+            </section>
+            ${d.treinos.map(t => `
+                <a href="/treinos/${t.id}" class="buscar-card-treino">
+                    <section class="buscar-treino-icon"><i class="fas fa-dumbbell"></i></section>
+                    <section class="buscar-treino-info">
+                        <section class="buscar-treino-nome">${t.nome}</section>
+                        <section class="buscar-treino-criador">
+                            por ${t.criador_username ? '@' + t.criador_username : t.criador_nome}
+                        </section>
+                        <section class="buscar-treino-meta">
+                            <span><i class="fas fa-list"></i> ${t.total_exercicios} exercícios</span>
+                            <span><i class="fas fa-play"></i> ${t.total_execucoes} execuções</span>
+                        </section>
+                    </section>
+                </a>
+            `).join('')}
+            <section class="buscar-card-treino" style="opacity:0.4;cursor:default">
+                <section class="buscar-treino-icon" style="background:rgba(255,255,255,0.05)">
+                    <i class="fas fa-image" style="color:#555"></i>
+                </section>
+                <section class="buscar-treino-info">
+                    <section class="buscar-treino-nome">Posts relacionados</section>
+                    <section class="buscar-treino-criador" style="color:#555">
+                        Em breve — posts chegam na próxima atualização
+                    </section>
+                </section>
+            </section>
+        `;
+    } catch (_) {
+        el.innerHTML = '<section class="buscar-empty">Erro ao carregar sugestões</section>';
+    }
+}
+
+// ── Sugestões sidebar ─────────────────────────────────────────────────────────
+async function carregarSugestoesSidebar() {
+    const el = document.getElementById('sugestoes-sidebar');
+    try {
+        const r = await fetch('/api/buscar/sugestoes-pessoas');
+        const d = await r.json();
+        if (!d.sugestoes?.length) {
+            el.innerHTML = '<section class="feed-widget-loading">Nenhuma sugestão</section>';
+            return;
+        }
+        el.innerHTML = d.sugestoes.map(u => `
+            <section class="sugestao-card">
+                <a href="/u/${u.username}">
+                    <img src="${u.foto_perfil || '/images/avatar.png'}" class="sugestao-avatar" alt="${u.nome}">
+                </a>
+                <section class="sugestao-info">
+                    <section class="sugestao-nome">${u.nome}</section>
+                    <section class="sugestao-username">@${u.username}</section>
+                </section>
+                <button class="sugestao-btn" data-user-id="${u.id}">Adicionar</button>
+            </section>
+        `).join('');
+    } catch (_) {
+        el.innerHTML = '<section class="feed-widget-loading">Erro ao carregar</section>';
+    }
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('aba-pessoas').addEventListener('click', () => mudarAba('pessoas'));
+    document.getElementById('aba-treinos').addEventListener('click', () => mudarAba('treinos'));
+    document.getElementById('aba-assuntos').addEventListener('click', () => mudarAba('assuntos'));
+
+    const inputBusca = document.getElementById('busca-input');
+
+    inputBusca.addEventListener('keydown', e => {
+        if (e.key === 'Enter') irParaBusca();
+    });
+
+    let liveTimer;
+    inputBusca.addEventListener('input', () => {
+        clearTimeout(liveTimer);
+        liveTimer = setTimeout(() => {
+            window._queryAtual = inputBusca.value.trim();
+            window._pessoasCarregadas = false;
+            window._treinosCarregados = false;
+            if (abaAtual === 'pessoas') carregarPessoas();
+            if (abaAtual === 'treinos') carregarTreinos();
+        }, 300);
+    });
+
+    document.getElementById('sugestoes-sidebar').addEventListener('click', async e => {
+        const btn = e.target.closest('.sugestao-btn');
+        if (!btn || btn.disabled) return;
+        const userId = btn.dataset.userId;
+        btn.disabled = true;
+        btn.textContent = '...';
+        const r = await fetch(`/api/amizades/solicitar/${userId}`, { method: 'POST' })
+            .then(x => x.json()).catch(() => ({ ok: false }));
+        if (r.ok) {
+            btn.textContent = 'Enviado';
+            btn.style.opacity = '0.5';
+        } else {
+            btn.textContent = 'Adicionar';
+            btn.disabled = false;
+        }
+    });
+
+    mudarAba(abaAtual);
+    carregarSugestoesSidebar();
+});
+</script>
+
+</body>
+</html>

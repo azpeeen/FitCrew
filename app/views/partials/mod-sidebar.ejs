@@ -1,0 +1,35 @@
+<aside class="admin-sidebar" id="mod-sidebar">
+    <section class="admin-sidebar-brand">
+        <img src="/images/logo.png" alt="FitCrew">
+        <section>
+            <span>FitCrew</span>
+            <small>Moderação</small>
+        </section>
+    </section>
+
+    <nav class="admin-nav">
+        <section class="admin-nav-section">Painel</section>
+        <a href="/mod" class="admin-nav-item <%= page_ativa==='dashboard' ? 'active' : '' %>">
+            <i class="fas fa-chart-pie"></i> Dashboard
+        </a>
+        <a href="/mod/denuncias" class="admin-nav-item <%= page_ativa==='denuncias' ? 'active' : '' %>">
+            <i class="fas fa-flag"></i> Denúncias
+            <% if (badges && badges.denuncias_pendentes > 0) { %>
+            <span class="admin-nav-badge"><%= badges.denuncias_pendentes %></span>
+            <% } %>
+        </a>
+        <a href="/mod/usuarios" class="admin-nav-item <%= page_ativa==='usuarios' ? 'active' : '' %>">
+            <i class="fas fa-users"></i> Usuários
+        </a>
+        <a href="/mod/apelacoes" class="admin-nav-item <%= page_ativa==='apelacoes' ? 'active' : '' %>">
+            <i class="fas fa-gavel"></i> Apelações
+            <% if (badges && badges.apelacoes_pendentes > 0) { %>
+            <span class="admin-nav-badge"><%= badges.apelacoes_pendentes %></span>
+            <% } %>
+        </a>
+    </nav>
+
+    <section class="admin-sidebar-footer">
+        <section>FitCrew — Moderação</section>
+    </section>
+</aside>

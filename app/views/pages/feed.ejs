@@ -1,0 +1,1810 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<%- include('../partials/seo') %>
+<link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+<link rel="stylesheet" href="/css/header.css">
+<link rel="stylesheet" href="/css/footer.css">
+<link rel="stylesheet" href="/css/area-aluno.css">
+<link rel="stylesheet" href="/css/compartilhar-feed.css">
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+<%- include('../partials/header-aluno') %>
+
+<section class="aluno-dashboard">
+    <section class="sidebar-overlay" id="sidebarOverlay"></section>
+
+    <!-- SIDEBAR -->
+    <section class="aluno-sidebar">
+        <section class="aluno-profile">
+            <section class="avatar">
+                <img src="<%= user.profile_photo || '/images/avatar.png' %>" alt="Avatar do Aluno">
+            </section>
+            <h2><%= user.nome %></h2>
+            <p data-translate="sidebar.role">Aluno FitCrew</p>
+        </section>
+        <ul class="aluno-menu">
+            <li class="menu-section-label">Principal</li>
+            <li><a href="/feed" class="active"><i class="fas fa-home"></i> Feed</a></li>
+            <li><a href="/metricas"><i class="fas fa-tachometer-alt"></i> Minhas Métricas</a></li>
+
+            <li class="menu-section-label">Social</li>
+            <li><a href="/amizades"><i class="fas fa-user-friends"></i> Amigos</a></li>
+            <li><a href="/chat"><i class="fas fa-comment"></i> Mensagens</a></li>
+            <li><a href="/buscar"><i class="fas fa-search"></i> Buscar pessoas</a></li>
+            <li><a href="/gymsquads"><i class="fas fa-medal"></i> GymSquads</a></li>
+
+            <li class="menu-section-label">Treino</li>
+            <li><a href="/treinos" data-translate="sidebar.treinos"><i class="fas fa-dumbbell"></i> Meus Treinos</a></li>
+            <li><a href="/evolucao" data-translate="sidebar.evolucao"><i class="fas fa-chart-line"></i> Evolução</a></li>
+
+            <li class="menu-section-label">Saúde</li>
+            <li><a href="/nutricao" data-translate="sidebar.nutricao"><i class="fas fa-utensils"></i> Nutrição</a></li>
+            <li><a href="/imc-form"><i class="fas fa-clipboard-list"></i> Medidas</a></li>
+
+            <li class="menu-section-label">IA</li>
+            <% if (user && (user.planoSlug === 'gymbro' || user.planoSlug === 'black')) { %>
+            <li><a href="/ai/chat" data-translate="sidebar.ai"><i class="fas fa-robot"></i> Personal Trainer IA</a></li>
+            <% } else { %>
+            <li><a href="/meu-plano?upgrade=1" class="menu-locked" data-translate="sidebar.ai"><i class="fas fa-robot"></i> Personal Trainer IA 🔒</a></li>
+            <% } %>
+            <% if (user && user.planoSlug === 'black') { %>
+            <li><a href="/ai/avaliacao" data-translate="sidebar.avaliacao"><i class="fas fa-camera"></i> Avaliação Corporal</a></li>
+            <% } else { %>
+            <li><a href="/meu-plano?upgrade=1" class="menu-locked" data-translate="sidebar.avaliacao"><i class="fas fa-camera"></i> Avaliação Corporal 🔒</a></li>
+            <% } %>
+
+            <li class="menu-section-label">Academia</li>
+            <li class="sidebar-scan-item"><a href="/scan"><i class="fas fa-qrcode"></i> Check-in / Scan</a></li>
+            <li><a href="/suporte" data-translate="sidebar.suporte"><i class="fas fa-headset"></i> Suporte</a></li>
+
+            <li class="menu-section-label">Conta</li>
+            <li><a href="/perfil/<%= user.username || user.id %>"><i class="fas fa-user-circle"></i> Meu Perfil</a></li>
+            <li><a href="/conquistas" data-translate="sidebar.conquistas"><i class="fas fa-trophy"></i> Conquistas</a></li>
+            <li><a href="/meu-plano" data-translate="sidebar.plano"><i class="fas fa-file-alt"></i> Meu Plano</a></li>
+            <li><a href="/config" data-translate="sidebar.config"><i class="fas fa-cog"></i> Configurações</a></li>
+            <li>
+                <button class="sidebar-logout-btn" type="button" id="feed-logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> Sair da conta
+                </button>
+            </li>
+        </ul>
+    </section>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <section class="aluno-main">
+        <section class="feed-layout">
+
+            <!-- Coluna Central -->
+            <section class="feed-col">
+
+                <section class="feed-header">
+                    <h1>Feed</h1>
+                </section>
+
+                <!-- Stories strip -->
+                <section class="stories-strip" id="stories-strip">
+                    <section class="story-bubble story-bubble--proprio" id="story-proprio">
+                        <section class="story-avatar-wrap">
+                            <img src="<%= user.profile_photo || '/images/avatar.png' %>"
+                                class="story-avatar" alt="Seu story">
+                            <section class="story-add-btn">+</section>
+                        </section>
+                        <span class="story-nome">Seu story</span>
+                    </section>
+
+                    <section id="stories-amigos">
+                        <section class="story-bubble story-skeleton"></section>
+                        <section class="story-bubble story-skeleton"></section>
+                        <section class="story-bubble story-skeleton"></section>
+                    </section>
+                </section>
+
+                <section id="feed-novos-banner" class="feed-novos-banner" style="display:none"></section>
+
+                <section class="feed-compose">
+                    <img class="feed-compose-avatar"
+                        src="<%= user.profile_photo || '/images/avatar.png' %>"
+                        alt="<%= user.nome %>">
+                    <textarea class="feed-compose-input"
+                        id="feed-compose-textarea"
+                        placeholder="O que você está pensando?"
+                        maxlength="2200"
+                        rows="1"></textarea>
+                </section>
+                <section class="feed-compose-preview" id="feed-compose-preview"></section>
+                <section class="feed-compose-footer">
+                    <button class="feed-compose-media-btn" type="button" id="feed-compose-media-btn" title="Adicionar foto ou vídeo">
+                        <i class="fas fa-image"></i>
+                    </button>
+                    <input type="file" id="feed-compose-file-input"
+                        accept="image/jpeg,image/jpg,image/png,image/webp,image/gif,video/mp4,video/quicktime,video/webm"
+                        multiple hidden>
+                    <button class="feed-compose-btn" id="feed-compose-submit-btn" disabled>Postar</button>
+                </section>
+                <section class="feed-compose-msg" id="feed-compose-msg"></section>
+
+                <!-- Sugestões mobile — só aparece em telas pequenas -->
+                <section class="feed-sugestoes-mobile" id="feed-sugestoes-mobile">
+                    <section class="feed-sugestoes-mobile-header">
+                        <span>Pessoas que você talvez conheça</span>
+                        <a href="/buscar" class="feed-sugestoes-ver-todos">Ver todos</a>
+                    </section>
+                    <section class="feed-sugestoes-mobile-scroll" id="feed-sugestoes-mobile-list">
+                        <section class="feed-sugestao-mobile-skeleton"></section>
+                        <section class="feed-sugestao-mobile-skeleton"></section>
+                        <section class="feed-sugestao-mobile-skeleton"></section>
+                    </section>
+                </section>
+
+                <section class="feed-posts" id="feed-posts">
+                    <% items.forEach(function(item) { %>
+                        <% if (item._tipo === 'evento') { %>
+                            <%- include('../partials/evento-card', { item }) %>
+                        <% } else { %>
+                            <%- include('../partials/post-card', { post: item, user }) %>
+                        <% } %>
+                    <% }); %>
+                </section>
+
+                <section class="feed-empty" id="feed-empty" style="<%= items.length ? 'display:none' : '' %>">
+                    <i class="fas fa-users"></i>
+                    <h3>Seu feed está vazio</h3>
+                    <p>Adicione amigos para ver treinos, conquistas e check-ins</p>
+                    <section class="feed-empty-actions">
+                        <a href="/buscar">
+                            <i class="fas fa-search"></i> Buscar pessoas
+                        </a>
+                        <a href="/u/<%= user.username %>">
+                            <i class="fas fa-user"></i> Ver meu perfil
+                        </a>
+                    </section>
+                </section>
+
+                <section class="feed-loading-more" id="feed-loading-more" style="display:none">
+                    <i class="fas fa-spinner fa-spin"></i>
+                </section>
+                <section id="feed-scroll-sentinel"></section>
+
+            </section>
+
+            <!-- Coluna Direita -->
+            <section class="feed-sidebar">
+
+                <!-- Busca -->
+                <section class="feed-widget" style="position:relative">
+                    <section class="feed-search-wrap">
+                        <i class="fas fa-search feed-search-icon"></i>
+                        <input type="text" id="feed-search-input"
+                            class="feed-search-input"
+                            placeholder="Buscar pessoas ou treinos"
+                            autocomplete="off">
+                    </section>
+                    <section id="feed-search-dropdown" class="feed-search-dropdown" style="display:none"></section>
+                </section>
+
+                <!-- Pessoas que você talvez conheça -->
+                <section class="feed-widget" id="widget-sugestoes">
+                    <h3 class="feed-widget-title">Pessoas que você talvez conheça</h3>
+                    <section id="sugestoes-list">
+                        <section class="feed-widget-loading"><i class="fas fa-spinner fa-spin"></i></section>
+                    </section>
+                </section>
+
+                <!-- Treinos Populares -->
+                <section class="feed-widget" id="widget-treinos">
+                    <h3 class="feed-widget-title">Treinos Populares</h3>
+                    <section id="treinos-list">
+                        <section class="feed-widget-loading"><i class="fas fa-spinner fa-spin"></i></section>
+                    </section>
+                </section>
+
+            </section>
+
+        </section>
+    </section>
+</section>
+
+<!-- Lightbox global de imagem do post -->
+<section id="lightbox" class="lightbox" style="display:none">
+    <button id="lightbox-close" class="lightbox-close" type="button">
+        <i class="fas fa-times"></i>
+    </button>
+    <img id="lightbox-img" class="lightbox-img" src="" alt="">
+</section>
+
+<!-- Story Viewer -->
+<section id="story-viewer">
+    <section class="story-viewer-header">
+        <section class="story-progress-bars" id="story-progress-bars"></section>
+        <section class="story-viewer-autor">
+            <img id="story-viewer-foto" src="" class="story-viewer-avatar" alt="">
+            <section>
+                <span id="story-viewer-nome" class="story-viewer-nome"></span>
+                <span id="story-viewer-tempo" class="story-viewer-tempo"></span>
+            </section>
+            <button id="story-viewer-fechar" class="story-viewer-fechar" type="button">
+                <i class="fas fa-times"></i>
+            </button>
+        </section>
+    </section>
+
+    <section class="story-viewer-content" id="story-viewer-content"></section>
+
+    <section class="story-nav-left"  id="story-nav-left"></section>
+    <section class="story-nav-right" id="story-nav-right"></section>
+
+    <!-- Rodapé owner (só aparece no próprio story) -->
+    <section class="story-viewer-footer" id="story-viewer-footer" style="display:none">
+        <section class="story-viewer-views">
+            <i class="fas fa-eye"></i>
+            <span id="story-viewer-views-count">0</span>
+        </section>
+        <button class="story-viewer-menu-btn" type="button" id="story-viewer-menu-btn">
+            <i class="fas fa-ellipsis-h"></i>
+        </button>
+        <section class="story-viewer-menu" id="story-viewer-menu" style="display:none">
+            <button type="button" class="story-viewer-menu-item" id="story-btn-ver-views">
+                <i class="fas fa-eye"></i> Ver quem visualizou
+            </button>
+            <button type="button" class="story-viewer-menu-item story-viewer-menu-item--danger" id="story-btn-apagar">
+                <i class="fas fa-trash"></i> Apagar story
+            </button>
+        </section>
+    </section>
+</section>
+
+<!-- Modal de visualizações do story -->
+<section class="story-views-modal" id="story-views-modal" style="display:none">
+    <section class="story-views-box">
+        <section class="story-views-header">
+            <h3 class="story-views-title">Visualizações</h3>
+            <button type="button" class="story-views-fechar" id="story-views-fechar">
+                <i class="fas fa-times"></i>
+            </button>
+        </section>
+        <section class="story-views-lista" id="story-views-lista">
+            <section class="story-views-loading">
+                <i class="fas fa-spinner fa-spin"></i>
+            </section>
+        </section>
+    </section>
+</section>
+
+<!-- Modal de exclusão do story -->
+<section class="story-delete-modal" id="story-delete-modal" style="display:none" role="dialog" aria-modal="true" aria-labelledby="story-delete-title">
+    <section class="story-delete-box">
+        <section class="story-delete-icon">
+            <i class="fas fa-trash"></i>
+        </section>
+        <h3 class="story-delete-title" id="story-delete-title">Excluir story?</h3>
+        <p class="story-delete-desc">Essa ação remove o story para todos os seguidores e não pode ser desfeita.</p>
+        <section class="story-delete-actions">
+            <button type="button" class="story-delete-btn story-delete-btn-cancel" id="story-delete-cancel">Cancelar</button>
+            <button type="button" class="story-delete-btn story-delete-btn-danger" id="story-delete-confirm">Excluir</button>
+        </section>
+    </section>
+</section>
+
+<!-- Modal criar story -->
+<section id="modal-criar-story" class="story-criar-modal" style="display:none">
+    <section class="story-criar-box">
+        <section class="story-criar-header">
+            <h3>Criar story</h3>
+            <button id="btn-fechar-criar-story" class="story-criar-fechar" type="button">
+                <i class="fas fa-times"></i>
+            </button>
+        </section>
+        <p class="story-criar-sub">Seu story some após 24 horas</p>
+
+        <section class="story-criar-opcoes">
+            <button class="story-criar-opcao" type="button" id="story-opcao-foto">
+                <i class="fas fa-image"></i>
+                <span>Foto</span>
+            </button>
+            <button class="story-criar-opcao" type="button" id="story-opcao-video">
+                <i class="fas fa-video"></i>
+                <span>Vídeo</span>
+            </button>
+            <button class="story-criar-opcao" type="button" id="story-opcao-texto">
+                <i class="fas fa-font"></i>
+                <span>Texto</span>
+            </button>
+        </section>
+
+        <input type="file" id="story-file-input" accept="image/*,video/*" hidden>
+
+        <section id="story-texto-editor" style="display:none">
+            <textarea id="story-texto-input"
+                class="story-texto-input"
+                placeholder="O que você quer compartilhar?"
+                maxlength="500"></textarea>
+            <section class="story-cor-picker">
+                <span class="story-cor-label">Cor de fundo:</span>
+                <% ['#1a1a1a', '#C98B1D', '#1e3a5f', '#2d1b69', '#1a3a1a'].forEach(function(bg, i) { %>
+                <button type="button" class="story-cor-btn<%= i === 0 ? ' selecionada' : '' %>"
+                    data-bg="<%= bg %>" style="background:<%= bg %>"></button>
+                <% }); %>
+            </section>
+            <button type="button" id="btn-postar-story-texto" class="story-criar-publicar">
+                Publicar Story
+            </button>
+        </section>
+    </section>
+</section>
+
+<script>
+window.__FEED_STATE__ = {
+    hasMore:          <%- JSON.stringify(hasMore) %>,
+    lastId:           <%- JSON.stringify(lastId) %>,
+    lastEventId:      <%- JSON.stringify(lastEventId) %>,
+    primeiroPostId:   <%- JSON.stringify((items.find(i => i._tipo === 'post')   || {}).id || null) %>,
+    primeiroEventId:  <%- JSON.stringify((items.find(i => i._tipo === 'evento') || {}).id || null) %>,
+    minhaFoto:        <%- JSON.stringify(user.profile_photo || '/images/avatar.png') %>,
+    meuUserId:        <%- JSON.stringify(user.id) %>,
+};
+</script>
+
+<script>
+// ── Helper: negrito no termo buscado ─────────────────────────────────────────
+function destacar(texto, termo) {
+    if (!texto || !termo) return texto || '';
+    const re = new RegExp('(' + termo.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+    return texto.replace(re, '<strong style="color:#f0f0f0">$1</strong>');
+}
+
+// ── Busca com dropdown ────────────────────────────────────────────────────────
+let buscarTimer;
+const searchInput = document.getElementById('feed-search-input');
+const dropdown    = document.getElementById('feed-search-dropdown');
+
+searchInput.addEventListener('input',   () => feedBuscar(searchInput.value));
+searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') feedBuscarPagina(searchInput.value); });
+
+function feedBuscar(q) {
+    clearTimeout(buscarTimer);
+    if (!q.trim()) { dropdown.style.display = 'none'; return; }
+
+    buscarTimer = setTimeout(async () => {
+        dropdown.style.display = 'block';
+        dropdown.innerHTML = '<section class="feed-widget-loading"><i class="fas fa-spinner fa-spin"></i></section>';
+
+        const [rPessoas, rTreinos] = await Promise.all([
+            fetch('/api/usuarios/buscar?q=' + encodeURIComponent(q) + '&limit=3').then(r => r.json()).catch(() => ({ usuarios: [] })),
+            fetch('/api/treinos/buscar?q='  + encodeURIComponent(q) + '&limit=3').then(r => r.json()).catch(() => ({ treinos: [] })),
+        ]);
+
+        let html = '';
+
+        if (rPessoas.usuarios?.length) {
+            html += '<section class="feed-search-section"><section class="feed-search-section-title">Pessoas</section>';
+            html += rPessoas.usuarios.map(u => `
+                <a href="/u/${u.username}" class="feed-search-item">
+                    <img src="${u.foto_perfil || '/images/avatar.png'}" class="feed-search-avatar" alt="${u.nome}">
+                    <section>
+                        <section class="feed-search-name">${destacar(u.nome, q)}</section>
+                        <section class="feed-search-sub">@${destacar(u.username, q)}</section>
+                    </section>
+                </a>`).join('');
+            html += '</section>';
+        }
+
+        if (rTreinos.treinos?.length) {
+            html += '<section class="feed-search-section"><section class="feed-search-section-title">Treinos</section>';
+            html += rTreinos.treinos.map(t => `
+                <a href="/treinos/${t.id}" class="feed-search-item">
+                    <section class="feed-search-treino-icon"><i class="fas fa-dumbbell"></i></section>
+                    <section>
+                        <section class="feed-search-name">${destacar(t.nome, q)}</section>
+                        <section class="feed-search-sub">${t.total_exercicios} exercícios · ${t.total_execucoes} execuções</section>
+                    </section>
+                </a>`).join('');
+            html += '</section>';
+        }
+
+        if (!rPessoas.usuarios?.length && !rTreinos.treinos?.length) {
+            html = '<section style="padding:16px;text-align:center;color:#555;font-size:0.875rem">Nenhum resultado</section>';
+        } else {
+            html += `<a href="/buscar?q=${encodeURIComponent(q)}" class="feed-search-ver-todos">Ver todos os resultados →</a>`;
+        }
+
+        dropdown.innerHTML = html;
+    }, 350);
+}
+
+function feedBuscarPagina(q) {
+    if (q.trim()) window.location.href = '/buscar?q=' + encodeURIComponent(q);
+}
+
+document.addEventListener('click', e => {
+    if (!searchInput.contains(e.target) && !dropdown.contains(e.target)) {
+        dropdown.style.display = 'none';
+    }
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') dropdown.style.display = 'none'; });
+
+// ── Sugestões de pessoas ──────────────────────────────────────────────────────
+fetch('/api/feed/sugestoes')
+    .then(r => r.json())
+    .then(data => {
+        const el = document.getElementById('sugestoes-list');
+        if (!data.sugestoes?.length) {
+            el.innerHTML = '<section class="feed-widget-loading">Nenhuma sugestão no momento</section>';
+            return;
+        }
+        el.innerHTML = data.sugestoes.map(u => `
+            <section class="sugestao-card">
+                <a href="/u/${u.username}">
+                    <img src="${u.foto_perfil || '/images/avatar.png'}" class="sugestao-avatar" alt="${u.nome}">
+                </a>
+                <section class="sugestao-info">
+                    <section class="sugestao-nome">${u.nome}</section>
+                    <section class="sugestao-username">@${u.username}</section>
+                </section>
+                <button class="sugestao-btn" data-user-id="${u.id}">Seguir</button>
+            </section>
+        `).join('');
+    })
+    .catch(() => {
+        document.getElementById('sugestoes-list').innerHTML = '<section class="feed-widget-loading">Erro ao carregar</section>';
+    });
+
+// ── Treinos populares ─────────────────────────────────────────────────────────
+fetch('/api/feed/treinos-populares')
+    .then(r => r.json())
+    .then(data => {
+        const el = document.getElementById('treinos-list');
+        if (!data.treinos?.length) {
+            el.innerHTML = '<section class="feed-widget-loading">Nenhum treino público ainda</section>';
+            return;
+        }
+        el.innerHTML = data.treinos.map(t => `
+            <a href="/treinos/${t.id}" class="treino-popular-card">
+                <section class="treino-popular-icon"><i class="fas fa-dumbbell"></i></section>
+                <section style="flex:1;min-width:0">
+                    <section class="treino-popular-nome">${t.nome}</section>
+                    <section class="treino-popular-meta">
+                        <span><i class="fas fa-list"></i> ${t.total_exercicios} exercícios</span>
+                        <span><i class="fas fa-play"></i> ${t.total_execucoes} execuções</span>
+                    </section>
+                    <section style="font-size:0.72rem;color:#555;margin-top:3px">
+                        por ${t.criador_username ? '@' + t.criador_username : t.criador_nome}
+                    </section>
+                </section>
+            </a>
+        `).join('');
+    })
+    .catch(() => {
+        document.getElementById('treinos-list').innerHTML = '<section class="feed-widget-loading">Erro ao carregar</section>';
+    });
+
+// ── Amizades ──────────────────────────────────────────────────────────────────
+document.getElementById('sugestoes-list').addEventListener('click', async e => {
+    const btn = e.target.closest('.sugestao-btn');
+    if (!btn || btn.disabled) return;
+    const userId = btn.dataset.userId;
+    btn.disabled = true;
+    btn.textContent = '...';
+    const r = await fetch(`/api/amizades/solicitar/${userId}`, { method: 'POST' })
+        .then(x => x.json()).catch(() => ({ ok: false }));
+    if (r.ok) {
+        btn.textContent = 'Enviado';
+        btn.style.opacity = '0.5';
+    } else {
+        btn.textContent = 'Seguir';
+        btn.disabled = false;
+    }
+});
+
+// Logout button (sem onclick inline)
+document.getElementById('feed-logout-btn')?.addEventListener('click', () => abrirModalLogout());
+
+// ── Sugestões mobile ──────────────────────────────────────────────────────────
+async function carregarSugestoesMobile() {
+    const lista = document.getElementById('feed-sugestoes-mobile-list');
+    if (!lista || window.innerWidth > 768) return;
+    try {
+        const r = await fetch('/api/feed/sugestoes');
+        const d = await r.json();
+        if (!d.sugestoes?.length) {
+            const secao = document.getElementById('feed-sugestoes-mobile');
+            if (secao) secao.style.display = 'none';
+            return;
+        }
+        lista.innerHTML = d.sugestoes.map(u => `
+            <section class="feed-sugestao-mobile-card">
+                <a href="/u/${u.username || u.id}">
+                    <img src="${u.foto_perfil || '/images/avatar.png'}"
+                        class="feed-sugestao-mobile-foto"
+                        alt="${u.nome}"
+                        loading="lazy">
+                </a>
+                <section class="feed-sugestao-mobile-nome">${u.nome}</section>
+                ${u.username ? `<section class="feed-sugestao-mobile-username">@${u.username}</section>` : ''}
+                <button class="feed-sugestao-mobile-btn" data-user-id="${u.id}">Seguir</button>
+            </section>
+        `).join('');
+    } catch (_) {
+        const secao = document.getElementById('feed-sugestoes-mobile');
+        if (secao) secao.style.display = 'none';
+    }
+}
+
+document.getElementById('feed-sugestoes-mobile-list')?.addEventListener('click', async e => {
+    const btn = e.target.closest('.feed-sugestao-mobile-btn');
+    if (!btn || btn.classList.contains('enviado')) return;
+    const userId = btn.dataset.userId;
+    try {
+        await fetch(`/api/amizades/solicitar/${userId}`, { method: 'POST' });
+    } catch (_) {}
+    btn.textContent = 'Enviado';
+    btn.classList.add('enviado');
+    btn.disabled = true;
+});
+
+carregarSugestoesMobile();
+
+// ── Fix scroll horizontal sugestões mobile ────────────────────────────────────
+(function () {
+    const scrollEl = document.getElementById('feed-sugestoes-mobile-list');
+    if (!scrollEl) return;
+    let startX = 0, startY = 0, scrollingX = false;
+    scrollEl.addEventListener('touchstart', function (e) {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+        scrollingX = false;
+    }, { passive: true });
+    scrollEl.addEventListener('touchmove', function (e) {
+        const dx = Math.abs(e.touches[0].clientX - startX);
+        const dy = Math.abs(e.touches[0].clientY - startY);
+        if (!scrollingX && dy > dx) return;
+        scrollingX = true;
+        e.stopPropagation();
+    }, { passive: true });
+})();
+
+// ── Posts do feed (F5 + F6) ──────────────────────────────────────────────────
+(function () {
+    const REACAO_EMOJI = {
+        fogo: '🔥', musculo: '💪', surpresa: '😮', parabens: '🎉', forca: '⚡',
+    };
+
+    function escapeHtml(str) {
+        return String(str).replace(/[&<>"']/g, c => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+        }[c]));
+    }
+
+    function formatarTempoPost(iso) {
+        const diff = (Date.now() - new Date(iso)) / 1000;
+        if (diff < 60)     return 'agora';
+        if (diff < 3600)   return Math.floor(diff / 60) + 'min';
+        if (diff < 86400)  return Math.floor(diff / 3600) + 'h';
+        if (diff < 172800) return 'ontem';
+        return Math.floor(diff / 86400) + 'd';
+    }
+
+    function atualizarTemposPosts() {
+        document.querySelectorAll('.post-time').forEach(el => {
+            el.textContent = formatarTempoPost(el.dataset.time);
+        });
+    }
+
+    function renderPostCard(post) {
+        const nome     = escapeHtml(post.autor_nome || '');
+        const username = post.autor_username ? escapeHtml(post.autor_username) : '';
+        const perfil   = '/u/' + encodeURIComponent(post.autor_username || post.autor_id);
+        const foto     = escapeHtml(post.autor_foto || '/images/avatar.png');
+        const legenda  = post.legenda ? `<p class="post-legenda">${escapeHtml(post.legenda)}</p>` : '';
+        const midias   = post.midias || [];
+
+        let midiaHtml = '';
+        if (midias.length) {
+            const items = midias.map(m => m.tipo === 'video'
+                ? `<video class="post-midia-item" src="${escapeHtml(m.url)}" controls playsinline></video>`
+                : `<img class="post-midia-item" src="${escapeHtml(m.url)}" alt="Post de ${nome}" loading="lazy">`
+            ).join('');
+            const dots = midias.length > 1
+                ? `<section class="post-carrossel-dots">${midias.map((_, i) => `<span class="post-dot${i === 0 ? ' active' : ''}"></span>`).join('')}</section>`
+                : '';
+            midiaHtml = `
+                <section class="post-midia${midias.length > 1 ? ' post-carrossel' : ''}">
+                    <section class="post-midia-track">${items}</section>
+                    ${dots}
+                </section>`;
+        }
+
+        const menuAction = post.souAutor
+            ? '<button type="button" class="post-menu-action" data-action="remover"><i class="fas fa-trash"></i> Remover</button>'
+            : '<button type="button" class="post-menu-action" data-action="denunciar"><i class="fas fa-flag"></i> Denunciar</button>';
+
+        const reagirAtivo = post.minhaReacao ? ' ativo' : '';
+        const reagirIcone = REACAO_EMOJI[post.minhaReacao] || '🔥';
+        const minhaFoto   = escapeHtml((window.__FEED_STATE__ && window.__FEED_STATE__.minhaFoto) || '/images/avatar.png');
+
+        return `
+        <section class="post-card" data-post-id="${post.id}">
+            <section class="post-header">
+                <a href="${perfil}"><img class="post-avatar" src="${foto}" alt="${nome}"></a>
+                <section class="post-header-info">
+                    <a href="${perfil}" class="post-author-name">${nome}</a>
+                    <section class="post-header-sub">
+                        ${username ? `<span class="post-author-username">@${username}</span><span class="post-dot-sep">·</span>` : ''}
+                        <span class="post-time" data-time="${post.created_at}">${formatarTempoPost(post.created_at)}</span>
+                    </section>
+                </section>
+                <button class="post-menu-btn" type="button" data-post-id="${post.id}" data-own="${post.souAutor ? '1' : '0'}">
+                    <i class="fas fa-ellipsis-h"></i>
+                </button>
+                <section class="post-menu-dropdown" style="display:none">${menuAction}</section>
+            </section>
+            ${legenda}
+            ${midiaHtml}
+            <section class="post-acoes">
+                <section class="post-reacoes-wrap">
+                    <button class="post-reagir-btn${reagirAtivo}" type="button" data-post-id="${post.id}">
+                        <span class="post-reagir-icone">${reagirIcone}</span>
+                        <span class="post-reacoes-total">${post.total_reacoes || 0}</span>
+                    </button>
+                    <section class="post-reacao-picker" data-post-id="${post.id}">
+                        <button type="button" class="reacao-opcao" data-tipo="fogo"     title="Fogo">🔥</button>
+                        <button type="button" class="reacao-opcao" data-tipo="musculo"  title="Força">💪</button>
+                        <button type="button" class="reacao-opcao" data-tipo="surpresa" title="Surpresa">😮</button>
+                        <button type="button" class="reacao-opcao" data-tipo="parabens" title="Parabéns">🎉</button>
+                        <button type="button" class="reacao-opcao" data-tipo="forca"    title="Energia">⚡</button>
+                    </section>
+                </section>
+                <button class="post-comentar-btn" type="button" data-post-id="${post.id}">
+                    <i class="fas fa-comment"></i>
+                    <span class="post-comentarios-total">${post.total_comentarios || 0}</span>
+                </button>
+            </section>
+            <section class="post-comentarios" id="comentarios-${post.id}" style="display:none">
+                <section class="post-comentarios-lista" id="lista-comentarios-${post.id}"></section>
+                <section class="post-comentario-input-wrap">
+                    <img src="${minhaFoto}" class="post-comentario-avatar" alt="Você">
+                    <section class="post-comentario-input-container">
+                        <input type="text" class="post-comentario-input" data-post-id="${post.id}"
+                            placeholder="Adicione um comentário... @mencione alguém" maxlength="1000">
+                        <button type="button" class="post-comentario-enviar" data-post-id="${post.id}">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </section>
+                </section>
+            </section>
+        </section>`;
+    }
+
+    const EVENTO_ICONE = { checkin: '📍', treino: '💪', conquista: '🏆' };
+
+    function renderEventCard(item) {
+        const payload = item.evento_payload
+            ? (typeof item.evento_payload === 'string' ? JSON.parse(item.evento_payload) : item.evento_payload)
+            : {};
+        const nome     = escapeHtml(item.autor_nome || '');
+        const username = item.autor_username ? escapeHtml(item.autor_username) : '';
+        const perfil   = '/u/' + encodeURIComponent(item.autor_username || item.autor_id);
+        const foto     = escapeHtml(item.autor_foto || '/images/avatar.png');
+
+        const descricoes = {
+            checkin:   `Fez check-in${payload.gym_nome ? ' em ' + escapeHtml(payload.gym_nome) : ''}`,
+            treino:    `Concluiu um treino${payload.treino_nome ? ' · ' + escapeHtml(payload.treino_nome) : ''}${payload.total_exercicios ? ' · ' + payload.total_exercicios + ' exercícios' : ''}`,
+            conquista: `Desbloqueou ${payload.conquista_icone || '🏆'} ${escapeHtml(payload.conquista_nome || 'uma conquista')}`,
+        };
+
+        return `
+        <section class="post-card evento-card" data-id="${item.id}" data-tipo="evento">
+            <section class="post-header">
+                <a href="${perfil}"><img class="post-avatar" src="${foto}" alt="${nome}"></a>
+                <section class="post-header-info">
+                    <a href="${perfil}" class="post-author-name">${nome}</a>
+                    <section class="post-header-sub">
+                        ${username ? `<span class="post-author-username">@${username}</span><span class="post-dot-sep">·</span>` : ''}
+                        <span class="post-time" data-time="${item.created_at}">${formatarTempoPost(item.created_at)}</span>
+                    </section>
+                </section>
+            </section>
+            <section class="evento-body">
+                <span class="evento-icone">${EVENTO_ICONE[item.evento_tipo] || '📌'}</span>
+                <span class="evento-descricao">${descricoes[item.evento_tipo] || 'Teve uma atividade'}</span>
+            </section>
+        </section>`;
+    }
+
+    function renderItem(item) {
+        return item._tipo === 'evento' ? renderEventCard(item) : renderPostCard(item);
+    }
+
+    atualizarTemposPosts();
+    setInterval(atualizarTemposPosts, 60000);
+
+    // ── Compose ──────────────────────────────────────────────────────────────
+    const textarea    = document.getElementById('feed-compose-textarea');
+    const mediaBtn     = document.getElementById('feed-compose-media-btn');
+    const fileInput    = document.getElementById('feed-compose-file-input');
+    const previewWrap  = document.getElementById('feed-compose-preview');
+    const submitBtn    = document.getElementById('feed-compose-submit-btn');
+    const msgEl        = document.getElementById('feed-compose-msg');
+    const postsWrap    = document.getElementById('feed-posts');
+    const emptyState   = document.getElementById('feed-empty');
+
+    let selectedFiles = [];
+
+    function atualizarBotaoPostar() {
+        submitBtn.disabled = !textarea.value.trim() && selectedFiles.length === 0;
+    }
+
+    textarea.addEventListener('input', () => {
+        textarea.style.height = 'auto';
+        textarea.style.height = textarea.scrollHeight + 'px';
+        atualizarBotaoPostar();
+    });
+
+    mediaBtn.addEventListener('click', () => fileInput.click());
+
+    fileInput.addEventListener('change', () => {
+        const novos = Array.from(fileInput.files || []);
+        selectedFiles = selectedFiles.concat(novos).slice(0, 10);
+        fileInput.value = '';
+        renderPreview();
+        atualizarBotaoPostar();
+    });
+
+    function renderPreview() {
+        previewWrap.innerHTML = '';
+        selectedFiles.forEach((file, idx) => {
+            const url  = URL.createObjectURL(file);
+            const item = document.createElement('section');
+            item.className = 'compose-preview-item';
+            item.innerHTML = file.type.startsWith('video')
+                ? `<video src="${url}" muted></video>`
+                : `<img src="${url}" alt="">`;
+            const removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.className = 'compose-preview-remove';
+            removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+            removeBtn.addEventListener('click', () => {
+                selectedFiles.splice(idx, 1);
+                renderPreview();
+                atualizarBotaoPostar();
+            });
+            item.appendChild(removeBtn);
+            previewWrap.appendChild(item);
+        });
+    }
+
+    function resetCompose() {
+        textarea.value = '';
+        textarea.style.height = 'auto';
+        selectedFiles = [];
+        renderPreview();
+        atualizarBotaoPostar();
+    }
+
+    function mostrarMensagem(texto, tipo) {
+        msgEl.textContent = texto;
+        msgEl.className   = 'feed-compose-msg feed-compose-msg-' + tipo;
+        msgEl.style.display = 'block';
+        setTimeout(() => { msgEl.style.display = 'none'; }, 5000);
+    }
+
+    submitBtn.addEventListener('click', async () => {
+        if (submitBtn.disabled) return;
+        submitBtn.disabled = true;
+        const textoOriginal = submitBtn.textContent;
+        submitBtn.textContent = 'Publicando...';
+
+        const formData = new FormData();
+        if (textarea.value.trim()) formData.append('legenda', textarea.value.trim());
+        selectedFiles.forEach(file => formData.append('midias', file));
+
+        try {
+            const data = await fetch('/api/posts', { method: 'POST', body: formData }).then(r => r.json());
+            if (!data.ok) {
+                mostrarMensagem(data.erro || 'Erro ao publicar post.', 'erro');
+                return;
+            }
+            mostrarMensagem(data.mensagem, data.status === 'em_revisao' ? 'aviso' : 'ok');
+            resetCompose();
+            if (data.status === 'ativo') {
+                try {
+                    const feedResp = await fetch('/api/posts/feed').then(r => r.json());
+                    const novo = feedResp.items.find(i => i._tipo === 'post' && i.id === data.postId);
+                    if (novo) {
+                        postsWrap.insertAdjacentHTML('afterbegin', renderPostCard(novo));
+                        atualizarTemposPosts();
+                        if (emptyState) emptyState.style.display = 'none';
+                    }
+                } catch (_) {}
+            }
+        } catch (_) {
+            mostrarMensagem('Erro ao publicar post.', 'erro');
+        } finally {
+            submitBtn.textContent = textoOriginal;
+            atualizarBotaoPostar();
+        }
+    });
+
+    // ── Scroll infinito ─────────────────────────────────────────────────────
+    const feedState = window.__FEED_STATE__ || { hasMore: false, lastId: null, lastEventId: null };
+    let carregandoMais = false;
+    const sentinel  = document.getElementById('feed-scroll-sentinel');
+    const loadingEl = document.getElementById('feed-loading-more');
+
+    async function carregarMaisPosts() {
+        if (carregandoMais || !feedState.hasMore) return;
+        carregandoMais = true;
+        loadingEl.style.display = 'block';
+        try {
+            const data = await fetch(
+                `/api/posts/feed?last_id=${feedState.lastId ?? ''}&last_event_id=${feedState.lastEventId ?? ''}`
+            ).then(r => r.json());
+            data.items.forEach(item => {
+                postsWrap.insertAdjacentHTML('beforeend', renderItem(item));
+            });
+            atualizarTemposPosts();
+            feedState.hasMore     = data.hasMore;
+            feedState.lastId      = data.lastId;
+            feedState.lastEventId = data.lastEventId;
+        } catch (_) {
+        } finally {
+            carregandoMais = false;
+            loadingEl.style.display = 'none';
+            if (!feedState.hasMore) observer.disconnect();
+        }
+    }
+
+    const observer = new IntersectionObserver(entries => {
+        if (entries[0].isIntersecting) carregarMaisPosts();
+    });
+    if (sentinel) observer.observe(sentinel);
+
+    // ── Polling de novos itens ────────────────────────────────────────────────
+    const novosBanner = document.getElementById('feed-novos-banner');
+
+    async function verificarNovos() {
+        try {
+            const data = await fetch(
+                `/api/posts/feed/novos?since_post_id=${feedState.primeiroPostId ?? 0}&since_event_id=${feedState.primeiroEventId ?? 0}`
+            ).then(r => r.json());
+            if (data.total > 0 && novosBanner) {
+                novosBanner.textContent = `${data.total} novo${data.total > 1 ? 's' : ''} — ver`;
+                novosBanner.style.display = 'block';
+            }
+        } catch (_) {}
+    }
+
+    novosBanner?.addEventListener('click', async () => {
+        try {
+            const data = await fetch('/api/posts/feed').then(r => r.json());
+            postsWrap.innerHTML = data.items.map(renderItem).join('');
+            atualizarTemposPosts();
+            feedState.hasMore      = data.hasMore;
+            feedState.lastId       = data.lastId;
+            feedState.lastEventId  = data.lastEventId;
+            feedState.primeiroPostId  = data.items.find(i => i._tipo === 'post')?.id ?? feedState.primeiroPostId;
+            feedState.primeiroEventId = data.items.find(i => i._tipo === 'evento')?.id ?? feedState.primeiroEventId;
+            if (emptyState) emptyState.style.display = data.items.length ? 'none' : '';
+            novosBanner.style.display = 'none';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } catch (_) {}
+    });
+
+    setInterval(verificarNovos, 30000);
+
+    // ── Menu do post (remover / denunciar) ──────────────────────────────────
+    document.addEventListener('click', async e => {
+        const menuBtn   = e.target.closest('.post-menu-btn');
+        const actionBtn = e.target.closest('.post-menu-action');
+
+        if (menuBtn) {
+            const dd = menuBtn.nextElementSibling;
+            document.querySelectorAll('.post-menu-dropdown').forEach(el => { if (el !== dd) el.style.display = 'none'; });
+            dd.style.display = dd.style.display === 'block' ? 'none' : 'block';
+            return;
+        }
+
+        if (!actionBtn) {
+            document.querySelectorAll('.post-menu-dropdown').forEach(el => { el.style.display = 'none'; });
+            return;
+        }
+
+        const card   = actionBtn.closest('.post-card');
+        const postId = card.dataset.postId;
+        const acao   = actionBtn.dataset.action;
+
+        if (acao === 'remover') {
+            if (!confirm('Remover este post?')) return;
+            try {
+                const data = await fetch(`/api/posts/${postId}`, { method: 'DELETE' }).then(r => r.json());
+                if (data.ok) {
+                    card.remove();
+                    if (postsWrap && !postsWrap.children.length && emptyState) emptyState.style.display = '';
+                }
+            } catch (_) {}
+        } else if (acao === 'denunciar') {
+            try {
+                const data = await fetch(`/api/posts/${postId}/denunciar`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ motivo: 'outro' }),
+                }).then(r => r.json());
+                actionBtn.textContent = data.ok ? 'Denunciado' : 'Erro ao denunciar';
+                actionBtn.disabled = true;
+            } catch (_) {}
+        }
+    });
+
+    // ── Carrossel: indicador de página ───────────────────────────────────────
+    document.addEventListener('scroll', e => {
+        const track = e.target.closest && e.target.closest('.post-midia-track');
+        if (!track) return;
+        const dots = track.parentElement.querySelectorAll('.post-dot');
+        if (!dots.length) return;
+        const idx = Math.round(track.scrollLeft / track.clientWidth);
+        dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+    }, true);
+
+    // ── Lightbox de imagem ───────────────────────────────────────────────────
+    const lightbox      = document.getElementById('lightbox');
+    const lightboxImg   = document.getElementById('lightbox-img');
+    const lightboxClose = document.getElementById('lightbox-close');
+
+    function abrirLightbox(src, alt) {
+        lightboxImg.src = src;
+        lightboxImg.alt = alt || '';
+        lightbox.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function fecharLightbox() {
+        lightbox.style.display = 'none';
+        lightboxImg.src = '';
+        document.body.style.overflow = '';
+    }
+
+    lightboxClose?.addEventListener('click', fecharLightbox);
+    lightbox?.addEventListener('click', e => { if (e.target === lightbox) fecharLightbox(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') fecharLightbox(); });
+
+    postsWrap?.addEventListener('click', e => {
+        const img = e.target.closest('img.post-midia-item');
+        if (!img) return;
+        abrirLightbox(img.src, img.alt);
+    });
+
+    // ── Reações ──────────────────────────────────────────────────────────────
+    postsWrap?.addEventListener('click', e => {
+        const btn = e.target.closest('.post-reagir-btn');
+        if (btn) {
+            const postId = btn.dataset.postId;
+            const picker = document.querySelector(`.post-reacao-picker[data-post-id="${postId}"]`);
+            if (picker) {
+                document.querySelectorAll('.post-reacao-picker.aberto').forEach(p => { if (p !== picker) p.classList.remove('aberto'); });
+                picker.classList.toggle('aberto');
+            }
+            return;
+        }
+
+        const opcao = e.target.closest('.reacao-opcao');
+        if (opcao) {
+            const picker = opcao.closest('.post-reacao-picker');
+            const postId = picker?.dataset.postId;
+            const tipo   = opcao.dataset.tipo;
+            if (!postId || !tipo) return;
+            picker.classList.remove('aberto');
+            reagir(postId, tipo);
+        }
+    });
+
+    async function reagir(postId, tipo) {
+        try {
+            const data = await fetch(`/api/posts/${postId}/reagir`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ tipo }),
+            }).then(r => r.json());
+            if (!data.ok) return;
+
+            const btn   = document.querySelector(`.post-reagir-btn[data-post-id="${postId}"]`);
+            const total = btn?.querySelector('.post-reacoes-total');
+            const icone = btn?.querySelector('.post-reagir-icone');
+            if (total) total.textContent = data.total_reacoes;
+            if (icone) icone.textContent = REACAO_EMOJI[tipo] || '🔥';
+            if (btn)   btn.classList.add('ativo');
+        } catch (_) {}
+    }
+
+    // Fechar picker de reações ao clicar fora
+    document.addEventListener('click', e => {
+        if (!e.target.closest('.post-reacoes-wrap')) {
+            document.querySelectorAll('.post-reacao-picker.aberto').forEach(p => p.classList.remove('aberto'));
+        }
+    });
+
+    // ── Comentários ──────────────────────────────────────────────────────────
+    function destacarMencoes(texto) {
+        return texto.replace(/@([a-z0-9_]+)/gi, '<a href="/u/$1" class="mencao">@$1</a>');
+    }
+
+    async function carregarComentarios(postId) {
+        const lista = document.getElementById(`lista-comentarios-${postId}`);
+        if (!lista) return;
+        lista.innerHTML = '<section style="text-align:center;padding:12px;color:#555;font-size:0.82rem"><i class="fas fa-spinner fa-spin"></i></section>';
+
+        try {
+            const data = await fetch(`/api/posts/${postId}/comentarios`).then(r => r.json());
+            if (!data.comentarios?.length) {
+                lista.innerHTML = '<section style="text-align:center;padding:12px;color:#555;font-size:0.82rem">Seja o primeiro a comentar</section>';
+                return;
+            }
+            lista.innerHTML = data.comentarios.map(c => `
+                <section class="comentario-card" data-id="${c.id}">
+                    <a href="/u/${encodeURIComponent(c.autor_username || c.autor_id)}">
+                        <img src="${escapeHtml(c.autor_foto || '/images/avatar.png')}" class="comentario-avatar" alt="${escapeHtml(c.autor_nome)}">
+                    </a>
+                    <section class="comentario-bubble">
+                        <section class="comentario-autor">
+                            <a href="/u/${encodeURIComponent(c.autor_username || c.autor_id)}">${escapeHtml(c.autor_nome)}</a>
+                        </section>
+                        <section class="comentario-texto">${destacarMencoes(escapeHtml(c.texto))}</section>
+                        <section class="comentario-tempo">${formatarTempoPost(c.created_at)}</section>
+                    </section>
+                </section>
+            `).join('');
+        } catch (_) {
+            lista.innerHTML = '<section style="text-align:center;padding:12px;color:#555;font-size:0.82rem">Erro ao carregar comentários</section>';
+        }
+    }
+
+    async function enviarComentario(input) {
+        const texto  = input.value.trim();
+        const postId = input.dataset.postId;
+        if (!texto || !postId) return;
+
+        input.disabled = true;
+        try {
+            const data = await fetch(`/api/posts/${postId}/comentarios`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ texto }),
+            }).then(r => r.json());
+
+            if (!data.ok) {
+                mostrarMensagem(data.erro || 'Erro ao comentar.', 'erro');
+                return;
+            }
+
+            input.value = '';
+            const btnEnviar = input.closest('.post-comentario-input-container')?.querySelector('.post-comentario-enviar');
+            if (btnEnviar) btnEnviar.classList.remove('ativo');
+
+            const total = document.querySelector(`.post-comentar-btn[data-post-id="${postId}"] .post-comentarios-total`);
+            if (total) total.textContent = String(parseInt(total.textContent || '0', 10) + 1);
+
+            await carregarComentarios(postId);
+        } catch (_) {
+            mostrarMensagem('Erro ao comentar. Tente novamente.', 'erro');
+        } finally {
+            input.disabled = false;
+            input.focus();
+        }
+    }
+
+    postsWrap?.addEventListener('click', async e => {
+        const btnComentar = e.target.closest('.post-comentar-btn');
+        if (btnComentar) {
+            const postId = btnComentar.dataset.postId;
+            const secao  = document.getElementById(`comentarios-${postId}`);
+            if (!secao) return;
+            const aberto = secao.style.display !== 'none';
+            secao.style.display = aberto ? 'none' : 'block';
+            if (!aberto) {
+                await carregarComentarios(postId);
+                secao.querySelector('.post-comentario-input')?.focus();
+            }
+            return;
+        }
+
+        const btnEnviar = e.target.closest('.post-comentario-enviar');
+        if (btnEnviar) {
+            const input = btnEnviar.closest('.post-comentario-input-wrap')?.querySelector('.post-comentario-input');
+            if (input) await enviarComentario(input);
+        }
+    });
+
+    postsWrap?.addEventListener('keydown', async e => {
+        if (e.key !== 'Enter') return;
+        const input = e.target.closest('.post-comentario-input');
+        if (!input) return;
+        if (mencaoAtiva && input._mencaoDropdown && input._mencaoDropdown.style.display !== 'none') return;
+        await enviarComentario(input);
+    });
+
+    postsWrap?.addEventListener('input', e => {
+        const input = e.target.closest('.post-comentario-input');
+        if (!input) return;
+        const btnEnviar = input.closest('.post-comentario-input-container')?.querySelector('.post-comentario-enviar');
+        if (btnEnviar) btnEnviar.classList.toggle('ativo', input.value.trim().length > 0);
+        detectarMencao(input);
+    });
+
+    // ── Autocomplete de @menção ────────────────────────────────────────────
+    let mencaoTimer;
+    let mencaoAtiva = false;
+    let mencaoStart = -1;
+
+    function criarDropdownMencao(input) {
+        let dropdown = input._mencaoDropdown;
+        if (!dropdown) {
+            dropdown = document.createElement('section');
+            dropdown.className = 'mencao-dropdown';
+            const container = input.closest('.post-comentario-input-container')
+                || input.closest('.post-comentario-input-wrap')
+                || input.parentElement;
+            container.style.position = 'relative';
+            container.appendChild(dropdown);
+            input._mencaoDropdown = dropdown;
+        }
+        return dropdown;
+    }
+
+    function fecharDropdownMencao(input) {
+        if (input._mencaoDropdown) input._mencaoDropdown.style.display = 'none';
+        mencaoAtiva = false;
+        mencaoStart = -1;
+    }
+
+    function detectarMencao(input) {
+        const texto  = input.value;
+        const cursor = input.selectionStart;
+
+        let atPos = -1;
+        for (let i = cursor - 1; i >= 0; i--) {
+            if (texto[i] === '@') { atPos = i; break; }
+            if (texto[i] === ' ') break;
+        }
+
+        if (atPos === -1) {
+            fecharDropdownMencao(input);
+            return;
+        }
+
+        const termo = texto.slice(atPos + 1, cursor);
+        if (termo.length === 0) {
+            fecharDropdownMencao(input);
+            return;
+        }
+
+        mencaoStart = atPos;
+        mencaoAtiva = true;
+        buscarMencao(input, termo);
+    }
+
+    function buscarMencao(input, termo) {
+        clearTimeout(mencaoTimer);
+        mencaoTimer = setTimeout(async () => {
+            try {
+                const data = await fetch(`/api/usuarios/buscar?q=${encodeURIComponent(termo)}&limit=5`)
+                    .then(r => r.json());
+                renderDropdownMencao(input, data.usuarios || []);
+            } catch (_) {
+                fecharDropdownMencao(input);
+            }
+        }, 200);
+    }
+
+    function renderDropdownMencao(input, usuarios) {
+        const dropdown = criarDropdownMencao(input);
+
+        if (!usuarios.length) {
+            dropdown.style.display = 'none';
+            return;
+        }
+
+        dropdown.innerHTML = usuarios.map(u => `
+            <section class="mencao-opcao" data-username="${escapeHtml(u.username)}">
+                <img class="mencao-opcao-avatar" src="${escapeHtml(u.foto_perfil || '/images/avatar.png')}" alt="${escapeHtml(u.nome)}">
+                <section class="mencao-opcao-info">
+                    <section class="mencao-opcao-nome">${escapeHtml(u.nome)}</section>
+                    <section class="mencao-opcao-username">@${escapeHtml(u.username)}</section>
+                </section>
+            </section>
+        `).join('');
+
+        dropdown.querySelectorAll('.mencao-opcao').forEach(op => {
+            op.addEventListener('mousedown', e => {
+                e.preventDefault();
+                aplicarMencao(input, op.dataset.username);
+            });
+        });
+
+        dropdown.style.display = 'block';
+    }
+
+    function aplicarMencao(input, username) {
+        const texto  = input.value;
+        const cursor = input.selectionStart;
+        const antes  = texto.slice(0, mencaoStart);
+        const depois = texto.slice(cursor);
+        input.value  = `${antes}@${username} ${depois}`;
+
+        const novoCursor = mencaoStart + username.length + 2;
+        input.setSelectionRange(novoCursor, novoCursor);
+        input.focus();
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+
+        fecharDropdownMencao(input);
+    }
+
+    postsWrap?.addEventListener('keydown', e => {
+        const input = e.target.closest('.post-comentario-input');
+        if (!input || !mencaoAtiva) return;
+        const dropdown = input._mencaoDropdown;
+        if (!dropdown || dropdown.style.display === 'none') return;
+
+        const opcoes = dropdown.querySelectorAll('.mencao-opcao');
+        const ativo  = dropdown.querySelector('.mencao-opcao.selecionado');
+        const idx    = Array.from(opcoes).indexOf(ativo);
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            if (ativo) ativo.classList.remove('selecionado');
+            (opcoes[idx + 1] || opcoes[0]).classList.add('selecionado');
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            if (ativo) ativo.classList.remove('selecionado');
+            (opcoes[idx - 1] || opcoes[opcoes.length - 1]).classList.add('selecionado');
+        } else if (e.key === 'Enter' && ativo) {
+            e.preventDefault();
+            aplicarMencao(input, ativo.dataset.username);
+        } else if (e.key === 'Escape') {
+            fecharDropdownMencao(input);
+        }
+    });
+
+    postsWrap?.addEventListener('blur', e => {
+        const input = e.target.closest('.post-comentario-input');
+        if (!input) return;
+        setTimeout(() => fecharDropdownMencao(input), 150);
+    }, true);
+
+    // ── Stories (F8) ─────────────────────────────────────────────────────────
+    let storiesData     = [];
+    let storyGrupoAtual = -1;
+    let storyIndexAtual = 0;
+    let storyTimer       = null;
+    const STORY_DURACAO  = 5000;
+
+    let storyPausado        = false;
+    let storyTempoRestante  = STORY_DURACAO;
+    let storyInicioAtual    = null;
+    let storyModalAberto    = false;
+
+    const storiesAmigosEl = document.getElementById('stories-amigos');
+    const storyViewerEl   = document.getElementById('story-viewer');
+    const storyProprioEl  = document.getElementById('story-proprio');
+
+    async function carregarStories() {
+        if (!storiesAmigosEl) return;
+        try {
+            const data = await fetch('/api/stories/feed').then(r => r.json());
+            const gruposAmigos = data.grupos || [];
+            const proprio       = data.proprio || null;
+            const offset        = proprio ? 1 : 0;
+
+            storiesData = proprio ? [proprio, ...gruposAmigos] : gruposAmigos;
+
+            if (storyProprioEl) {
+                storyProprioEl.classList.toggle('story-bubble--novo', !!proprio);
+                storyProprioEl.dataset.grupo = proprio ? '0' : '';
+            }
+
+            if (!gruposAmigos.length) {
+                storiesAmigosEl.innerHTML = '';
+                return;
+            }
+
+            storiesAmigosEl.innerHTML = gruposAmigos.map((grupo, idx) => {
+                const status = grupo.total_vistos >= grupo.total_stories ? 'visto' : 'novo';
+                const nome   = escapeHtml((grupo.user_nome || '').split(' ')[0]);
+                const foto   = escapeHtml(grupo.user_foto || '/images/avatar.png');
+                return `
+                <section class="story-bubble story-bubble--${status}" data-grupo="${idx + offset}">
+                    <section class="story-avatar-wrap">
+                        <img src="${foto}" class="story-avatar" alt="${nome}">
+                    </section>
+                    <span class="story-nome">${nome}</span>
+                </section>`;
+            }).join('');
+        } catch (_) {
+            storiesAmigosEl.innerHTML = '';
+        }
+    }
+
+    function abrirStoryViewer(grupoIdx) {
+        storyGrupoAtual = grupoIdx;
+        storyIndexAtual = 0;
+        mostrarStoryAtual();
+        storyViewerEl?.classList.add('aberto');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function fecharStoryViewer() {
+        clearTimeout(storyTimer);
+        storyViewerEl?.classList.remove('aberto');
+        document.body.style.overflow = '';
+        storyGrupoAtual = -1;
+        storyIndexAtual = 0;
+    }
+
+    function pausarStory() {
+        if (storyGrupoAtual < 0 || storyPausado) return;
+        storyPausado = true;
+        clearTimeout(storyTimer);
+
+        if (storyInicioAtual) {
+            const decorrido = Date.now() - storyInicioAtual;
+            storyTempoRestante = Math.max(0, storyTempoRestante - decorrido);
+        }
+
+        const fill = document.getElementById(`progress-${storyIndexAtual}`);
+        if (fill) {
+            const computed    = window.getComputedStyle(fill).width;
+            const parentWidth = fill.parentElement?.clientWidth || 1;
+            const pct = (parseFloat(computed) / parentWidth) * 100;
+            fill.style.transition = 'none';
+            fill.style.width = pct + '%';
+        }
+    }
+
+    function retomarStory() {
+        if (storyGrupoAtual < 0 || !storyPausado) return;
+        storyPausado = false;
+        storyInicioAtual = Date.now();
+
+        const fill = document.getElementById(`progress-${storyIndexAtual}`);
+        if (fill) {
+            requestAnimationFrame(() => {
+                fill.style.transition = `width ${storyTempoRestante}ms linear`;
+                fill.style.width = '100%';
+            });
+        }
+
+        clearTimeout(storyTimer);
+        storyTimer = setTimeout(() => {
+            storyIndexAtual++;
+            mostrarStoryAtual();
+        }, storyTempoRestante);
+    }
+
+    function mostrarStoryAtual() {
+        const grupo = storiesData[storyGrupoAtual];
+        if (!grupo) { fecharStoryViewer(); return; }
+
+        const story = grupo.stories[storyIndexAtual];
+        if (!story) {
+            if (storyGrupoAtual < storiesData.length - 1) {
+                storyGrupoAtual++;
+                storyIndexAtual = 0;
+                mostrarStoryAtual();
+            } else {
+                fecharStoryViewer();
+            }
+            return;
+        }
+
+        document.getElementById('story-viewer-foto').src = grupo.user_foto || '/images/avatar.png';
+        document.getElementById('story-viewer-nome').textContent = grupo.user_nome;
+        document.getElementById('story-viewer-tempo').textContent = formatarTempoPost(story.created_at);
+
+        const barras = document.getElementById('story-progress-bars');
+        barras.innerHTML = grupo.stories.map((_, i) => `
+            <section class="story-progress-bar">
+                <section class="story-progress-fill ${i < storyIndexAtual ? 'completo' : ''}" id="progress-${i}"></section>
+            </section>
+        `).join('');
+
+        const content = document.getElementById('story-viewer-content');
+        if (story.tipo === 'foto') {
+            content.innerHTML = `<img src="${escapeHtml(story.url)}" alt="Story">`;
+        } else if (story.tipo === 'video') {
+            content.innerHTML = `
+                <video
+                    src="${escapeHtml(story.url)}"
+                    autoplay
+                    muted
+                    playsinline
+                    preload="auto"
+                    webkit-playsinline
+                    x5-playsinline
+                ></video>`;
+            const storyVideo = content.querySelector('video');
+            if (storyVideo) {
+                storyVideo.addEventListener('loadeddata', function () { this.play().catch(() => {}); });
+                storyVideo.addEventListener('error', function () {
+                    this.style.display = 'none';
+                    this.parentElement.innerHTML += '<section class="story-texto-card">Não foi possível reproduzir este vídeo.</section>';
+                });
+            }
+        } else {
+            content.innerHTML = `
+                <section class="story-texto-card" style="background:${escapeHtml(story.cor_fundo || '#1a1a1a')}">
+                    ${escapeHtml(story.texto || '')}
+                </section>`;
+        }
+
+        const isOwner = grupo.user_id === window.__FEED_STATE__.meuUserId;
+        if (!isOwner) {
+            fetch(`/api/stories/${story.id}/view`, { method: 'POST' }).catch(() => {});
+        }
+
+        const storyFooterEl = document.getElementById('story-viewer-footer');
+        if (storyFooterEl) {
+            storyFooterEl.style.display = isOwner ? 'flex' : 'none';
+            storyFooterEl.dataset.storyId = story.id;
+            const viewsCount = document.getElementById('story-viewer-views-count');
+            if (viewsCount) viewsCount.textContent = story.views || 0;
+            const menuEl = document.getElementById('story-viewer-menu');
+            if (menuEl) menuEl.style.display = 'none';
+        }
+
+        clearTimeout(storyTimer);
+        storyPausado       = false;
+        storyTempoRestante = STORY_DURACAO;
+
+        const fill = document.getElementById(`progress-${storyIndexAtual}`);
+        if (fill) {
+            requestAnimationFrame(() => {
+                fill.style.transition = `width ${STORY_DURACAO}ms linear`;
+                fill.style.width = '100%';
+            });
+        }
+        storyInicioAtual = Date.now();
+        storyTimer = setTimeout(() => {
+            storyIndexAtual++;
+            mostrarStoryAtual();
+        }, STORY_DURACAO);
+    }
+
+    function storyAnterior() {
+        clearTimeout(storyTimer);
+        if (storyIndexAtual > 0) {
+            storyIndexAtual--;
+        } else if (storyGrupoAtual > 0) {
+            storyGrupoAtual--;
+            storyIndexAtual = storiesData[storyGrupoAtual].stories.length - 1;
+        }
+        mostrarStoryAtual();
+    }
+
+    function storyProximo() {
+        clearTimeout(storyTimer);
+        storyIndexAtual++;
+        mostrarStoryAtual();
+    }
+
+    document.getElementById('story-viewer-fechar')?.addEventListener('click', fecharStoryViewer);
+
+    // Clique (desktop) nas zonas de navegação — suprimido quando o toque
+    // (mobile) já navegou, pra não disparar duas vezes pro mesmo gesto.
+    let ignorarProximoClique = false;
+    document.getElementById('story-nav-left')?.addEventListener('click', () => {
+        if (ignorarProximoClique) { ignorarProximoClique = false; return; }
+        storyAnterior();
+    });
+    document.getElementById('story-nav-right')?.addEventListener('click', () => {
+        if (ignorarProximoClique) { ignorarProximoClique = false; return; }
+        storyProximo();
+    });
+
+    document.addEventListener('keydown', e => {
+        if (storyGrupoAtual < 0) return;
+        if (e.key === 'Escape')    fecharStoryViewer();
+        if (e.key === 'ArrowRight') storyProximo();
+        if (e.key === 'ArrowLeft')  storyAnterior();
+    });
+
+    // ── Segurar para pausar / toque para navegar ────────────────────────────
+    const storyAreaExcluida = el => el.closest('.story-viewer-header') || el.closest('.story-viewer-footer');
+
+    storyViewerEl?.addEventListener('mousedown', e => {
+        if (storyAreaExcluida(e.target)) return;
+        pausarStory();
+    });
+    storyViewerEl?.addEventListener('mouseup', () => {
+        if (storyModalAberto) return;
+        retomarStory();
+    });
+    storyViewerEl?.addEventListener('mouseleave', () => {
+        if (storyModalAberto || !storyPausado) return;
+        retomarStory();
+    });
+
+    let touchStartTime = 0;
+    let touchStartX    = 0;
+    let touchHoldTimer = null;
+    const TOQUE_LIMITE_MS = 200;
+
+    storyViewerEl?.addEventListener('touchstart', e => {
+        if (storyAreaExcluida(e.target)) return;
+        touchStartTime = Date.now();
+        touchStartX    = e.touches[0].clientX;
+        clearTimeout(touchHoldTimer);
+        touchHoldTimer = setTimeout(pausarStory, TOQUE_LIMITE_MS);
+    }, { passive: true });
+
+    storyViewerEl?.addEventListener('touchend', e => {
+        if (storyAreaExcluida(e.target) || storyModalAberto) return;
+        clearTimeout(touchHoldTimer);
+
+        const duracao = Date.now() - touchStartTime;
+        const deltaX  = e.changedTouches[0].clientX - touchStartX;
+
+        if (storyPausado) {
+            retomarStory();
+            return;
+        }
+
+        if (duracao < TOQUE_LIMITE_MS && Math.abs(deltaX) < 10) {
+            ignorarProximoClique = true;
+            const largura = storyViewerEl.clientWidth;
+            if (e.changedTouches[0].clientX < largura * 0.35) {
+                storyAnterior();
+            } else {
+                storyProximo();
+            }
+        }
+    }, { passive: true });
+
+    storiesAmigosEl?.addEventListener('click', e => {
+        const bubble = e.target.closest('.story-bubble[data-grupo]');
+        if (!bubble) return;
+        abrirStoryViewer(parseInt(bubble.dataset.grupo, 10));
+    });
+
+    // ── Story owner actions (menu, ver quem viu, apagar) ───────────────────────
+    const storyFooter     = document.getElementById('story-viewer-footer');
+    const storyMenuBtn    = document.getElementById('story-viewer-menu-btn');
+    const storyMenu       = document.getElementById('story-viewer-menu');
+    const storyViewsModal = document.getElementById('story-views-modal');
+    const storyViewsLista = document.getElementById('story-views-lista');
+    const storyDeleteModal = document.getElementById('story-delete-modal');
+    const storyDeleteCancelBtn = document.getElementById('story-delete-cancel');
+    const storyDeleteConfirmBtn = document.getElementById('story-delete-confirm');
+    let storyIdParaExcluir = null;
+
+    storyMenuBtn?.addEventListener('click', e => {
+        e.stopPropagation();
+        if (!storyMenu) return;
+        storyMenu.style.display = storyMenu.style.display === 'block' ? 'none' : 'block';
+    });
+
+    document.addEventListener('click', e => {
+        if (storyMenu && storyMenu.style.display === 'block' && !storyMenuBtn?.contains(e.target)) {
+            storyMenu.style.display = 'none';
+        }
+    });
+
+    document.getElementById('story-btn-ver-views')?.addEventListener('click', async () => {
+        if (storyMenu) storyMenu.style.display = 'none';
+        const storyId = storyFooter?.dataset.storyId;
+        if (!storyId || !storyViewsModal || !storyViewsLista) return;
+
+        storyModalAberto = true;
+        pausarStory();
+
+        storyViewsModal.style.display = 'flex';
+        storyViewsLista.innerHTML = '<section class="story-views-loading"><i class="fas fa-spinner fa-spin"></i></section>';
+
+        try {
+            const data = await fetch(`/api/stories/${storyId}/views`).then(r => r.json());
+
+            if (!data.ok || !data.visualizacoes?.length) {
+                storyViewsLista.innerHTML = '<section class="story-views-loading">Nenhuma visualização ainda</section>';
+                return;
+            }
+
+            storyViewsLista.innerHTML = data.visualizacoes.map(v => `
+                <a href="/u/${encodeURIComponent(v.username || v.id)}" class="story-view-item">
+                    <img src="${escapeHtml(v.foto_perfil || '/images/avatar.png')}" class="story-view-avatar" alt="${escapeHtml(v.nome)}">
+                    <section>
+                        <section class="story-view-nome">${escapeHtml(v.nome)}</section>
+                        ${v.username ? `<section class="story-view-username">@${escapeHtml(v.username)}</section>` : ''}
+                    </section>
+                    <span class="story-view-tempo">${formatarTempoPost(v.viewed_at)}</span>
+                </a>
+            `).join('');
+        } catch (_) {
+            storyViewsLista.innerHTML = '<section class="story-views-loading">Erro ao carregar</section>';
+        }
+    });
+
+    document.getElementById('story-views-fechar')?.addEventListener('click', () => {
+        storyModalAberto = false;
+        if (storyViewsModal) storyViewsModal.style.display = 'none';
+        retomarStory();
+    });
+
+    function abrirModalExcluirStory(storyId) {
+        if (!storyDeleteModal) return;
+        storyIdParaExcluir = storyId;
+        storyModalAberto = true;
+        storyDeleteModal.style.display = 'flex';
+        pausarStory();
+    }
+
+    function fecharModalExcluirStory() {
+        storyIdParaExcluir = null;
+        storyModalAberto = false;
+        if (storyDeleteModal) storyDeleteModal.style.display = 'none';
+        retomarStory();
+    }
+
+    storyDeleteCancelBtn?.addEventListener('click', fecharModalExcluirStory);
+    storyDeleteModal?.addEventListener('click', e => {
+        if (e.target === storyDeleteModal) fecharModalExcluirStory();
+    });
+    storyDeleteConfirmBtn?.addEventListener('click', async () => {
+        const storyId = storyIdParaExcluir;
+        if (!storyId) return;
+        fecharModalExcluirStory();
+
+        try {
+            const data = await fetch(`/api/stories/${storyId}`, { method: 'DELETE' }).then(r => r.json());
+            if (data.ok) {
+                fecharStoryViewer();
+                await carregarStories();
+            } else {
+                mostrarMensagem(data.erro || 'Erro ao apagar story.', 'erro');
+            }
+        } catch (_) {
+            mostrarMensagem('Erro ao apagar story.', 'erro');
+        }
+    });
+
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && storyDeleteModal && storyDeleteModal.style.display === 'flex') {
+            fecharModalExcluirStory();
+        }
+    });
+
+    document.addEventListener('click', e => {
+        const apagarBtn = e.target.closest('#story-btn-apagar');
+        if (!apagarBtn) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+        if (storyMenu) storyMenu.style.display = 'none';
+
+        const storyId = storyFooter?.dataset.storyId;
+        if (!storyId) return;
+        abrirModalExcluirStory(storyId);
+    });
+
+    // ── Modal criar story ────────────────────────────────────────────────────
+    const modalCriarStory  = document.getElementById('modal-criar-story');
+    const storyTextoEditor = document.getElementById('story-texto-editor');
+    const storyFileInput   = document.getElementById('story-file-input');
+    let storyCor = '#1a1a1a';
+
+    function abrirModalCriarStory() {
+        if (modalCriarStory) modalCriarStory.style.display = 'flex';
+    }
+
+    function fecharModalCriarStory() {
+        if (modalCriarStory) modalCriarStory.style.display = 'none';
+        if (storyTextoEditor) storyTextoEditor.style.display = 'none';
+        const textoInput = document.getElementById('story-texto-input');
+        if (textoInput) textoInput.value = '';
+    }
+
+    storyProprioEl?.addEventListener('click', e => {
+        const addBtn  = e.target.closest('.story-add-btn');
+        const temStory = storyProprioEl.dataset.grupo !== '';
+        if (addBtn || !temStory) {
+            abrirModalCriarStory();
+            return;
+        }
+        abrirStoryViewer(parseInt(storyProprioEl.dataset.grupo, 10));
+    });
+    document.getElementById('btn-fechar-criar-story')?.addEventListener('click', fecharModalCriarStory);
+
+    // Deep-link do replay de treino: /feed?criar_story=1 abre o modal direto
+    if (new URLSearchParams(location.search).get('criar_story') === '1') {
+        abrirModalCriarStory();
+        history.replaceState(null, '', '/feed');
+    }
+
+    document.getElementById('story-opcao-foto')?.addEventListener('click', () => {
+        if (storyFileInput) { storyFileInput.accept = 'image/*'; storyFileInput.click(); }
+    });
+    document.getElementById('story-opcao-video')?.addEventListener('click', () => {
+        if (storyFileInput) { storyFileInput.accept = 'video/*'; storyFileInput.click(); }
+    });
+    document.getElementById('story-opcao-texto')?.addEventListener('click', () => {
+        if (storyTextoEditor) storyTextoEditor.style.display = 'block';
+    });
+
+    storyFileInput?.addEventListener('change', async e => {
+        console.log('[story] change disparado');
+        const btnFoto  = document.getElementById('story-opcao-foto');
+        const btnVideo = document.getElementById('story-opcao-video');
+
+        try {
+            const file = e.target.files[0];
+            if (!file) { console.log('[story] sem arquivo'); return; }
+            console.log('[story] arquivo:', file.name, file.type, file.size);
+
+            if (btnFoto)  { btnFoto.disabled  = true; btnFoto.innerHTML  = '<i class="fas fa-spinner fa-spin"></i><span>Enviando...</span>'; }
+            if (btnVideo) { btnVideo.disabled = true; btnVideo.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Enviando...</span>'; }
+
+            const form = new FormData();
+            form.append('midia', file);
+            form.append('tipo', file.type.startsWith('video') ? 'video' : 'foto');
+            console.log('[story] FormData montado, enviando fetch...');
+
+            const res = await fetch('/api/stories', { method: 'POST', body: form });
+            console.log('[story] status HTTP:', res.status);
+            const data = await res.json();
+            console.log('[story] resposta:', data);
+
+            if (data.ok) {
+                fecharModalCriarStory();
+                await carregarStories();
+                console.log('[story] strip atualizada');
+            } else {
+                mostrarMensagem(data.erro || 'Erro ao publicar story.', 'erro');
+            }
+        } catch (err) {
+            console.error('[story] erro no handler de upload:', err);
+            mostrarMensagem('Erro ao publicar story.', 'erro');
+        } finally {
+            if (btnFoto)  { btnFoto.disabled  = false; btnFoto.innerHTML  = '<i class="fas fa-image"></i><span>Foto</span>'; }
+            if (btnVideo) { btnVideo.disabled = false; btnVideo.innerHTML = '<i class="fas fa-video"></i><span>Vídeo</span>'; }
+            e.target.value = '';
+        }
+    });
+
+    document.querySelectorAll('.story-cor-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            storyCor = btn.dataset.bg;
+            document.querySelectorAll('.story-cor-btn').forEach(b => b.classList.remove('selecionada'));
+            btn.classList.add('selecionada');
+        });
+    });
+
+    document.getElementById('btn-postar-story-texto')?.addEventListener('click', async () => {
+        const textoInput = document.getElementById('story-texto-input');
+        const texto = textoInput?.value.trim();
+        if (!texto) return;
+
+        try {
+            const data = await fetch('/api/stories', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ tipo: 'texto', texto, cor_fundo: storyCor }),
+            }).then(r => r.json());
+            if (data.ok) {
+                fecharModalCriarStory();
+                await carregarStories();
+            } else {
+                mostrarMensagem(data.erro || 'Erro ao publicar story.', 'erro');
+            }
+        } catch (_) {
+            mostrarMensagem('Erro ao publicar story.', 'erro');
+        }
+    });
+
+    carregarStories();
+})();
+</script>
+
+</body>
+</html>

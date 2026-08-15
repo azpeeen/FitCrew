@@ -1,0 +1,285 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<%- include('../partials/seo') %>
+<link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+<link rel="stylesheet" href="/css/header.css">
+<link rel="stylesheet" href="/css/footer.css">
+<link rel="stylesheet" href="/css/area-aluno.css">
+</head>
+<body>
+
+<%- include('../partials/header-aluno') %>
+
+<section class="aluno-dashboard">
+    <section class="sidebar-overlay" id="sidebarOverlay"></section>
+
+    <!-- SIDEBAR -->
+    <section class="aluno-sidebar">
+        <section class="aluno-profile">
+            <section class="avatar">
+                <img src="<%= user.profile_photo || '/images/avatar.png' %>" alt="Avatar do Aluno">
+            </section>
+            <h2><%= user.nome %></h2>
+            <p data-translate="sidebar.role">Aluno FitCrew</p>
+        </section>
+        <ul class="aluno-menu">
+            <li class="menu-section-label">Principal</li>
+            <li><a href="/feed"><i class="fas fa-home"></i> Feed</a></li>
+            <li><a href="/metricas" class="active"><i class="fas fa-tachometer-alt"></i> Minhas Métricas</a></li>
+
+            <li class="menu-section-label">Social</li>
+            <li><a href="/amizades"><i class="fas fa-user-friends"></i> Amigos</a></li>
+            <li><a href="/chat"><i class="fas fa-comment"></i> Mensagens</a></li>
+            <li><a href="/buscar"><i class="fas fa-search"></i> Buscar pessoas</a></li>
+            <li><a href="/gymsquads"><i class="fas fa-medal"></i> GymSquads</a></li>
+
+            <li class="menu-section-label">Treino</li>
+            <li><a href="/treinos" data-translate="sidebar.treinos"><i class="fas fa-dumbbell"></i> Meus Treinos</a></li>
+            <li><a href="/evolucao" data-translate="sidebar.evolucao"><i class="fas fa-chart-line"></i> Evolução</a></li>
+
+            <li class="menu-section-label">Saúde</li>
+            <li><a href="/nutricao" data-translate="sidebar.nutricao"><i class="fas fa-utensils"></i> Nutrição</a></li>
+            <li><a href="/imc-form"><i class="fas fa-clipboard-list"></i> Medidas</a></li>
+
+            <li class="menu-section-label">IA</li>
+            <% if (user && (user.planoSlug === 'gymbro' || user.planoSlug === 'black')) { %>
+            <li><a href="/ai/chat" data-translate="sidebar.ai"><i class="fas fa-robot"></i> Personal Trainer IA</a></li>
+            <% } else { %>
+            <li><a href="/meu-plano?upgrade=1" class="menu-locked" data-translate="sidebar.ai"><i class="fas fa-robot"></i> Personal Trainer IA 🔒</a></li>
+            <% } %>
+            <% if (user && user.planoSlug === 'black') { %>
+            <li><a href="/ai/avaliacao" data-translate="sidebar.avaliacao"><i class="fas fa-camera"></i> Avaliação Corporal</a></li>
+            <% } else { %>
+            <li><a href="/meu-plano?upgrade=1" class="menu-locked" data-translate="sidebar.avaliacao"><i class="fas fa-camera"></i> Avaliação Corporal 🔒</a></li>
+            <% } %>
+
+            <li class="menu-section-label">Academia</li>
+            <li class="sidebar-scan-item"><a href="/scan"><i class="fas fa-qrcode"></i> Check-in / Scan</a></li>
+            <li><a href="/suporte" data-translate="sidebar.suporte"><i class="fas fa-headset"></i> Suporte</a></li>
+
+            <li class="menu-section-label">Conta</li>
+            <li><a href="/perfil/<%= user.username || user.id %>"><i class="fas fa-user-circle"></i> Meu Perfil</a></li>
+            <li><a href="/conquistas" data-translate="sidebar.conquistas"><i class="fas fa-trophy"></i> Conquistas</a></li>
+            <li><a href="/meu-plano" data-translate="sidebar.plano"><i class="fas fa-file-alt"></i> Meu Plano</a></li>
+            <li><a href="/config" data-translate="sidebar.config"><i class="fas fa-cog"></i> Configurações</a></li>
+            <li>
+                <button class="sidebar-logout-btn" type="button">
+                    <i class="fas fa-sign-out-alt"></i> Sair da conta
+                </button>
+            </li>
+        </ul>
+    </section>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <section class="aluno-main">
+
+        <% if (!user.webauthn_enabled) { %>
+        <section class="biometria-banner" id="bannerBiometria">
+          <section class="biometria-banner-content">
+            <i class="fas fa-fingerprint"></i>
+            <section class="biometria-banner-text">
+              <strong>Ative o login por biometria</strong>
+              <span>Acesse sua conta com impressão digital ou Face ID</span>
+            </section>
+          </section>
+          <section class="biometria-banner-actions">
+            <a href="/config" class="biometria-banner-btn">Ativar agora</a>
+            <button class="biometria-banner-dismiss" id="btnDismissBiometria" type="button">
+              <i class="fas fa-times"></i>
+            </button>
+          </section>
+        </section>
+        <script>if (localStorage.getItem('gymbros_biometria_dismissed') === '1') { var b = document.getElementById('bannerBiometria'); if (b) b.style.display = 'none'; }</script>
+        <% } %>
+
+        <!-- BANNERS DE NOTIFICAÇÃO -->
+        <%
+          const agora = new Date();
+          const diasSemImc = user.last_imc_update
+            ? Math.floor((agora - new Date(user.last_imc_update)) / 86400000)
+            : 999;
+          const diasSemAval = user.last_avaliacao_update
+            ? Math.floor((agora - new Date(user.last_avaliacao_update)) / 86400000)
+            : 999;
+          const intervalo = user.notification_interval_days || 7;
+        %>
+        <% if (diasSemImc >= intervalo) { %>
+        <section class="notif-banner notif-warning" id="bannerImc">
+          <span>📋 Faz <%= diasSemImc === 999 ? 'um tempo' : diasSemImc + ' dias' %> que você não atualiza seu perfil IMC.</span>
+          <a href="/imc-form" class="notif-link">Atualizar agora</a>
+          <button class="notif-fechar" data-banner="bannerImc" type="button">✕</button>
+        </section>
+        <% } %>
+        <% if (['gymbro','black'].includes(user.planoSlug) && diasSemAval >= intervalo) { %>
+        <section class="notif-banner notif-info" id="bannerAval">
+          <span>📸 Que tal fazer uma avaliação corporal? Acompanhe sua evolução.</span>
+          <a href="/ai/avaliacao" class="notif-link">Fazer avaliação</a>
+          <button class="notif-fechar" data-banner="bannerAval" type="button">✕</button>
+        </section>
+        <% } %>
+
+        <!-- BANNER DE BOAS-VINDAS -->
+        <section class="dash-welcome">
+            <section class="dash-welcome-text">
+                <h1><span data-i18n="dashboard.welcome">Bem-vindo</span>, <%= user.nome %>!</h1>
+                <p data-i18n="dashboard.subtitle">Acompanhe seu progresso, treinos e planos</p>
+            </section>
+            <section class="dash-welcome-badge">
+                <i class="fas fa-dumbbell"></i>
+            </section>
+        </section>
+
+        <!-- STATS -->
+        <section class="dash-stats">
+            <section class="dash-stat">
+                <section class="dash-stat-icon dash-stat-blue">
+                    <i class="fas fa-fire"></i>
+                </section>
+                <section class="dash-stat-info">
+                    <span class="dash-stat-val"><%= checkinsNaSemana || 0 %></span>
+                    <span class="dash-stat-label" data-i18n="dashboard.weekly">Treinos esta semana</span>
+                </section>
+            </section>
+            <section class="dash-stat">
+                <section class="dash-stat-icon dash-stat-yellow">
+                    <i class="fas fa-trophy"></i>
+                </section>
+                <section class="dash-stat-info">
+                    <span class="dash-stat-val"><%= totalConquistas || 0 %></span>
+                    <span class="dash-stat-label" data-i18n="dashboard.achievements">Conquistas</span>
+                </section>
+            </section>
+            <section class="dash-stat">
+                <section class="dash-stat-icon dash-stat-green">
+                    <i class="fas fa-chart-line"></i>
+                </section>
+                <section class="dash-stat-info">
+                    <span class="dash-stat-val"><%= metaSemanal || 0 %>%</span>
+                    <span class="dash-stat-label" data-i18n="dashboard.goal">Meta semanal</span>
+                </section>
+            </section>
+        </section>
+
+        <!-- ACESSO RÁPIDO -->
+        <section class="dash-actions">
+            <a href="/scan" class="dash-action-card dash-action-green dash-action-qr-mobile">
+                <section class="dash-action-icon"><i class="fas fa-qrcode"></i></section>
+                <section class="dash-action-body">
+                    <span class="dash-action-title">Escanear QR Code</span>
+                    <span class="dash-action-sub">Identificar equipamento</span>
+                </section>
+                <i class="fas fa-chevron-right dash-action-arrow"></i>
+            </a>
+            <a href="/treinos" class="dash-action-card dash-action-blue">
+                <section class="dash-action-icon"><i class="fas fa-dumbbell"></i></section>
+                <section class="dash-action-body">
+                    <span class="dash-action-title" data-i18n="treinos.title">Meus Treinos</span>
+                    <span class="dash-action-sub" data-i18n="dashboard.actions.treinos">Ver planilha de treinos</span>
+                </section>
+                <i class="fas fa-chevron-right dash-action-arrow"></i>
+            </a>
+            <a href="/evolucao" class="dash-action-card dash-action-orange">
+                <section class="dash-action-icon"><i class="fas fa-chart-line"></i></section>
+                <section class="dash-action-body">
+                    <span class="dash-action-title">Evolução</span>
+                    <span class="dash-action-sub" data-i18n="dashboard.actions.evolucao">Acompanhe seus resultados</span>
+                </section>
+                <i class="fas fa-chevron-right dash-action-arrow"></i>
+            </a>
+            <a href="/meu-plano" class="dash-action-card dash-action-gold">
+                <section class="dash-action-icon"><i class="fas fa-crown"></i></section>
+                <section class="dash-action-body">
+                    <span class="dash-action-title">Meu Plano</span>
+                    <span class="dash-action-sub"><%= user.plano || 'Sem plano ativo' %></span>
+                </section>
+                <i class="fas fa-chevron-right dash-action-arrow"></i>
+            </a>
+        </section>
+
+        <!-- ATIVIDADES RECENTES -->
+        <section class="dash-activities">
+            <h2><i class="fas fa-history"></i> <span data-i18n="dashboard.recent">Atividades Recentes</span></h2>
+            <ul class="dash-activities-list">
+                <li>
+                    <section class="dash-act-icon"><i class="fas fa-dumbbell"></i></section>
+                    <section class="dash-act-info">
+                        <span class="dash-act-name">Treino de Peito</span>
+                        <span class="dash-act-time">Ontem</span>
+                    </section>
+                </li>
+                <li>
+                    <section class="dash-act-icon"><i class="fas fa-dumbbell"></i></section>
+                    <section class="dash-act-info">
+                        <span class="dash-act-name">Treino de Inferiores</span>
+                        <span class="dash-act-time">2 dias atrás</span>
+                    </section>
+                </li>
+                <li>
+                    <section class="dash-act-icon dash-act-leaf"><i class="fas fa-leaf"></i></section>
+                    <section class="dash-act-info">
+                        <span class="dash-act-name">Yoga leve</span>
+                        <span class="dash-act-time">3 dias atrás</span>
+                    </section>
+                </li>
+            </ul>
+        </section>
+
+        <!-- META SEMANAL -->
+        <section class="dash-goal-section">
+            <section class="dash-goal-header">
+                <h2><i class="fas fa-bullseye"></i> <span data-i18n="dashboard.goal.title">Meta Semanal</span></h2>
+                <span class="dash-goal-count"><%= checkinsNaSemana || 0 %> / 5 treinos</span>
+            </section>
+            <section class="dash-goal-bar">
+                <section class="dash-goal-fill" id="dashGoalFill"></section>
+            </section>
+            <section class="dash-badges">
+                <% if (ultimasConquistas && ultimasConquistas.length > 0) { %>
+                    <% ultimasConquistas.forEach(function(c) { %>
+                    <a href="/conquistas" class="dash-badge"><%= c.icone %> <%= c.nome %></a>
+                    <% }); %>
+                <% } else { %>
+                <a href="/conquistas" class="dash-badge"><i class="fas fa-trophy"></i> Ver conquistas</a>
+                <% } %>
+            </section>
+        </section>
+
+    </section>
+
+</section>
+
+<%- include('../partials/footer') %>
+
+<script>
+(function () {
+    var dbtn = document.getElementById('btnDismissBiometria');
+    if (dbtn) dbtn.addEventListener('click', function () {
+        localStorage.setItem('gymbros_biometria_dismissed', '1');
+        var el = document.getElementById('bannerBiometria');
+        if (el) { el.style.opacity = '0'; setTimeout(function () { el.style.display = 'none'; }, 300); }
+    });
+    document.querySelectorAll('.notif-fechar[data-banner]').forEach(function (b) {
+        b.addEventListener('click', function () {
+            var el = document.getElementById(b.dataset.banner);
+            if (el) { el.style.opacity = '0'; setTimeout(function () { el.remove(); }, 300); }
+        });
+    });
+})();
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var fill = document.getElementById('dashGoalFill');
+    if (fill) {
+        requestAnimationFrame(function () {
+            fill.style.width = '<%= metaSemanal || 0 %>%';
+        });
+    }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<%- include('../partials/seo') %>
+<link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+<link rel="stylesheet" href="/css/header.css">
+<link rel="stylesheet" href="/css/footer.css">
+<link rel="stylesheet" href="/css/area-aluno.css">
+<style>
+.eq-hero {
+    background: linear-gradient(135deg,#1a1a1a,#111);
+    border: 1px solid #2a2a2a; border-radius: 16px;
+    padding: 28px; margin-bottom: 24px;
+    display: flex; align-items: center; gap: 20px;
+}
+.eq-hero-icon {
+    width: 64px; height: 64px; border-radius: 16px; flex-shrink: 0;
+    background: rgba(255,215,0,.12); border: 1px solid rgba(255,215,0,.25);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem; color: #FFD700;
+}
+.eq-hero-nome { font-size: 1.4rem; font-weight: 800; color: #fff; margin: 0 0 4px; }
+.eq-hero-sub  { font-size: .82rem; color: #888; margin: 0; }
+.eq-hero-badge {
+    margin-left: auto; white-space: nowrap;
+    padding: 4px 12px; border-radius: 20px;
+    background: rgba(255,215,0,.12); border: 1px solid rgba(255,215,0,.25);
+    color: #FFD700; font-size: .72rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .05em;
+}
+.eq-titulo {
+    font-size: 1rem; font-weight: 700; color: #FFD700;
+    margin: 0 0 16px; display: flex; align-items: center; gap: 8px;
+}
+.eq-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+}
+.eq-card {
+    background: #1a1a1a; border: 1px solid #2a2a2a;
+    border-radius: 14px; overflow: hidden;
+    transition: border-color .2s, transform .15s;
+}
+.eq-card:hover { border-color: rgba(255,215,0,.4); transform: translateY(-2px); }
+.eq-card-gif {
+    width: 100%; aspect-ratio: 16/9;
+    object-fit: cover; display: block; background: #111;
+}
+.eq-card-placeholder {
+    width: 100%; aspect-ratio: 16/9; background: #111;
+    display: flex; align-items: center; justify-content: center;
+    color: #333; font-size: 2rem;
+}
+.eq-card-info { padding: 14px 16px; }
+.eq-card-nome    { font-size: .9rem; font-weight: 700; color: #fff; margin: 0 0 4px; }
+.eq-card-musculo { font-size: .75rem; color: #888; margin: 0; }
+.eq-empty { text-align: center; padding: 48px 20px; color: #555; }
+.eq-empty i { font-size: 2.5rem; display: block; margin-bottom: 12px; color: #333; }
+@media (max-width: 600px) {
+    .eq-hero { flex-wrap: wrap; }
+    .eq-hero-badge { margin-left: 0; }
+    .eq-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+}
+
+/* MODAL DE EXERCÍCIO */
+.eq-gif-clickable { cursor: pointer; }
+.eq-gif-clickable:hover { opacity: .88; transition: opacity .15s; }
+
+.eq-modal-overlay {
+    position: fixed; inset: 0; z-index: 9000;
+    background: rgba(0,0,0,.85);
+    display: flex; align-items: center; justify-content: center;
+    padding: 16px;
+    opacity: 0; pointer-events: none;
+    transition: opacity .22s ease;
+}
+.eq-modal-overlay.active { opacity: 1; pointer-events: all; }
+.eq-modal-box {
+    background: #1a1a1a; border: 1px solid #2a2a2a;
+    border-radius: 16px; width: 100%; max-width: 480px;
+    padding: 20px; position: relative;
+    transform: scale(.95);
+    transition: transform .25s ease;
+    max-height: 90vh; overflow-y: auto;
+}
+.eq-modal-overlay.active .eq-modal-box { transform: scale(1); }
+.eq-modal-close {
+    position: absolute; top: 12px; right: 12px;
+    background: rgba(255,255,255,.08); border: none; border-radius: 8px;
+    color: #aaa; cursor: pointer; width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .95rem; transition: background .15s, color .15s;
+}
+.eq-modal-close:hover { background: rgba(255,255,255,.15); color: #fff; }
+.eq-modal-gif {
+    width: 100%; border-radius: 10px; display: block;
+    margin-bottom: 16px; background: #111;
+}
+.eq-modal-nome {
+    font-size: 1.05rem; font-weight: 800; color: #fff;
+    margin: 0 0 10px; text-transform: capitalize;
+}
+.eq-modal-meta { display: flex; flex-wrap: wrap; gap: 8px; }
+.eq-modal-tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px; border-radius: 20px; font-size: .75rem; font-weight: 600;
+    background: rgba(255,215,0,.1); border: 1px solid rgba(255,215,0,.2); color: #FFD700;
+    text-transform: capitalize;
+}
+</style>
+</head>
+<body>
+
+<%- include('../partials/header-aluno') %>
+<section class="aluno-dashboard">
+    <section class="sidebar-overlay" id="sidebarOverlay"></section>
+    <%- include('../partials/sidebar-aluno') %>
+    <section class="aluno-main">
+
+        <section class="eq-hero">
+            <section class="eq-hero-icon"><i class="fas fa-dumbbell"></i></section>
+            <section>
+                <h1 class="eq-hero-nome"><%= equipamento.nome %></h1>
+                <p class="eq-hero-sub">
+                    <% if (equipamento.academia_nome) { %>
+                    <i class="fas fa-location-dot"></i> <%= equipamento.academia_nome %>
+                    <% } %>
+                    <% if (equipamento.descricao) { %><% if (equipamento.academia_nome) { %> · <% } %><%= equipamento.descricao %><% } %>
+                </p>
+            </section>
+            <span class="eq-hero-badge"><%= equipamento.grupo_muscular %></span>
+        </section>
+
+        <h2 class="eq-titulo">
+            <i class="fas fa-play-circle"></i>
+            Exercícios neste equipamento (<%= exercicios.length %>)
+        </h2>
+
+        <% if (exercicios.length === 0) { %>
+        <section class="eq-empty">
+            <i class="fas fa-dumbbell"></i>
+            <p>Nenhum exercício cadastrado para este equipamento ainda.</p>
+        </section>
+        <% } else { %>
+        <section class="eq-grid">
+            <% exercicios.forEach(ex => { %>
+            <section class="eq-card">
+                <% if (ex.gif_url) { %>
+                <img src="<%= ex.gif_url %>" alt="<%= ex.name_pt || ex.name %>"
+                     class="eq-card-gif eq-gif-clickable" loading="lazy"
+                     data-gif="<%= ex.gif_url %>"
+                     data-nome="<%= ex.name_pt || ex.name %>"
+                     data-musculo="<%= ex.target_muscle || '' %>"
+                     data-parte="<%= ex.body_part || '' %>">
+                <% } else { %>
+                <section class="eq-card-placeholder">
+                    <i class="fas fa-dumbbell"></i>
+                </section>
+                <% } %>
+                <section class="eq-card-info">
+                    <p class="eq-card-nome"><%= ex.name_pt || ex.name %></p>
+                    <p class="eq-card-musculo">
+                        <% if (ex.target_muscle) { %>
+                        <i class="fas fa-bullseye"></i> <%= ex.target_muscle %>
+                        <% } %>
+                    </p>
+                </section>
+            </section>
+            <% }) %>
+        </section>
+        <% } %>
+
+    </section>
+</section>
+
+<!-- MODAL DE EXERCÍCIO -->
+<section id="exercise-modal" class="eq-modal-overlay" role="dialog" aria-modal="true" aria-label="Detalhes do exercício">
+    <section class="eq-modal-box">
+        <button class="eq-modal-close" id="eq-modal-close" aria-label="Fechar">
+            <i class="fas fa-times"></i>
+        </button>
+        <img id="eq-modal-gif" src="" alt="" class="eq-modal-gif">
+        <h3 id="eq-modal-nome" class="eq-modal-nome"></h3>
+        <section class="eq-modal-meta" id="eq-modal-meta"></section>
+    </section>
+</section>
+
+<script>
+(function () {
+    function openExerciseModal(el) {
+        var gif     = el.getAttribute('data-gif');
+        var nome    = el.getAttribute('data-nome')    || '';
+        var musculo = el.getAttribute('data-musculo') || '';
+        var parte   = el.getAttribute('data-parte')   || '';
+
+        var gifEl  = document.getElementById('eq-modal-gif');
+        var nomeEl = document.getElementById('eq-modal-nome');
+        var metaEl = document.getElementById('eq-modal-meta');
+
+        gifEl.src = gif || '';
+        gifEl.alt = nome;
+        gifEl.style.display = gif ? '' : 'none';
+        nomeEl.textContent = nome;
+
+        metaEl.innerHTML = '';
+        if (musculo) {
+            var t1 = document.createElement('span');
+            t1.className = 'eq-modal-tag';
+            t1.innerHTML = '<i class="fas fa-bullseye"></i>' + escHtml(musculo);
+            metaEl.appendChild(t1);
+        }
+        if (parte) {
+            var t2 = document.createElement('span');
+            t2.className = 'eq-modal-tag';
+            t2.innerHTML = '<i class="fas fa-layer-group"></i>' + escHtml(parte);
+            metaEl.appendChild(t2);
+        }
+
+        document.getElementById('exercise-modal').classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeExerciseModal() {
+        var overlay = document.getElementById('exercise-modal');
+        if (!overlay) return;
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+        setTimeout(function () {
+            var gifEl = document.getElementById('eq-modal-gif');
+            if (gifEl) gifEl.src = '';
+        }, 250);
+    }
+
+    function escHtml(s) {
+        return String(s)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    }
+
+    window.openExerciseModal = openExerciseModal;
+
+    document.querySelectorAll('.eq-gif-clickable').forEach(function (img) {
+        img.addEventListener('click', function () { openExerciseModal(img); });
+    });
+
+    document.getElementById('eq-modal-close').addEventListener('click', closeExerciseModal);
+
+    document.getElementById('exercise-modal').addEventListener('click', function (e) {
+        if (e.target === this) closeExerciseModal();
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeExerciseModal();
+    });
+}());
+</script>
+
+<%- include('../partials/footer') %>
+</body>
+</html>

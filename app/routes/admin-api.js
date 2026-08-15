@@ -1,0 +1,602 @@
+/**
+ * admin-api.js — API REST + SSE do painel administrativo GymBros
+ */
+'use strict';
+
+const express = require('express');
+const router  = express.Router();
+const bcrypt        = require('bcryptjs');
+const db            = require('../config/db');
+const User          = require('../models/User');
+const Plan          = require('../models/Plan');
+const Gym           = require('../models/Gym');
+const SupportTicket = require('../models/SupportTicket');
+const { addAdminClient, broadcast, broadcastTicket, broadcastToStudents, emitToUser, emitToUsers, emitToPlan, onlineUsers } = require('../events');
+const { limiterSSE } = require('../middleware/rateLimits');
+const { decryptCpf } = require('../services/cripto');
+
+// Nunca expor senha_hash/cpf_enc/cpf_hmac em respostas JSON — troca cpf por cpf_display formatado
+function sanitizeUserJson(user) {
+    if (!user) return user;
+    const { senha_hash, cpf_enc, cpf_hmac, webauthn_public_key, webauthn_credential_id, ...safe } = user;
+    safe.cpf_display = cpf_enc
+        ? (decryptCpf(cpf_enc) || '***.***.***-**').replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4')
+        : (safe.cpf ? safe.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4') : '—');
+    return safe;
+}
+
+// ── Auditoria: registra ações sensíveis ───────────────────────────────────────
+async function logAdmin(adminId, acao, entidade, entidadeId, detalhes, ip) {
+    await db.execute(
+        'INSERT INTO admin_log (admin_id, acao, entidade, entidade_id, detalhes, ip) VALUES (?, ?, ?, ?, ?, ?)',
+        [adminId, acao, entidade, entidadeId, JSON.stringify(detalhes), ip]
+    ).catch(() => {});
+}
+
+// Protege toda a API admin
+router.use((req, res, next) => {
+    if (req.session && req.session.admin) return next();
+    return res.status(401).json({ erro: 'Não autorizado.' });
+});
+
+// ── SSE Stream (tempo real) ───────────────────────────────────────────────────
+router.get('/stream', limiterSSE, (req, res) => {
+    res.set({
+        'Content-Type':  'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection':    'keep-alive',
+        'X-Accel-Buffering': 'no',
+    });
+    res.flushHeaders();
+    res.write(':ok\n\n');
+    addAdminClient(res);
+
+    // Envia usuários online imediatamente
+    const now = Date.now();
+    const online = [...onlineUsers.entries()]
+        .filter(([, u]) => now - u.lastSeen < 5 * 60 * 1000)
+        .map(([id, u]) => ({ id, ...u }));
+    res.write(`event: online_users\ndata: ${JSON.stringify(online)}\n\n`);
+
+    // Ping a cada 20s para manter a conexão viva
+    const ping = setInterval(() => {
+        try { res.write(':ping\n\n'); } catch (_) { clearInterval(ping); }
+    }, 20000);
+    res.on('close', () => clearInterval(ping));
+});
+
+// ── KPIs ──────────────────────────────────────────────────────────────────────
+router.get('/stats', async (req, res) => {
+    try {
+        const [[{ totalUsuarios }]] = await db.execute('SELECT COUNT(*) AS totalUsuarios FROM user');
+        const [[{ ativosHoje }]]    = await db.execute("SELECT COUNT(*) AS ativosHoje FROM checkin WHERE DATE(data) = CURDATE()");
+        const [[{ receitaMes }]]    = await db.execute("SELECT COALESCE(SUM(valor_final),0) AS receitaMes FROM payment WHERE MONTH(created_at)=MONTH(NOW()) AND YEAR(created_at)=YEAR(NOW()) AND status='pago'");
+        const [[{ ticketsAbertos }]]= await db.execute("SELECT COUNT(*) AS ticketsAbertos FROM support_ticket WHERE status != 'resolvido'");
+        const now = Date.now();
+        const onlineNow = [...onlineUsers.values()].filter(u => now - u.lastSeen < 5 * 60 * 1000).length;
+        res.json({
+            totalUsuarios: Number(totalUsuarios),
+            ativosHoje:    Number(ativosHoje),
+            receitaMes:    Number(receitaMes).toFixed(2),
+            ticketsAbertos:Number(ticketsAbertos),
+            onlineNow,
+        });
+    } catch (err) {
+        console.error('[admin-api/stats]', err);
+        res.status(500).json({ erro: 'Erro ao buscar KPIs.' });
+    }
+});
+
+// ── Usuários online ───────────────────────────────────────────────────────────
+router.get('/online', (req, res) => {
+    const now = Date.now();
+    const online = [...onlineUsers.entries()]
+        .filter(([, u]) => now - u.lastSeen < 5 * 60 * 1000)
+        .map(([id, u]) => ({ id, ...u }))
+        .sort((a, b) => b.lastSeen - a.lastSeen);
+    res.json(online);
+});
+
+// ── USUÁRIOS ──────────────────────────────────────────────────────────────────
+router.get('/usuarios', async (req, res) => {
+    const { busca = '', plano = '', status = '', page = 1, per = 15 } = req.query;
+    const perN    = parseInt(per);
+    const filters = { status: status || null, busca: busca || null, plano: plano || null };
+    try {
+        const [items, total] = await Promise.all([
+            User.findAll({ page: parseInt(page), limit: perN, ...filters }),
+            User.count(filters),
+        ]);
+        res.json({ total, items: items.map(sanitizeUserJson) });
+    } catch (err) {
+        console.error('[admin-api/usuarios]', err);
+        res.status(500).json({ erro: 'Erro ao buscar usuários.' });
+    }
+});
+
+router.get('/usuarios/:id', async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        if (!user) return res.status(404).json({ erro: 'Usuário não encontrado.' });
+        const [userCheckins, userTickets, userTransacoes] = await Promise.all([
+            db.execute('SELECT c.*, g.nome AS academiaNome FROM checkin c LEFT JOIN gym g ON g.id=c.gym_id WHERE c.user_id=? ORDER BY c.data DESC LIMIT 30', [user.id]).then(([r]) => r),
+            db.execute('SELECT * FROM support_ticket WHERE user_id=?', [user.id]).then(([r]) => r),
+            db.execute('SELECT py.*, p.nome AS planoNome FROM payment py LEFT JOIN plan p ON p.id=py.plan_id WHERE py.user_id=? ORDER BY py.created_at DESC', [user.id]).then(([r]) => r),
+        ]);
+        res.json({ user: sanitizeUserJson(user), checkins: userCheckins, tickets: userTickets, transacoes: userTransacoes });
+    } catch (err) {
+        console.error('[admin-api/usuarios/:id]', err);
+        res.status(500).json({ erro: 'Erro ao buscar usuário.' });
+    }
+});
+
+router.put('/usuarios/:id', async (req, res) => {
+    const { nome, email, status } = req.body;
+    try {
+        const user = await User.findById(req.params.id);
+        if (!user) return res.status(404).json({ erro: 'Usuário não encontrado.' });
+        await User.update(req.params.id, { nome, email, status });
+        const updated = await User.findById(req.params.id);
+        await logAdmin(req.session.admin.id, 'editar_usuario', 'user', req.params.id, req.body, req.ip);
+        res.json({ mensagem: 'Usuário atualizado.', user: sanitizeUserJson(updated) });
+    } catch (err) {
+        console.error('[admin-api/usuarios/:id PUT]', err);
+        res.status(500).json({ erro: 'Erro ao atualizar usuário.' });
+    }
+});
+
+router.post('/usuarios/:id/desativar', async (req, res) => {
+    try {
+        const [[user]] = await db.execute('SELECT id, status FROM user WHERE id = ?', [req.params.id]);
+        if (!user) return res.status(404).json({ erro: 'Usuário não encontrado.' });
+        const novoStatus = user.status === 'ativo' ? 'inativo' : 'ativo';
+        await db.execute('UPDATE user SET status=? WHERE id=?', [novoStatus, req.params.id]);
+        await logAdmin(req.session.admin.id, 'alterar_status', 'user', req.params.id, { status: novoStatus }, req.ip);
+        res.json({ mensagem: `Conta ${novoStatus}.`, status: novoStatus });
+    } catch (err) {
+        console.error('[admin-api/usuarios/:id/desativar]', err);
+        res.status(500).json({ erro: 'Erro ao alterar status.' });
+    }
+});
+
+// ── ACADEMIAS ─────────────────────────────────────────────────────────────────
+router.get('/academias', async (req, res) => {
+    try {
+        res.json(await Gym.findAll());
+    } catch (err) {
+        res.status(500).json({ erro: 'Erro ao buscar academias.' });
+    }
+});
+
+router.post('/academias', async (req, res) => {
+    const { nome, endereco, numero, bairro, cidade, estado, cep, telefone, email, whatsapp, latitude, longitude } = req.body;
+    if (!nome) return res.status(400).json({ erro: 'Nome é obrigatório.' });
+    try {
+        const id  = await Gym.create({ nome, endereco, numero, bairro, cidade, estado, cep, telefone, email, whatsapp, latitude, longitude });
+        const nova = await Gym.findById(id);
+        await logAdmin(req.session.admin.id, 'criar_academia', 'gym', id, { nome }, req.ip);
+        res.status(201).json({ mensagem: 'Academia criada.', academia: nova });
+    } catch (err) {
+        console.error('[admin-api/academias POST]', err);
+        res.status(500).json({ erro: 'Erro ao criar academia.' });
+    }
+});
+
+router.put('/academias/:id', async (req, res) => {
+    try {
+        const ac = await Gym.findById(req.params.id);
+        if (!ac) return res.status(404).json({ erro: 'Academia não encontrada.' });
+        await Gym.update(req.params.id, req.body);
+        const updated = await Gym.findById(req.params.id);
+        res.json({ mensagem: 'Academia atualizada.', academia: updated });
+    } catch (err) {
+        console.error('[admin-api/academias/:id PUT]', err);
+        res.status(500).json({ erro: 'Erro ao atualizar academia.' });
+    }
+});
+
+router.post('/academias/:id/toggle', async (req, res) => {
+    try {
+        const [[ac]] = await db.execute('SELECT id, status FROM gym WHERE id=?', [req.params.id]);
+        if (!ac) return res.status(404).json({ erro: 'Academia não encontrada.' });
+        const novoStatus = ac.status === 'ativa' ? 'inativa' : 'ativa';
+        await db.execute('UPDATE gym SET status=? WHERE id=?', [novoStatus, req.params.id]);
+        res.json({ mensagem: `Academia ${novoStatus}.`, status: novoStatus });
+    } catch (err) {
+        res.status(500).json({ erro: 'Erro ao alterar status da academia.' });
+    }
+});
+
+// ── PLANOS ────────────────────────────────────────────────────────────────────
+router.get('/planos', async (req, res) => {
+    try {
+        res.json(await Plan.findAllWithSubscriberCount());
+    } catch (err) {
+        res.status(500).json({ erro: 'Erro ao buscar planos.' });
+    }
+});
+
+router.post('/planos', async (req, res) => {
+    const { slug, nome, descricao, preco, duracao_dias, beneficios, permite_ia, permite_avaliacao_corporal, ordem } = req.body;
+    if (!nome || !preco) return res.status(400).json({ erro: 'Nome e preço são obrigatórios.' });
+    try {
+        const id   = await Plan.create({ slug, nome, descricao, preco, duracao_dias, beneficios, permite_ia, permite_avaliacao_corporal, ordem });
+        const novo = await Plan.findById(id);
+        await logAdmin(req.session.admin.id, 'criar_plano', 'plan', id, { nome }, req.ip);
+        res.status(201).json({ mensagem: 'Plano criado.', plano: novo });
+    } catch (err) {
+        console.error('[admin-api/planos POST]', err);
+        res.status(500).json({ erro: 'Erro ao criar plano.' });
+    }
+});
+
+router.put('/planos/:id', async (req, res) => {
+    try {
+        const plan = await Plan.findById(req.params.id);
+        if (!plan) return res.status(404).json({ erro: 'Plano não encontrado.' });
+        const { nome, descricao, preco, beneficios, status } = req.body;
+        await Plan.update(req.params.id, { nome, descricao, preco: preco ? parseFloat(preco) : undefined, beneficios: beneficios ? (Array.isArray(beneficios) ? beneficios : []) : undefined, status });
+        const updated = await Plan.findById(req.params.id);
+        await logAdmin(req.session.admin.id, 'editar_plano', 'plan', req.params.id, req.body, req.ip);
+        res.json({ mensagem: 'Plano atualizado.', plano: updated });
+    } catch (err) {
+        console.error('[admin-api/planos/:id PUT]', err);
+        res.status(500).json({ erro: 'Erro ao atualizar plano.' });
+    }
+});
+
+// ── CHECK-INS ────────────────────────────────────────────────────────────────
+router.get('/checkins', async (req, res) => {
+    const { academia = '', page = 1, per = 20 } = req.query;
+    const perN = parseInt(per), offset = (parseInt(page) - 1) * perN;
+    const params = [];
+    let where = 'WHERE 1=1';
+    if (academia) { where += ' AND c.gym_id = ?'; params.push(academia); }
+    try {
+        const [[{ total }]] = await db.execute(`SELECT COUNT(*) AS total FROM checkin c ${where}`, params);
+        const [items] = await db.execute(
+            `SELECT c.*, u.nome AS userName, g.nome AS academiaNome
+             FROM checkin c
+             LEFT JOIN user u ON u.id=c.user_id
+             LEFT JOIN gym g ON g.id=c.gym_id
+             ${where} ORDER BY c.data DESC LIMIT ? OFFSET ?`,
+            [...params, perN, offset]
+        );
+        res.json({ total: Number(total), items });
+    } catch (err) {
+        res.status(500).json({ erro: 'Erro ao buscar check-ins.' });
+    }
+});
+
+// ── FINANCEIRO ────────────────────────────────────────────────────────────────
+router.get('/financeiro', async (req, res) => {
+    try {
+        const [[{ receitaMes }]]     = await db.execute("SELECT COALESCE(SUM(valor_final),0) AS receitaMes FROM payment WHERE MONTH(created_at)=MONTH(NOW()) AND YEAR(created_at)=YEAR(NOW()) AND status='pago'");
+        const [[{ totalTransacoes }]]= await db.execute('SELECT COUNT(*) AS totalTransacoes FROM payment');
+        const [[{ inadimplentes }]]  = await db.execute("SELECT COUNT(*) AS inadimplentes FROM payment WHERE status='pendente'");
+        res.json({
+            receitaMes:      Number(receitaMes),
+            totalTransacoes: Number(totalTransacoes),
+            inadimplentes:   Number(inadimplentes),
+        });
+    } catch (err) {
+        res.status(500).json({ erro: 'Erro ao buscar financeiro.' });
+    }
+});
+
+router.get('/financeiro/transacoes', async (req, res) => {
+    const { status = '', page = 1 } = req.query;
+    const offset = (parseInt(page) - 1) * 20;
+    const params = [];
+    let where = 'WHERE 1=1';
+    if (status) { where += ' AND py.status = ?'; params.push(status); }
+    try {
+        const [[{ total }]] = await db.execute(`SELECT COUNT(*) AS total FROM payment py ${where}`, params);
+        const [items] = await db.execute(
+            `SELECT py.*, u.nome AS userName, u.email AS userEmail, p.nome AS planoNome
+             FROM payment py
+             LEFT JOIN user u ON u.id=py.user_id
+             LEFT JOIN plan p ON p.id=py.plan_id
+             ${where} ORDER BY py.created_at DESC LIMIT 20 OFFSET ?`,
+            [...params, offset]
+        );
+        res.json({ total: Number(total), items });
+    } catch (err) {
+        res.status(500).json({ erro: 'Erro ao buscar transações.' });
+    }
+});
+
+// ── SUPORTE (admin) ───────────────────────────────────────────────────────────
+router.get('/suporte/tickets', async (req, res) => {
+    const { status = '' } = req.query;
+    try {
+        res.json(await SupportTicket.findAll({ status: status || null }));
+    } catch (err) {
+        res.status(500).json({ erro: 'Erro ao buscar tickets.' });
+    }
+});
+
+router.get('/suporte/tickets/:id', async (req, res) => {
+    try {
+        const [[ticket]] = await db.execute('SELECT * FROM support_ticket WHERE id = ?', [req.params.id]);
+        if (!ticket) return res.status(404).json({ erro: 'Ticket não encontrado.' });
+        const [mensagens] = await db.execute(
+            'SELECT * FROM support_message WHERE ticket_id = ? ORDER BY created_at ASC',
+            [ticket.id]
+        );
+        res.json({ ticket, mensagens });
+    } catch (err) {
+        res.status(500).json({ erro: 'Erro ao buscar ticket.' });
+    }
+});
+
+router.post('/suporte/tickets/:id/mensagem', async (req, res) => {
+    const { texto } = req.body;
+    if (!texto?.trim()) return res.status(400).json({ erro: 'Mensagem vazia.' });
+    try {
+        const [[ticket]] = await db.execute('SELECT * FROM support_ticket WHERE id = ?', [req.params.id]);
+        if (!ticket) return res.status(404).json({ erro: 'Ticket não encontrado.' });
+
+        const [result] = await db.execute(
+            'INSERT INTO support_message (ticket_id, remetente, admin_id, texto) VALUES (?, "admin", ?, ?)',
+            [ticket.id, req.session.admin.id, texto.trim()]
+        );
+        const novoStatus = ticket.status === 'aberto' ? 'em_atendimento' : ticket.status;
+        await db.execute(
+            'UPDATE support_ticket SET status=?, admin_id=?, updated_at=NOW() WHERE id=?',
+            [novoStatus, req.session.admin.id, ticket.id]
+        );
+
+        const [[msg]] = await db.execute('SELECT * FROM support_message WHERE id=?', [result.insertId]);
+        broadcastTicket(ticket.id, 'new_message', msg);
+        emitToUser(ticket.user_id, 'new_message', { ticketId: ticket.id, texto: texto.trim() });
+        res.status(201).json(msg);
+    } catch (err) {
+        console.error('[admin-api/suporte/tickets/:id/mensagem]', err);
+        res.status(500).json({ erro: 'Erro ao enviar mensagem.' });
+    }
+});
+
+router.put('/suporte/tickets/:id/status', async (req, res) => {
+    const { status } = req.body;
+    if (!['aberto','em_atendimento','resolvido'].includes(status)) return res.status(400).json({ erro: 'Status inválido.' });
+    try {
+        const [[ticket]] = await db.execute('SELECT * FROM support_ticket WHERE id = ?', [req.params.id]);
+        if (!ticket) return res.status(404).json({ erro: 'Ticket não encontrado.' });
+
+        const resolvido_em = status === 'resolvido' ? new Date() : null;
+        await db.execute(
+            'UPDATE support_ticket SET status=?, resolvido_em=?, updated_at=NOW() WHERE id=?',
+            [status, resolvido_em, ticket.id]
+        );
+        broadcastTicket(ticket.id, 'status_change', { ticketId: ticket.id, status });
+        broadcast('ticket_update', { ticketId: ticket.id, status, assunto: ticket.assunto });
+        emitToUser(ticket.user_id, 'status_change', { ticketId: ticket.id, status });
+        res.json({ mensagem: 'Status atualizado.' });
+    } catch (err) {
+        res.status(500).json({ erro: 'Erro ao atualizar status.' });
+    }
+});
+
+// ── NOTIFICAÇÕES ─────────────────────────────────────────────────────────────
+router.post('/notificacoes', async (req, res) => {
+    const { titulo, mensagem: msg, tipo, destinatarios, user_ids } = req.body;
+    if (!titulo || !msg) return res.status(400).json({ erro: 'Título e mensagem são obrigatórios.' });
+    try {
+        const [result] = await db.execute(
+            'INSERT INTO notification (titulo, mensagem, tipo, destinatarios, enviada_por) VALUES (?, ?, ?, ?, ?)',
+            [titulo, msg, tipo || 'informativo', destinatarios || 'todos', req.session.admin.id]
+        );
+
+        // Emissão SSE conforme destinatários
+        if (!destinatarios || destinatarios === 'todos') {
+            broadcastToStudents('admin_notification', { titulo, mensagem: msg, tipo: tipo || 'informativo' });
+        } else if (destinatarios === 'selecionados' && Array.isArray(user_ids) && user_ids.length) {
+            emitToUsers(user_ids, 'admin_notification', { titulo, mensagem: msg, tipo: tipo || 'informativo' });
+        } else {
+            // destinatarios = plan_id numérico
+            await emitToPlan(destinatarios, 'admin_notification', { titulo, mensagem: msg, tipo: tipo || 'informativo' });
+        }
+        broadcast('admin_notification', { titulo, mensagem: msg, tipo: tipo || 'informativo' });
+
+        res.status(201).json({ mensagem: 'Notificação enviada.', id: result.insertId });
+    } catch (err) {
+        console.error('[admin-api/notificacoes]', err);
+        res.status(500).json({ erro: 'Erro ao enviar notificação.' });
+    }
+});
+
+// ── CONFIGURAÇÕES ─────────────────────────────────────────────────────────────
+router.put('/configuracoes', async (req, res) => {
+    try {
+        for (const [chave, valor] of Object.entries(req.body)) {
+            await db.execute(
+                'INSERT INTO app_config (chave, valor) VALUES (?, ?) ON DUPLICATE KEY UPDATE valor=?',
+                [chave, String(valor), String(valor)]
+            );
+        }
+        res.json({ mensagem: 'Configurações salvas.' });
+    } catch (err) {
+        console.error('[admin-api/configuracoes PUT]', err);
+        res.status(500).json({ erro: 'Erro ao salvar configurações.' });
+    }
+});
+
+// ── Busca de exercícios (usada pelo painel de equipamentos) ───────────────────
+router.get('/exercicios', async (req, res) => {
+    try {
+        const q = (req.query.q || '').trim();
+        const equipId = req.query.equipamento_id;
+        if (equipId) {
+            const [rows] = await db.execute(`
+                SELECT ex.id, ex.name, ex.name_pt, ex.target_muscle
+                FROM equipamento_exercicio ee
+                JOIN exercises ex ON ex.id = ee.exercise_id
+                WHERE ee.equipamento_id = ?
+                ORDER BY ex.name ASC
+            `, [equipId]);
+            return res.json(rows);
+        }
+        if (!q) return res.json([]);
+        const [rows] = await db.execute(
+            `SELECT id, name, name_pt, target_muscle FROM exercises
+             WHERE name LIKE ? OR name_pt LIKE ?
+             ORDER BY name ASC LIMIT 30`,
+            [`%${q}%`, `%${q}%`]
+        );
+        res.json(rows);
+    } catch (err) { res.status(500).json([]); }
+});
+
+// ── F6/F9 — Equipamentos ────────────────────────────────────────────────────────
+
+router.get('/equipamentos/exercicios', async (req, res) => {
+    try {
+        const equipments = Array.isArray(req.query.equipment)
+            ? req.query.equipment
+            : req.query.equipment ? [req.query.equipment] : [];
+
+        if (!equipments.length) return res.json({ exercicios: [] });
+
+        const placeholders = equipments.map(() => '?').join(',');
+        const [exercicios] = await db.execute(`
+            SELECT e.id, e.name, e.name_pt, e.body_part, e.target_muscle, e.equipment_name,
+                   em.cloudinary_gif_url AS gif_url
+            FROM exercises e
+            LEFT JOIN exercise_media em ON em.exercise_id = e.id
+            WHERE e.equipment_name IN (${placeholders})
+              AND e.body_part IS NOT NULL
+            ORDER BY e.body_part ASC, e.name ASC
+        `, equipments);
+
+        res.json({ exercicios });
+    } catch (err) {
+        console.error('[admin/equipamentos/exercicios]', err.message);
+        res.status(500).json({ erro: 'Erro ao buscar exercícios.' });
+    }
+});
+
+router.get('/equipamentos', async (req, res) => {
+    try {
+        const [rows] = await db.execute(`
+            SELECT e.*, g.nome AS academia_nome,
+                   COUNT(DISTINCT ee.id) AS total_exercicios,
+                   COUNT(DISTINCT es.id) AS total_scans
+            FROM equipamento e
+            LEFT JOIN gym g ON g.id = e.academia_id
+            LEFT JOIN equipamento_exercicio ee ON ee.equipamento_id = e.id
+            LEFT JOIN equipamento_scan es ON es.equipamento_id = e.id
+            GROUP BY e.id ORDER BY e.nome ASC
+        `);
+        res.json(rows);
+    } catch (err) { res.status(500).json({ erro: 'Erro ao buscar equipamentos.' }); }
+});
+
+router.post('/equipamentos', async (req, res) => {
+    const { nome, descricao, grupo_muscular, academia_id, exercise_ids } = req.body;
+    if (!nome) return res.status(400).json({ erro: 'Nome obrigatório.' });
+    try {
+        const qr_token = require('crypto').randomUUID();
+        const [result] = await db.execute(
+            'INSERT INTO equipamento (nome, descricao, grupo_muscular, academia_id, qr_token) VALUES (?, ?, ?, ?, ?)',
+            [nome, descricao || null, grupo_muscular || 'outro', academia_id || null, qr_token]
+        );
+        const equipId = result.insertId;
+        if (Array.isArray(exercise_ids) && exercise_ids.length) {
+            for (const exId of exercise_ids) {
+                await db.execute(
+                    'INSERT IGNORE INTO equipamento_exercicio (equipamento_id, exercise_id) VALUES (?, ?)',
+                    [equipId, exId]
+                );
+            }
+        }
+        const [[novo]] = await db.execute('SELECT * FROM equipamento WHERE id = ?', [equipId]);
+        res.status(201).json({ mensagem: 'Equipamento criado.', equipamento: novo });
+    } catch (err) {
+        console.error('[admin/equipamentos POST]', err.message);
+        res.status(500).json({ erro: 'Erro ao criar equipamento.' });
+    }
+});
+
+router.put('/equipamentos/:id', async (req, res) => {
+    const { nome, descricao, grupo_muscular, academia_id, ativo, exercise_ids } = req.body;
+    try {
+        await db.execute(
+            'UPDATE equipamento SET nome=?, descricao=?, grupo_muscular=?, academia_id=?, ativo=? WHERE id=?',
+            [nome, descricao || null, grupo_muscular, academia_id || null, ativo ?? 1, req.params.id]
+        );
+        if (Array.isArray(exercise_ids)) {
+            await db.execute('DELETE FROM equipamento_exercicio WHERE equipamento_id=?', [req.params.id]);
+            for (const exId of exercise_ids) {
+                await db.execute(
+                    'INSERT IGNORE INTO equipamento_exercicio (equipamento_id, exercise_id) VALUES (?, ?)',
+                    [req.params.id, exId]
+                );
+            }
+        }
+        res.json({ mensagem: 'Equipamento atualizado.' });
+    } catch (err) { res.status(500).json({ erro: 'Erro ao atualizar equipamento.' }); }
+});
+
+router.get('/equipamentos/:id/qr', async (req, res) => {
+    try {
+        const [[eq]] = await db.execute('SELECT qr_token, nome FROM equipamento WHERE id=?', [req.params.id]);
+        if (!eq) return res.status(404).json({ erro: 'Equipamento não encontrado.' });
+        const url = `${process.env.WEBAUTHN_ORIGIN || 'https://fitcrew.net'}/equipamento/${eq.qr_token}`;
+        const QRCode = require('qrcode');
+        const png = await QRCode.toBuffer(url, {
+            width: 400, margin: 2,
+            color: { dark: '#000000', light: '#ffffff' },
+        });
+        res.set({
+            'Content-Type': 'image/png',
+            'Content-Disposition': `attachment; filename="qr-${eq.nome.replace(/\s+/g, '-')}.png"`,
+        });
+        res.send(png);
+    } catch (err) {
+        console.error('[admin/equipamentos/qr]', err.message);
+        res.status(500).json({ erro: 'Erro ao gerar QR.' });
+    }
+});
+
+router.get('/equipamentos/:id/metricas', async (req, res) => {
+    try {
+        const [[eq]] = await db.execute('SELECT id, nome FROM equipamento WHERE id=?', [req.params.id]);
+        if (!eq) return res.status(404).json({ erro: 'Equipamento não encontrado.' });
+        const [[{ total_scans }]] = await db.execute(
+            'SELECT COUNT(*) AS total_scans FROM equipamento_scan WHERE equipamento_id=?', [req.params.id]
+        );
+        const [por_dia] = await db.execute(`
+            SELECT DATE(created_at) AS dia, COUNT(*) AS scans
+            FROM equipamento_scan WHERE equipamento_id=?
+            AND created_at >= CURDATE() - INTERVAL 7 DAY
+            GROUP BY DATE(created_at) ORDER BY dia ASC
+        `, [req.params.id]);
+        const [top_horarios] = await db.execute(`
+            SELECT HOUR(created_at) AS hora, COUNT(*) AS scans
+            FROM equipamento_scan WHERE equipamento_id=?
+            GROUP BY HOUR(created_at) ORDER BY scans DESC LIMIT 5
+        `, [req.params.id]);
+        res.json({ equipamento: eq, total_scans, por_dia, top_horarios });
+    } catch (err) { res.status(500).json({ erro: 'Erro ao buscar métricas.' }); }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+
+router.post('/configuracoes/senha', async (req, res) => {
+    const { senhaAtual, novaSenha } = req.body;
+    try {
+        const [[admin]] = await db.execute('SELECT senha_hash FROM admin_user WHERE id = ?', [req.session.admin.id]);
+        if (!admin) return res.status(404).json({ erro: 'Admin não encontrado.' });
+        const ok = await bcrypt.compare(senhaAtual, admin.senha_hash);
+        if (!ok) return res.status(400).json({ erro: 'Senha atual incorreta.' });
+        const nova_hash = await bcrypt.hash(novaSenha, 10);
+        await db.execute('UPDATE admin_user SET senha_hash=? WHERE id=?', [nova_hash, req.session.admin.id]);
+        res.json({ mensagem: 'Senha alterada com sucesso.' });
+    } catch (err) {
+        console.error('[admin-api/configuracoes/senha]', err);
+        res.status(500).json({ erro: 'Erro ao alterar senha.' });
+    }
+});
+
+module.exports = router;

@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nova Academia — FitCrew Admin</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin.css">
+    <style>
+    .field-hint {
+        font-size: 0.75rem;
+        margin-top: 4px;
+        display: none;
+    }
+    .field-hint.show { display: block; }
+    .field-hint.ok   { color: var(--success); }
+    .field-hint.err  { color: var(--error); }
+    .field-hint.warn { color: var(--warning); }
+
+    .admin-input.is-valid   { border-color: var(--success); }
+    .admin-input.is-invalid { border-color: var(--error); }
+
+    .cep-wrap { position: relative; }
+    .cep-spinner {
+        position: absolute; right: 10px; top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted); font-size: 0.8rem;
+        display: none;
+    }
+    .cep-spinner.show { display: block; }
+
+    .readonly-filled {
+        background: rgba(34,197,94,0.05) !important;
+        border-color: rgba(34,197,94,0.35) !important;
+        color: var(--text);
+    }
+    </style>
+</head>
+<body class="admin-body">
+<section class="admin-wrapper">
+    <%- include('../partials/admin-sidebar') %>
+    <section class="admin-content">
+        <%- include('../partials/admin-topbar') %>
+        <main class="admin-main">
+            <section style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+                <a href="/admin/academias" class="btn btn-outline btn-sm"><i class="fas fa-arrow-left"></i></a>
+                <section>
+                    <h1 class="admin-page-title" style="margin-bottom:0">Nova Academia</h1>
+                    <p class="admin-page-subtitle" style="margin-bottom:0">Cadastra e ativa imediatamente + envia credenciais ao gestor</p>
+                </section>
+            </section>
+
+            <% if (erro) { %>
+            <section class="admin-toast" style="position:static;margin-bottom:20px;border-left-color:var(--error)">
+                <i class="fas fa-exclamation-circle" style="color:var(--error)"></i> <%= erro %>
+            </section>
+            <% } %>
+
+            <form method="POST" action="/admin/academias/nova" id="form-nova-academia" novalidate>
+                <section class="admin-2col" style="gap:20px;align-items:start">
+
+                    <!-- Coluna esquerda: dados da academia + contrato -->
+                    <section>
+                        <section class="admin-card" style="margin-bottom:16px">
+                            <section class="admin-card-header">
+                                <span class="admin-card-title"><i class="fas fa-building text-gold" style="margin-right:6px"></i>Dados da Academia</span>
+                            </section>
+                            <section class="admin-card-body">
+
+                                <section class="admin-form-group">
+                                    <label for="nome">Nome *</label>
+                                    <input type="text" id="nome" name="nome" class="admin-input"
+                                        placeholder="Panobianco Barueri" required>
+                                </section>
+
+                                <!-- CNPJ com validação -->
+                                <section class="admin-form-group">
+                                    <label for="cnpj">CNPJ *</label>
+                                    <input type="text" id="cnpj" name="cnpj" class="admin-input"
+                                        placeholder="00.000.000/0001-00"
+                                        maxlength="18" autocomplete="off" required>
+                                    <section id="cnpj-hint" class="field-hint"></section>
+                                </section>
+
+                                <!-- CEP (primeiro — dispara ViaCEP) -->
+                                <section class="admin-form-group">
+                                    <label for="cep">CEP</label>
+                                    <section class="cep-wrap">
+                                        <input type="text" id="cep" name="cep" class="admin-input"
+                                            placeholder="00000-000" maxlength="9">
+                                        <i class="fas fa-spinner fa-spin cep-spinner" id="cep-spinner"></i>
+                                    </section>
+                                    <section id="cep-hint" class="field-hint"></section>
+                                </section>
+
+                                <!-- Endereço preenchido pelo ViaCEP -->
+                                <section class="admin-form-group">
+                                    <label for="endereco">Endereço</label>
+                                    <input type="text" id="endereco" name="endereco" class="admin-input"
+                                        placeholder="Preenchido automaticamente pelo CEP">
+                                </section>
+
+                                <section class="admin-2col">
+                                    <section class="admin-form-group">
+                                        <label for="numero">Número</label>
+                                        <input type="text" id="numero" name="numero" class="admin-input js-only-digits"
+                                            placeholder="500" inputmode="numeric">
+                                    </section>
+                                    <section class="admin-form-group">
+                                        <label for="bairro">Bairro</label>
+                                        <input type="text" id="bairro" name="bairro" class="admin-input"
+                                            placeholder="Centro">
+                                    </section>
+                                </section>
+
+                                <section class="admin-2col">
+                                    <section class="admin-form-group">
+                                        <label for="cidade">Cidade</label>
+                                        <input type="text" id="cidade" name="cidade" class="admin-input"
+                                            placeholder="Barueri">
+                                    </section>
+                                    <section class="admin-form-group">
+                                        <label for="estado">Estado</label>
+                                        <input type="text" id="estado" name="estado" class="admin-input"
+                                            placeholder="SP" maxlength="2">
+                                    </section>
+                                </section>
+
+                                <section class="admin-form-group">
+                                    <label for="telefone">Telefone</label>
+                                    <input type="text" id="telefone" name="telefone" class="admin-input"
+                                        placeholder="(11) 94444-0000" maxlength="15" autocomplete="tel">
+                                    <section id="telefone-hint" class="field-hint"></section>
+                                </section>
+                            </section>
+                        </section>
+
+                        <!-- Contrato -->
+                        <section class="admin-card">
+                            <section class="admin-card-header">
+                                <span class="admin-card-title"><i class="fas fa-file-contract text-gold" style="margin-right:6px"></i>Contrato B2B</span>
+                            </section>
+                            <section class="admin-card-body">
+                                <section class="admin-2col">
+                                    <section class="admin-form-group">
+                                        <label>Plano</label>
+                                        <select name="plano" class="admin-input admin-select-lg">
+                                            <option value="basic">Basic</option>
+                                            <option value="pro">Pro</option>
+                                            <option value="enterprise" selected>Enterprise</option>
+                                        </select>
+                                    </section>
+                                    <section class="admin-form-group">
+                                        <label>Valor Mensal (R$)</label>
+                                        <input type="number" name="valor_mensal" class="admin-input"
+                                            placeholder="5000.00" step="0.01" min="0">
+                                    </section>
+                                </section>
+                                <section class="admin-2col">
+                                    <section class="admin-form-group">
+                                        <label>Máx. Alunos</label>
+                                        <input type="number" name="max_alunos" class="admin-input js-only-digits"
+                                            placeholder="500" min="1">
+                                    </section>
+                                    <section class="admin-form-group">
+                                        <label>Início do Contrato</label>
+                                        <input type="date" name="data_inicio" class="admin-input"
+                                            value="<%= new Date().toISOString().slice(0,10) %>">
+                                    </section>
+                                </section>
+                                <section class="admin-form-group">
+                                    <label>Contato Responsável (cliente)</label>
+                                    <input type="text" name="contato_responsavel" class="admin-input"
+                                        placeholder="Ex: Denis — diretor comercial">
+                                </section>
+                            </section>
+                        </section>
+                    </section>
+
+                    <!-- Coluna direita: gestor + resumo -->
+                    <section>
+                        <section class="admin-card" style="margin-bottom:16px">
+                            <section class="admin-card-header">
+                                <span class="admin-card-title"><i class="fas fa-user-tie text-gold" style="margin-right:6px"></i>Gestor Responsável (owner)</span>
+                            </section>
+                            <section class="admin-card-body">
+                                <section class="admin-form-group">
+                                    <label>Nome *</label>
+                                    <input type="text" name="gestor_nome" class="admin-input"
+                                        placeholder="Gestor Demo" required>
+                                </section>
+                                <section class="admin-form-group">
+                                    <label>E-mail *</label>
+                                    <input type="email" name="gestor_email" class="admin-input"
+                                        placeholder="gestor@suaacademia.com" required>
+                                </section>
+                                <section style="background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:12px;font-size:0.8rem;color:var(--text-muted)">
+                                    <i class="fas fa-info-circle" style="color:var(--gold);margin-right:6px"></i>
+                                    Uma senha temporária será gerada e enviada por e-mail ao gestor automaticamente.
+                                </section>
+                            </section>
+                        </section>
+
+                        <section style="background:var(--surface);border:1px solid rgba(201,139,29,0.2);border-radius:10px;padding:16px;font-size:0.82rem;color:var(--text-muted);margin-bottom:16px">
+                            <section style="font-weight:600;color:var(--gold);margin-bottom:8px"><i class="fas fa-bolt" style="margin-right:6px"></i>O que acontece ao salvar:</section>
+                            <ul style="list-style:none;display:flex;flex-direction:column;gap:6px;padding:0">
+                                <li><i class="fas fa-check" style="color:var(--success);margin-right:8px"></i>Academia criada com status <strong>ativa</strong></li>
+                                <li><i class="fas fa-check" style="color:var(--success);margin-right:8px"></i>Contrato B2B registrado</li>
+                                <li><i class="fas fa-check" style="color:var(--success);margin-right:8px"></i>Gestor owner criado com senha temporária</li>
+                                <li><i class="fas fa-check" style="color:var(--success);margin-right:8px"></i>E-mail de boas-vindas enviado</li>
+                            </ul>
+                        </section>
+
+                        <button type="submit" id="btn-submit" class="btn btn-gold w-100" style="justify-content:center">
+                            <i class="fas fa-save"></i> Criar Academia e Enviar Acesso
+                        </button>
+                        <a href="/admin/academias" class="btn btn-outline w-100" style="justify-content:center;margin-top:8px">Cancelar</a>
+                    </section>
+                </section>
+            </form>
+        </main>
+    </section>
+</section>
+<script src="/js/admin.js"></script>
+<script>
+document.addEventListener('input', function (e) {
+    if (e.target.classList && e.target.classList.contains('js-only-digits')) {
+        e.target.value = e.target.value.replace(/\D/g, '');
+    }
+});
+// ── Validação de CNPJ (algoritmo oficial) ────────────────────────────────────
+function validarCNPJ(cnpj) {
+    cnpj = cnpj.replace(/\D/g, '');
+    if (cnpj.length !== 14) return false;
+    if (/^(\d)\1{13}$/.test(cnpj)) return false; // todos iguais
+
+    function calcDig(cnpj, len) {
+        let sum = 0, pos = len - 7;
+        for (let i = len; i >= 1; i--) {
+            sum += parseInt(cnpj.charAt(len - i)) * pos--;
+            if (pos < 2) pos = 9;
+        }
+        const r = sum % 11;
+        return r < 2 ? 0 : 11 - r;
+    }
+    if (calcDig(cnpj, 12) !== parseInt(cnpj[12])) return false;
+    if (calcDig(cnpj, 13) !== parseInt(cnpj[13])) return false;
+    return true;
+}
+
+// ── Máscara CNPJ ─────────────────────────────────────────────────────────────
+const cnpjInput = document.getElementById('cnpj');
+const cnpjHint  = document.getElementById('cnpj-hint');
+let cnpjCheckTimer = null;
+
+function maskCNPJ(v) {
+    v = v.replace(/\D/g, '').slice(0, 14);
+    if (v.length > 12) v = v.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{0,2}).*/, '$1.$2.$3/$4-$5');
+    else if (v.length > 8)  v = v.replace(/^(\d{2})(\d{3})(\d{3})(\d{0,4}).*/, '$1.$2.$3/$4');
+    else if (v.length > 5)  v = v.replace(/^(\d{2})(\d{3})(\d{0,3}).*/, '$1.$2.$3');
+    else if (v.length > 2)  v = v.replace(/^(\d{2})(\d{0,3}).*/, '$1.$2');
+    return v;
+}
+
+function setHint(el, msg, type) {
+    el.textContent = msg;
+    el.className = `field-hint show ${type}`;
+}
+function clearHint(el) { el.className = 'field-hint'; }
+
+cnpjInput.addEventListener('input', function () {
+    this.value = maskCNPJ(this.value);
+    const digits = this.value.replace(/\D/g, '');
+    this.classList.remove('is-valid', 'is-invalid');
+    clearHint(cnpjHint);
+    clearTimeout(cnpjCheckTimer);
+
+    if (digits.length < 14) return;
+
+    if (!validarCNPJ(digits)) {
+        this.classList.add('is-invalid');
+        setHint(cnpjHint, '✗ CNPJ inválido.', 'err');
+        return;
+    }
+
+    // CNPJ válido — verifica se já existe no banco
+    setHint(cnpjHint, 'Verificando...', 'warn');
+    cnpjCheckTimer = setTimeout(async () => {
+        try {
+            const res  = await fetch(`/admin/academias/check-cnpj?cnpj=${encodeURIComponent(digits)}`);
+            const data = await res.json();
+            if (data.exists) {
+                cnpjInput.classList.add('is-invalid');
+                setHint(cnpjHint, '✗ CNPJ já cadastrado no sistema.', 'err');
+            } else {
+                cnpjInput.classList.add('is-valid');
+                setHint(cnpjHint, '✓ CNPJ válido e disponível.', 'ok');
+            }
+        } catch {
+            cnpjInput.classList.add('is-valid');
+            setHint(cnpjHint, '✓ CNPJ válido.', 'ok');
+        }
+    }, 400);
+});
+
+// Bloqueia envio se CNPJ ou telefone inválidos
+document.getElementById('form-nova-academia').addEventListener('submit', function (e) {
+    let blocked = false;
+
+    const cnpjDigits = cnpjInput.value.replace(/\D/g, '');
+    if (cnpjDigits.length > 0 && !validarCNPJ(cnpjDigits)) {
+        cnpjInput.classList.add('is-invalid');
+        setHint(cnpjHint, '✗ Corrija o CNPJ antes de salvar.', 'err');
+        if (!blocked) cnpjInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        blocked = true;
+    }
+
+    const telDigits = telInput.value.replace(/\D/g, '');
+    if (telDigits.length > 0 && telDigits.length < 10) {
+        telInput.classList.add('is-invalid');
+        setHint(telHint, '✗ Telefone incompleto (mínimo 10 dígitos).', 'err');
+        if (!blocked) telInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        blocked = true;
+    }
+
+    if (blocked) e.preventDefault();
+});
+
+// ── Máscara CEP ──────────────────────────────────────────────────────────────
+const cepInput   = document.getElementById('cep');
+const cepSpinner = document.getElementById('cep-spinner');
+const cepHint    = document.getElementById('cep-hint');
+
+cepInput.addEventListener('input', function () {
+    let v = this.value.replace(/\D/g, '').slice(0, 8);
+    if (v.length > 5) v = v.replace(/^(\d{5})(\d{0,3})/, '$1-$2');
+    this.value = v;
+});
+
+cepInput.addEventListener('blur', async function () {
+    const cep = this.value.replace(/\D/g, '');
+    clearHint(cepHint);
+    if (cep.length !== 8) return;
+
+    cepSpinner.classList.add('show');
+    try {
+        const res  = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+        const data = await res.json();
+
+        if (data.erro) {
+            setHint(cepHint, '✗ CEP não encontrado.', 'err');
+            return;
+        }
+
+        const fields = {
+            endereco: data.logradouro || '',
+            bairro:   data.bairro     || '',
+            cidade:   data.localidade || '',
+            estado:   data.uf         || '',
+        };
+
+        for (const [id, val] of Object.entries(fields)) {
+            const el = document.getElementById(id);
+            if (!el) continue;
+            el.value = val;
+            if (val) el.classList.add('readonly-filled');
+            else      el.classList.remove('readonly-filled');
+        }
+
+        setHint(cepHint, '✓ Endereço preenchido automaticamente.', 'ok');
+        document.getElementById('numero').focus();
+    } catch {
+        setHint(cepHint, '✗ Erro ao buscar CEP. Preencha manualmente.', 'err');
+    } finally {
+        cepSpinner.classList.remove('show');
+    }
+});
+
+// Limpa readonly-filled ao editar endereço manualmente
+['endereco','bairro','cidade','estado'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', () => el.classList.remove('readonly-filled'));
+});
+
+// ── Máscara e validação de telefone ──────────────────────────────────────────
+const telInput = document.getElementById('telefone');
+const telHint  = document.getElementById('telefone-hint');
+
+function maskTel(v) {
+    v = v.replace(/\D/g, '').slice(0, 11);
+    if (v.length > 10) {
+        // Celular: (XX) 9XXXX-XXXX
+        v = v.replace(/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3');
+    } else if (v.length > 6) {
+        // Fixo: (XX) XXXX-XXXX (parcial)
+        v = v.replace(/^(\d{2})(\d{4,5})(\d{0,4})/, '($1) $2-$3');
+    } else if (v.length > 2) {
+        v = v.replace(/^(\d{2})(\d{0,5})/, '($1) $2');
+    } else if (v.length > 0) {
+        v = v.replace(/^(\d{0,2})/, '($1');
+    }
+    return v;
+}
+
+telInput.addEventListener('input', function () {
+    const cursor = this.selectionStart;
+    const prevLen = this.value.length;
+    this.value = maskTel(this.value);
+    const diff = this.value.length - prevLen;
+    this.setSelectionRange(cursor + diff, cursor + diff);
+    this.classList.remove('is-valid', 'is-invalid');
+    clearHint(telHint);
+});
+
+telInput.addEventListener('blur', function () {
+    const digits = this.value.replace(/\D/g, '');
+    if (digits.length === 0) return; // opcional — não valida vazio
+    if (digits.length < 10) {
+        this.classList.add('is-invalid');
+        setHint(telHint, '✗ Telefone incompleto (mínimo 10 dígitos).', 'err');
+    } else {
+        this.classList.add('is-valid');
+        clearHint(telHint);
+    }
+});
+</script>
+</body>
+</html>

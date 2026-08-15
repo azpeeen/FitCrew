@@ -1,0 +1,606 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<%- include('../partials/seo') %>
+<link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+<link rel="stylesheet" href="/css/header.css">
+<link rel="stylesheet" href="/css/footer.css">
+<link rel="stylesheet" href="/css/area-aluno.css">
+<link rel="stylesheet" href="/css/evolucao.css">
+</head>
+<body>
+
+<%- include('../partials/header-aluno') %>
+
+<section class="aluno-dashboard">
+    <section class="sidebar-overlay" id="sidebarOverlay"></section>
+
+    <!-- SIDEBAR -->
+    <section class="aluno-sidebar">
+        <section class="aluno-profile">
+            <section class="avatar">
+                <img id="sidebar-avatar" src="<%= user.profile_photo || '/images/avatar.png' %>" alt="Avatar do Aluno">
+            </section>
+            <h2><%= user.nome %></h2>
+            <p data-translate="sidebar.role">Aluno FitCrew</p>
+        </section>
+        <ul class="aluno-menu">
+            <li class="menu-section-label">Principal</li>
+            <li><a href="/feed"><i class="fas fa-home"></i> Feed</a></li>
+            <li><a href="/metricas"><i class="fas fa-tachometer-alt"></i> Minhas Métricas</a></li>
+
+            <li class="menu-section-label">Social</li>
+            <li><a href="/amizades"><i class="fas fa-user-friends"></i> Amigos</a></li>
+            <li><a href="/chat"><i class="fas fa-comment"></i> Mensagens</a></li>
+            <li><a href="/buscar"><i class="fas fa-search"></i> Buscar pessoas</a></li>
+            <li><a href="/gymsquads"><i class="fas fa-medal"></i> GymSquads</a></li>
+
+            <li class="menu-section-label">Treino</li>
+            <li><a href="/treinos" data-translate="sidebar.treinos"><i class="fas fa-dumbbell"></i> Meus Treinos</a></li>
+            <li><a href="/evolucao" class="active" data-translate="sidebar.evolucao"><i class="fas fa-chart-line"></i> Evolução</a></li>
+
+            <li class="menu-section-label">Saúde</li>
+            <li><a href="/nutricao" data-translate="sidebar.nutricao"><i class="fas fa-utensils"></i> Nutrição</a></li>
+            <li><a href="/imc-form"><i class="fas fa-clipboard-list"></i> Medidas</a></li>
+
+            <li class="menu-section-label">IA</li>
+            <% if (user && (user.planoSlug === 'gymbro' || user.planoSlug === 'black')) { %>
+            <li><a href="/ai/chat" data-translate="sidebar.ai"><i class="fas fa-robot"></i> Personal Trainer IA</a></li>
+            <% } else { %>
+            <li><a href="/meu-plano?upgrade=1" class="menu-locked" data-translate="sidebar.ai"><i class="fas fa-robot"></i> Personal Trainer IA 🔒</a></li>
+            <% } %>
+            <% if (user && user.planoSlug === 'black') { %>
+            <li><a href="/ai/avaliacao" data-translate="sidebar.avaliacao"><i class="fas fa-camera"></i> Avaliação Corporal</a></li>
+            <% } else { %>
+            <li><a href="/meu-plano?upgrade=1" class="menu-locked" data-translate="sidebar.avaliacao"><i class="fas fa-camera"></i> Avaliação Corporal 🔒</a></li>
+            <% } %>
+
+            <li class="menu-section-label">Academia</li>
+            <li class="sidebar-scan-item"><a href="/scan"><i class="fas fa-qrcode"></i> Check-in / Scan</a></li>
+            <li><a href="/suporte" data-translate="sidebar.suporte"><i class="fas fa-headset"></i> Suporte</a></li>
+
+            <li class="menu-section-label">Conta</li>
+            <li><a href="/perfil/<%= user.username || user.id %>"><i class="fas fa-user-circle"></i> Meu Perfil</a></li>
+            <li><a href="/conquistas" data-translate="sidebar.conquistas"><i class="fas fa-trophy"></i> Conquistas</a></li>
+            <li><a href="/meu-plano" data-translate="sidebar.plano"><i class="fas fa-file-alt"></i> Meu Plano</a></li>
+            <li><a href="/config" data-translate="sidebar.config"><i class="fas fa-cog"></i> Configurações</a></li>
+            <li>
+                <button class="sidebar-logout-btn" type="button">
+                    <i class="fas fa-sign-out-alt"></i> Sair da conta
+                </button>
+            </li>
+        </ul>
+    </section>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <section class="aluno-main">
+        <section class="dashboard-top">
+            <h1><i class="fas fa-chart-line"></i> Minha Evolução</h1>
+            <p>Acompanhe seu histórico de IMC, avaliações e treinos ao longo do tempo</p>
+        </section>
+
+        <!-- STATS RÁPIDOS -->
+        <section class="evo-stats">
+            <section class="evo-stat">
+                <section class="es-icon"><i class="fas fa-dumbbell"></i></section>
+                <section class="es-num" id="stTreinos">0</section>
+                <section class="es-label">Treinos Registrados</section>
+            </section>
+            <section class="evo-stat">
+                <section class="es-icon"><i class="fas fa-clock"></i></section>
+                <section class="es-num" id="stTempo">0</section>
+                <section class="es-label">Min na Academia</section>
+            </section>
+            <section class="evo-stat">
+                <section class="es-icon"><i class="fas fa-weight"></i></section>
+                <section class="es-num" id="stIMC">—</section>
+                <section class="es-label">IMC Atual</section>
+            </section>
+            <section class="evo-stat">
+                <section class="es-icon"><i class="fas fa-camera"></i></section>
+                <section class="es-num" id="stAval">0</section>
+                <section class="es-label">Avaliações</section>
+            </section>
+        </section>
+
+        <!-- GRÁFICO: PESO AO LONGO DO TEMPO -->
+        <section class="evo-section" id="secGraficoPeso">
+            <section class="evo-section-header">
+                <h2><i class="fas fa-weight"></i> Evolução do Peso</h2>
+                <small id="labelPeso"></small>
+            </section>
+            <section class="evo-chart-wrap">
+                <canvas id="graficoPeso"></canvas>
+            </section>
+        </section>
+
+        <!-- GRÁFICO: TREINOS POR SEMANA -->
+        <section class="evo-section" id="secGraficoTreinos">
+            <section class="evo-section-header">
+                <h2><i class="fas fa-calendar-alt"></i> Treinos por Semana</h2>
+                <small id="labelTreinos"></small>
+            </section>
+            <section class="evo-chart-wrap">
+                <canvas id="graficoTreinos"></canvas>
+            </section>
+        </section>
+
+        <!-- GRÁFICO: EVOLUÇÃO DE CARGA POR EXERCÍCIO -->
+        <% if (locals.exerciciosExecutados && exerciciosExecutados.length > 0) { %>
+        <%
+        const _bodyPt = { chest:'peito', back:'costas', shoulders:'ombros', 'upper arms':'braços', 'lower arms':'antebraços', 'upper legs':'coxas', 'lower legs':'panturrilhas', waist:'abdômen', neck:'pescoço', cardio:'cardio' };
+        const _bodyEs = { chest:'pecho', back:'espalda', shoulders:'hombros', 'upper arms':'brazos', 'lower arms':'antebrazos', 'upper legs':'muslos', 'lower legs':'pantorrillas', waist:'cintura', neck:'cuello', cardio:'cardio' };
+        function _getNome(ex) {
+            if (locale === 'en') return ex.name;
+            if (locale === 'es') return ex.name_es || ex.name_pt || ex.name;
+            return ex.name_pt || ex.name;
+        }
+        function _getBodyPart(bp) {
+            if (locale === 'en') return bp;
+            if (locale === 'es') return _bodyEs[bp] || bp;
+            return _bodyPt[bp] || bp;
+        }
+        %>
+        <section class="evo-section" id="secGraficoCarga">
+            <section class="evo-section-header">
+                <h2><i class="fas fa-arrow-trend-up"></i> Evolução de Carga</h2>
+                <small>progressão de peso por exercício</small>
+            </section>
+            <section style="margin-bottom:14px">
+                <select id="exercicio-select" class="evo-exercicio-select">
+                    <% exerciciosExecutados.forEach(ex => { %>
+                    <option value="<%= ex.id %>"><%= _getNome(ex) %> (<%= _getBodyPart(ex.body_part) %>)</option>
+                    <% }) %>
+                </select>
+            </section>
+            <section class="evo-chart-wrap">
+                <canvas id="graficoCarga"></canvas>
+            </section>
+            <section class="evo-empty" id="carga-empty" style="display:none">
+                <i class="fas fa-chart-line"></i>
+                Nenhum dado de carga para este exercício ainda.
+            </section>
+        </section>
+        <% } %>
+
+        <!-- GRÁFICO: VOLUME SEMANAL -->
+        <% if (locals.volumeSemanal && volumeSemanal.length > 0) { %>
+        <section class="evo-section" id="secGraficoVolume">
+            <section class="evo-section-header">
+                <h2><i class="fas fa-calendar-week"></i> Volume Semanal</h2>
+                <small>sessões concluídas nas últimas 8 semanas</small>
+            </section>
+            <section class="evo-chart-wrap">
+                <canvas id="graficoVolume"></canvas>
+            </section>
+        </section>
+        <% } %>
+
+        <!-- TABELA DE TREINOS REGISTRADOS -->
+        <section class="evo-section">
+            <section class="evo-section-header">
+                <h2><i class="fas fa-list"></i> Histórico de Treinos</h2>
+            </section>
+            <section id="tabelaTreinos"></section>
+        </section>
+
+        <!-- TIMELINE: SNAPSHOTS IMC + AVALIAÇÃO -->
+        <section class="evo-section">
+            <section class="evo-section-header">
+                <h2><i class="fas fa-history"></i> Histórico Completo</h2>
+                <small>IMC, avaliações e treinos</small>
+            </section>
+            <section class="evo-timeline" id="timeline"></section>
+        </section>
+
+    </section>
+</section>
+
+<%- include('../partials/footer') %><script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>window.GYMBROS_USER_ID = '<%= user.id %>';</script>
+<script>
+window._SRV = {
+    graficoLabels: <%- graficoLabels %>,
+    graficoData:   <%- graficoData %>,
+    workoutLogs:   <%- JSON.stringify(workoutLogs) %>,
+    measurements:  <%- JSON.stringify(measurements) %>
+};
+</script>
+<script>
+const _uid        = (window.GYMBROS_USER_ID || 'guest').replace(/\D/g, '');
+const EVO_KEY     = `gymbros_evolucao_${_uid}`;
+const TREINOS_KEY = `gymbros_treinos_${_uid}`;
+
+function getHistorico() {
+    try { return JSON.parse(localStorage.getItem(EVO_KEY) || '[]'); }
+    catch { return []; }
+}
+
+function getTreinosRegistrados() {
+    try { return JSON.parse(localStorage.getItem(TREINOS_KEY) || '[]'); }
+    catch { return []; }
+}
+
+const historico  = getHistorico().sort((a, b) => a.timestamp - b.timestamp);
+const treinos    = getTreinosRegistrados().sort((a, b) => b.timestamp - a.timestamp);
+
+const snapIMC    = historico.filter(e => e.tipo === 'imc');
+const snapAval   = historico.filter(e => e.tipo === 'avaliacao');
+const snapTreino = historico.filter(e => e.tipo === 'treino');
+
+const srvLogs    = window._SRV.workoutLogs   || [];
+const srvMeds    = window._SRV.measurements  || [];
+
+// ─── STATS ────────────────────────────────────────────
+document.getElementById('stTreinos').textContent = srvLogs.length || treinos.length;
+document.getElementById('stTempo').textContent   = srvLogs.length
+    ? srvLogs.reduce((a, l) => a + (parseInt(l.duracao) || 0), 0)
+    : treinos.reduce((a, t) => a + (parseInt(t.duracao) || 0), 0);
+document.getElementById('stAval').textContent    = snapAval.length;
+
+// IMC atual: sessão do servidor tem precedência sobre localStorage
+<% if (user.imc && user.imc.imcValor) { %>
+document.getElementById('stIMC').textContent = parseFloat('<%- user.imc.imcValor %>').toFixed(1);
+<% } else { %>
+const ultimoIMC = snapIMC.length ? snapIMC[snapIMC.length - 1] : null;
+if (ultimoIMC) document.getElementById('stIMC').textContent = parseFloat(ultimoIMC.dados.imcValor).toFixed(1);
+<% } %>
+
+// ─── GRÁFICO PESO ─────────────────────────────────────
+const ctxPeso = document.getElementById('graficoPeso').getContext('2d');
+const pesoLabels = srvMeds.length
+    ? srvMeds.map(m => new Date(m.data).toLocaleDateString('pt-BR')).reverse()
+    : snapIMC.map(e => e.data);
+const pesoData = srvMeds.length
+    ? srvMeds.map(m => parseFloat(m.peso || m.valor || 0)).reverse()
+    : snapIMC.map(e => parseFloat(e.dados.peso));
+
+if (pesoLabels.length >= 1) {
+    document.getElementById('labelPeso').textContent = `${pesoLabels.length} registro(s)`;
+    Chart.getChart(document.getElementById('graficoPeso'))?.destroy();
+    new Chart(ctxPeso, {
+        type: 'line',
+        data: {
+            labels: pesoLabels,
+            datasets: [{
+                label: 'Peso (kg)',
+                data: pesoData,
+                borderColor: '#FFD700',
+                backgroundColor: 'rgba(255,215,0,0.12)',
+                tension: 0.35,
+                fill: true,
+                pointBackgroundColor: '#FFD700',
+                pointRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.y} kg` } }
+            },
+            scales: {
+                x: { ticks: { color: '#888' }, grid: { color: '#1e1e1e' } },
+                y: { ticks: { color: '#888' }, grid: { color: '#1e1e1e' }, beginAtZero: false }
+            }
+        }
+    });
+} else {
+    document.getElementById('secGraficoPeso').innerHTML += `<section class="evo-empty">
+        <i class="fas fa-weight"></i>
+        Salve seu perfil IMC ao menos uma vez para ver o gráfico de peso.
+    </section>`;
+    ctxPeso.canvas.style.display = 'none';
+}
+
+// ─── GRÁFICO CHECK-INS POR DIA DA SEMANA ──────────────
+const ctxTreinos = document.getElementById('graficoTreinos').getContext('2d');
+const labSem = window._SRV.graficoLabels;
+const datSem = window._SRV.graficoData;
+const temCheckins = datSem.some(v => v > 0);
+
+if (temCheckins) {
+    document.getElementById('labelTreinos').textContent = 'últimos 30 dias';
+    Chart.getChart(document.getElementById('graficoTreinos'))?.destroy();
+    new Chart(ctxTreinos, {
+        type: 'bar',
+        data: {
+            labels: labSem,
+            datasets: [{
+                label: 'Check-ins',
+                data: datSem,
+                backgroundColor: 'rgba(255,215,0,0.7)',
+                borderColor: '#FFD700',
+                borderWidth: 1,
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { ticks: { color: '#888' }, grid: { color: '#1e1e1e' } },
+                y: { ticks: { color: '#888', stepSize: 1 }, grid: { color: '#1e1e1e' }, beginAtZero: true }
+            }
+        }
+    });
+} else {
+    // Gráfico vazio com labels dos 7 dias
+    Chart.getChart(document.getElementById('graficoTreinos'))?.destroy();
+    new Chart(ctxTreinos, {
+        type: 'bar',
+        data: {
+            labels: labSem,
+            datasets: [{ label: 'Check-ins', data: [0,0,0,0,0,0,0], backgroundColor: 'rgba(255,215,0,0.2)', borderColor: '#FFD700', borderWidth: 1, borderRadius: 6 }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { ticks: { color: '#888' }, grid: { color: '#1e1e1e' } },
+                y: { ticks: { color: '#888', stepSize: 1 }, grid: { color: '#1e1e1e' }, beginAtZero: true, max: 5 }
+            }
+        }
+    });
+    document.getElementById('labelTreinos').textContent = 'sem check-ins nos últimos 30 dias';
+}
+
+// ─── TABELA DE TREINOS ─────────────────────────────────
+const tabelaEl = document.getElementById('tabelaTreinos');
+
+if (srvLogs.length > 0) {
+    const linhas = srvLogs.slice(0, 20).map(l => {
+        const nome = l.workout_nome || l.nome || '—';
+        const data = l.data ? new Date(l.data).toLocaleDateString('pt-BR') : '—';
+        const dur  = l.duracao ? `${l.duracao} min` : '—';
+        return `<tr>
+            <td>${data}</td>
+            <td><strong style="color:#fff">${nome}</strong></td>
+            <td>${dur}</td>
+        </tr>`;
+    }).join('');
+    tabelaEl.innerHTML = `<table class="evo-table">
+        <thead><tr><th>Data</th><th>Treino</th><th>Duração</th></tr></thead>
+        <tbody>${linhas}</tbody>
+    </table>`;
+} else if (treinos.length > 0) {
+    const badgeClass = tipo => tipo === 'Força' ? 'forca' : tipo === 'Cardio' ? 'cardio' : 'alongamento';
+    const linhas = treinos.slice(0, 20).map(t => {
+        const cargaCell = t.tipo === 'Força' && t.peso
+            ? `${t.peso}kg${t.series ? ' · ' + t.series + 'x' : ''}${t.reps ? t.reps + 'rep' : ''}` : '—';
+        const cardioCell = t.tipo === 'Cardio' && t.cardioMin
+            ? `${t.cardioMin}min ${t.intensidade ? '· ' + t.intensidade : ''}` : '—';
+        return `<tr>
+            <td>${t.data}</td>
+            <td><strong style="color:#fff">${t.nome}</strong></td>
+            <td><span class="evo-badge ${badgeClass(t.tipo)}">${t.tipo}</span></td>
+            <td>${t.duracao} min</td>
+            <td style="color:#FFD700">${cargaCell}</td>
+            <td style="color:#FF6B35">${cardioCell}</td>
+        </tr>`;
+    }).join('');
+    tabelaEl.innerHTML = `<table class="evo-table">
+        <thead><tr><th>Data</th><th>Treino</th><th>Tipo</th><th>Duração</th><th>Carga / Séries</th><th>Cardio</th></tr></thead>
+        <tbody>${linhas}</tbody>
+    </table>`;
+} else {
+    tabelaEl.innerHTML = `<section class="evo-empty">
+        <i class="fas fa-table"></i>
+        Nenhum treino registrado ainda.
+    </section>`;
+}
+
+// ─── TIMELINE COMPLETA ─────────────────────────────────
+const timelineEl = document.getElementById('timeline');
+
+// Junta todos os eventos e ordena do mais recente
+const todosEventos = [
+    ...snapIMC.map(e => ({ ...e, _tipo: 'imc' })),
+    ...snapAval.map(e => ({ ...e, _tipo: 'avaliacao' })),
+    ...snapTreino.map(e => ({ ...e, _tipo: 'treino' }))
+].sort((a, b) => b.timestamp - a.timestamp);
+
+if (todosEventos.length === 0) {
+    timelineEl.innerHTML = `<section class="evo-empty">
+        <i class="fas fa-history"></i>
+        Nenhum registro ainda. Preencha seu perfil IMC, faça uma avaliação corporal ou registre treinos!
+    </section>`;
+} else {
+    // Função para calcular posição na barra IMC
+    const imcPct = imc => Math.min(100, Math.max(0, ((parseFloat(imc) - 14) / 26) * 100));
+
+    // Função para categoria IMC
+    const imcCat = v => {
+        v = parseFloat(v);
+        if (v < 18.5) return 'Abaixo do peso';
+        if (v < 25)   return 'Normal';
+        if (v < 30)   return 'Sobrepeso';
+        return 'Obesidade';
+    };
+
+    timelineEl.innerHTML = todosEventos.map(e => {
+        let dotClass = '', icon = '', title = '', detailsHtml = '';
+
+        if (e._tipo === 'imc') {
+            dotClass = 'tipo-imc';
+            icon     = 'fas fa-weight';
+            title    = 'Perfil IMC Atualizado';
+            const d  = e.dados;
+            const pct = imcPct(d.imcValor);
+            detailsHtml = `
+                <section class="evo-entry-details">
+                    <span class="evo-chip">Peso <span>${d.peso} kg</span></span>
+                    <span class="evo-chip">Altura <span>${d.altura} cm</span></span>
+                    <span class="evo-chip">Idade <span>${d.idade} anos</span></span>
+                    <span class="evo-chip">Objetivo <span>${d.objetivo || '—'}</span></span>
+                </section>
+                <section style="margin-top:0.8rem; display:flex; align-items:center; gap:0.6rem">
+                    <span style="color:#888; font-size:0.8rem">IMC</span>
+                    <strong style="color:#FFD700; font-size:1.1rem">${parseFloat(d.imcValor).toFixed(1)}</strong>
+                    <span style="color:#aaa; font-size:0.8rem">${imcCat(d.imcValor)}</span>
+                    <section class="imc-mini-bar" style="flex:1">
+                        <section class="imc-mini-marker" style="left:${pct}%"></section>
+                    </section>
+                </section>`;
+        }
+
+        else if (e._tipo === 'avaliacao') {
+            dotClass = 'tipo-avaliacao';
+            icon     = 'fas fa-camera';
+            title    = 'Avaliação Corporal com IA';
+            const d  = e.dados;
+            const c  = d.composicao || {};
+            detailsHtml = `
+                <section class="evo-entry-details">
+                    <span class="evo-chip">Gordura <span>${c.percentual_gordura_estimado || '—'}</span></span>
+                    <span class="evo-chip">Músculo <span>${c.massa_muscular_aparente || '—'}</span></span>
+                    <span class="evo-chip">Região <span>${c.regiao_predominante || '—'}</span></span>
+                </section>
+                ${d.classificacao_imc_visual
+                    ? `<p style="margin-top:0.5rem; font-size:0.82rem; color:#888">
+                        IMC visual: <span style="color:#4fc3f7">${d.classificacao_imc_visual}</span>
+                       </p>`
+                    : ''}
+                ${(d.areas_melhoria || []).length
+                    ? `<p style="margin-top:0.4rem; font-size:0.8rem; color:#888">
+                        Áreas de melhoria: ${d.areas_melhoria.slice(0,2).join(' · ')}
+                       </p>`
+                    : ''}`;
+        }
+
+        else if (e._tipo === 'treino') {
+            dotClass = 'tipo-treino';
+            icon     = 'fas fa-dumbbell';
+            title    = e.dados.nome || 'Treino Registrado';
+            const d  = e.dados;
+            const chips = [];
+            chips.push(`<span class="evo-chip">Tipo <span>${d.tipo}</span></span>`);
+            chips.push(`<span class="evo-chip">Duração <span>${d.duracao} min</span></span>`);
+            if (d.peso)      chips.push(`<span class="evo-chip">Carga <span>${d.peso} kg</span></span>`);
+            if (d.series)    chips.push(`<span class="evo-chip">Séries <span>${d.series}x${d.reps || ''}</span></span>`);
+            if (d.cardioMin) chips.push(`<span class="evo-chip">Cardio <span>${d.cardioMin} min</span></span>`);
+            detailsHtml = `<section class="evo-entry-details">${chips.join('')}</section>
+                ${d.obs ? `<p style="margin-top:0.5rem; font-size:0.8rem; color:#888; font-style:italic">"${d.obs}"</p>` : ''}`;
+        }
+
+        return `<section class="evo-entry">
+            <section class="evo-entry-dot ${dotClass}">
+                <i class="${icon}"></i>
+            </section>
+            <section class="evo-entry-body">
+                <section class="evo-entry-header">
+                    <span class="evo-entry-title">${title}</span>
+                    <span class="evo-entry-date">${e.data}</span>
+                </section>
+                ${detailsHtml}
+            </section>
+        </section>`;
+    }).join('');
+}
+
+// ─── UTILITÁRIO DE DATA ────────────────────────────────
+function formatarData(val) {
+    if (!val) return '—';
+    if (val instanceof Date) return val.toLocaleDateString('pt-BR', { day:'2-digit', month:'short' });
+    const s = String(val).trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+        const [y, m, d] = s.split('-');
+        return new Date(Number(y), Number(m) - 1, Number(d)).toLocaleDateString('pt-BR', { day:'2-digit', month:'short' });
+    }
+    const dt = new Date(s);
+    return isNaN(dt) ? s : dt.toLocaleDateString('pt-BR', { day:'2-digit', month:'short' });
+}
+
+// ─── GRÁFICO EVOLUÇÃO DE CARGA ─────────────────────────
+<% if (locals.exerciciosExecutados && exerciciosExecutados.length > 0) { %>
+let _chartCarga = null;
+
+async function carregarCarga(exercicioId) {
+    const res  = await fetch('/api/evolucao/exercicio/' + exercicioId);
+    const data = await res.json();
+    const canvas = document.getElementById('graficoCarga');
+    const empty  = document.getElementById('carga-empty');
+    if (!data.length) {
+        canvas.style.display = 'none';
+        empty.style.display  = 'block';
+        return;
+    }
+    canvas.style.display = 'block';
+    empty.style.display  = 'none';
+    const labels = data.map(d => formatarData(d.data));
+    const cargas = data.map(d => parseFloat(d.carga_maxima));
+    if (_chartCarga) _chartCarga.destroy();
+    _chartCarga = new Chart(canvas.getContext('2d'), {
+        type: 'line',
+        data: {
+            labels,
+            datasets: [{
+                label: 'Carga máxima (kg)', data: cargas,
+                borderColor: '#FFD700', backgroundColor: 'rgba(255,215,0,0.08)',
+                pointBackgroundColor: '#FFD700', pointRadius: 4, pointHoverRadius: 6,
+                tension: 0.35, fill: true, borderWidth: 2,
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#1A1A1A', borderColor: '#2E2E2E', borderWidth: 1,
+                    titleColor: '#fff', bodyColor: '#FFD700', padding: 10,
+                    callbacks: { label: ctx => ` ${ctx.parsed.y} kg` }
+                }
+            },
+            scales: {
+                x: { ticks: { color: '#888' }, grid: { color: '#1e1e1e' } },
+                y: { ticks: { color: '#888', callback: v => v + ' kg' }, grid: { color: '#1e1e1e' }, beginAtZero: false }
+            }
+        }
+    });
+}
+const _selEx = document.getElementById('exercicio-select');
+_selEx.addEventListener('change', () => carregarCarga(_selEx.value));
+carregarCarga(_selEx.value);
+<% } %>
+
+// ─── GRÁFICO VOLUME SEMANAL ────────────────────────────
+<% if (locals.volumeSemanal && volumeSemanal.length > 0) { %>
+(function() {
+    const vd      = <%- JSON.stringify(volumeSemanal) %>;
+    const labels  = vd.map(d => formatarData(d.inicio_semana));
+    const sessoes = vd.map(d => Number(d.sessoes));
+    new Chart(document.getElementById('graficoVolume').getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels,
+            datasets: [{
+                label: 'Sessões', data: sessoes,
+                backgroundColor: 'rgba(255,215,0,0.65)', borderColor: '#FFD700',
+                borderWidth: 1, borderRadius: 4, maxBarThickness: 48
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#1A1A1A', borderColor: '#2E2E2E', borderWidth: 1,
+                    titleColor: '#fff', bodyColor: '#FFD700', padding: 10,
+                }
+            },
+            scales: {
+                x: { ticks: { color: '#888' }, grid: { color: '#1e1e1e' } },
+                y: { ticks: { color: '#888', stepSize: 1 }, grid: { color: '#1e1e1e' }, beginAtZero: true }
+            }
+        }
+    });
+})();
+<% } %>
+</script>
+</body>
+</html>

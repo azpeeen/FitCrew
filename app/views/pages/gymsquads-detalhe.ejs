@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<%- include('../partials/seo') %>
+<link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+<link rel="stylesheet" href="/css/header.css">
+<link rel="stylesheet" href="/css/footer.css">
+<link rel="stylesheet" href="/css/area-aluno.css">
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin></head>
+<body>
+
+<%- include('../partials/header-aluno') %>
+
+<section class="aluno-dashboard">
+    <section class="sidebar-overlay" id="sidebarOverlay"></section>
+    <%- include('../partials/sidebar-aluno') %>
+
+    <section class="aluno-main">
+        <section class="gymsquads-layout">
+
+            <a href="/gymsquads" class="gymsquad-voltar"><i class="fas fa-arrow-left"></i> GymSquads</a>
+
+            <section class="gymsquad-card">
+                <section class="gymsquad-card-header">
+                    <section>
+                        <section class="gymsquad-card-titulo"><%= gymsquad.nome %></section>
+                        <section class="gymsquad-card-meta">
+                            <span class="gymsquad-tipo-badge"><%= gymsquad.tipo_desafio %></span>
+                            <span><%= new Date(gymsquad.data_inicio).toLocaleDateString('pt-BR') %> → <%= new Date(gymsquad.data_fim).toLocaleDateString('pt-BR') %></span>
+                            <span><%= gymsquad.status === 'encerrado' ? 'Encerrado' : 'Ativo' %></span>
+                        </section>
+                        <% if (gymsquad.descricao) { %><p style="font-size:.85rem;color:#999;margin-top:8px"><%= gymsquad.descricao %></p><% } %>
+                        <% if (gymsquad.tipo_desafio === 'personalizado' && gymsquad.descricao_meta) { %>
+                        <p style="font-size:.85rem;color:#C98B1D;margin-top:8px"><i class="fas fa-bullseye"></i> <%= gymsquad.descricao_meta %></p>
+                        <% } %>
+                    </section>
+                </section>
+
+                <section class="gymsquad-placar" id="placar-<%= gymsquad.id %>"></section>
+
+                <section class="gymsquad-card-acoes">
+                    <% if (gymsquad.status === 'ativo' && gymsquad.tipo_desafio === 'distancia') { %>
+                    <button type="button" class="gymsquad-btn gymsquad-btn--outline" id="btn-abrir-km"><i class="fas fa-route"></i> Registrar km de hoje</button>
+                    <% } %>
+                    <% if (gymsquad.status === 'ativo' && gymsquad.tipo_desafio === 'personalizado') { %>
+                    <button type="button" class="gymsquad-btn gymsquad-btn--outline" id="btn-abrir-vincular"><i class="fas fa-camera"></i> Provar no feed do grupo</button>
+                    <% } %>
+                    <% if (gymsquad.status === 'ativo' && souAdmin) { %>
+                    <button type="button" class="gymsquad-btn gymsquad-btn--outline" id="btn-encerrar-gymsquad"><i class="fas fa-flag-checkered"></i> Encerrar desafio</button>
+                    <% } %>
+                </section>
+            </section>
+
+            <section class="gymsquads-section">
+                <h2 class="gymsquads-section-title">Feed do grupo</h2>
+
+                <section class="feed-compose">
+                    <img class="feed-compose-avatar" src="<%= user.profile_photo || '/images/avatar.png' %>" alt="<%= user.nome %>">
+                    <textarea class="feed-compose-input" id="gymsquad-compose-textarea"
+                        placeholder="Compartilhe seu treino com o grupo..."
+                        maxlength="2200" rows="1"></textarea>
+                </section>
+                <section class="feed-compose-preview" id="gymsquad-compose-preview"></section>
+                <section class="feed-compose-footer">
+                    <button class="feed-compose-media-btn" type="button" id="gymsquad-compose-media-btn" title="Adicionar foto ou vídeo">
+                        <i class="fas fa-image"></i>
+                    </button>
+                    <input type="file" id="gymsquad-compose-file-input"
+                        accept="image/jpeg,image/jpg,image/png,image/webp,image/gif,video/mp4,video/quicktime,video/webm"
+                        multiple hidden>
+                    <button class="feed-compose-btn" id="gymsquad-compose-submit-btn" disabled>Publicar</button>
+                </section>
+                <section class="feed-compose-msg" id="gymsquad-compose-msg"></section>
+
+                <section id="gymsquad-feed-lista"></section>
+                <section id="gymsquad-feed-vazio" class="amizades-vazio" style="display:none">
+                    <i class="fas fa-camera" style="font-size:2.5rem;opacity:.15;display:block;margin-bottom:14px"></i>
+                    Nenhum post no feed do grupo ainda.
+                </section>
+                <section id="gymsquad-feed-sentinel"></section>
+            </section>
+
+        </section>
+    </section>
+</section>
+
+<!-- MODAL: REGISTRAR KM -->
+<section id="modal-gymsquad-km" class="modal-overlay">
+    <section class="modal-box">
+        <section class="modal-header">
+            <h2><i class="fas fa-route"></i> Registrar km de hoje</h2>
+            <button type="button" class="modal-close" id="modal-km-fechar"><i class="fas fa-times"></i></button>
+        </section>
+        <section class="form-group">
+            <label class="form-label">Data</label>
+            <input type="date" id="gymsquad-km-data" class="form-input">
+        </section>
+        <section class="form-group">
+            <label class="form-label">Distância (km) *</label>
+            <input type="number" id="gymsquad-km-valor" class="form-input" min="0.1" max="200" step="0.1" placeholder="Ex: 5.2">
+        </section>
+        <p style="font-size:.78rem;color:#666;margin:0 0 12px">Auto-declarado — sem GPS. Um registro por dia (substitui o anterior).</p>
+        <button type="button" class="btn-gold-full" id="btn-salvar-km">Salvar</button>
+    </section>
+</section>
+
+<!-- MODAL: VINCULAR POST (personalizado) -->
+<section id="modal-gymsquad-vincular" class="modal-overlay">
+    <section class="modal-box">
+        <section class="modal-header">
+            <h2><i class="fas fa-camera"></i> Provar no feed do grupo</h2>
+            <button type="button" class="modal-close" id="modal-vincular-fechar"><i class="fas fa-times"></i></button>
+        </section>
+        <p style="font-size:.82rem;color:#999;margin:0 0 14px">
+            Escolha um post seu já publicado (feito no <a href="/feed" style="color:#C98B1D">feed</a>) pra contar como prova neste desafio.
+        </p>
+        <section id="gymsquad-meus-posts-lista" class="gymsquad-amigos-lista">
+            <p style="font-size:.82rem;color:#666;margin:0">Carregando...</p>
+        </section>
+    </section>
+</section>
+
+<script>
+const GYMSQUAD_ID = <%= gymsquad.id %>;
+const GYMSQUAD_TIPO = <%- JSON.stringify(gymsquad.tipo_desafio) %>;
+const PLACAR_INICIAL = <%- JSON.stringify(placar) %>;
+
+function escHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+}
+
+function renderPlacar(placar) {
+    const container = document.getElementById(`placar-${GYMSQUAD_ID}`);
+    if (!container) return;
+    if (!placar.length) {
+        container.innerHTML = '<p style="font-size:.82rem;color:#666;margin:0">Sem membros ainda.</p>';
+        return;
+    }
+    const maxPontos = placar[0]?.pontuacao || 1;
+    container.innerHTML = placar.map((p, i) => `
+        <section class="gymsquad-placar-item" data-user-id="${p.user_id}">
+            <span class="gymsquad-placar-pos gymsquad-placar-pos--${i + 1}">${i + 1}º</span>
+            <img src="${escHtml(p.foto_perfil || '/images/avatar.png')}" class="gymsquad-placar-avatar" alt="${escHtml(p.nome)}">
+            <section class="gymsquad-placar-info">
+                <section class="gymsquad-placar-nome">${escHtml(p.nome)}</section>
+                <section class="gymsquad-placar-barra-wrap">
+                    <section class="gymsquad-placar-barra">
+                        <section class="gymsquad-placar-fill" style="width:${Math.round((p.pontuacao / maxPontos) * 100)}%"></section>
+                    </section>
+                    <span class="gymsquad-placar-valor">${p.pontuacao}</span>
+                </section>
+            </section>
+        </section>`).join('');
+}
+
+renderPlacar(PLACAR_INICIAL);
+
+// Placar em tempo real via SSE (repassado como CustomEvent pelo header-aluno.ejs)
+window.addEventListener('sse:gymsquad_placar', e => {
+    const d = e.detail;
+    if (!d || d.gymsquad_id !== GYMSQUAD_ID) return;
+    renderPlacar(d.placar);
+    const container = document.getElementById(`placar-${GYMSQUAD_ID}`);
+    container?.querySelectorAll('.gymsquad-placar-item').forEach(el => {
+        el.classList.add('atualizado');
+        setTimeout(() => el.classList.remove('atualizado'), 1000);
+    });
+});
+
+// ── Feed do grupo (scroll infinito) ─────────────────────────────────────────
+const feedLista = document.getElementById('gymsquad-feed-lista');
+const feedVazio = document.getElementById('gymsquad-feed-vazio');
+const feedSentinel = document.getElementById('gymsquad-feed-sentinel');
+let feedState = { hasMore: true, lastId: null, carregando: false, primeira: true };
+
+function renderFeedItem(post) {
+    const midia = post.midias && post.midias[0];
+    const midiaHtml = midia
+        ? (midia.tipo === 'video'
+            ? `<video class="post-midia-item" src="${escHtml(midia.url)}" controls playsinline></video>`
+            : `<img class="post-midia-item" src="${escHtml(midia.url)}" alt="" loading="lazy">`)
+        : '';
+    return `
+        <section class="post-card" data-post-id="${post.id}">
+            <section class="post-header">
+                <a href="/u/${escHtml(post.autor_username || post.autor_id)}">
+                    <img class="post-avatar" src="${escHtml(post.autor_foto || '/images/avatar.png')}" alt="${escHtml(post.autor_nome)}">
+                </a>
+                <section class="post-header-info">
+                    <a href="/u/${escHtml(post.autor_username || post.autor_id)}" class="post-author-name">${escHtml(post.autor_nome)}</a>
+                    <section class="post-header-sub">
+                        <span class="post-time">${new Date(post.created_at).toLocaleDateString('pt-BR')}</span>
+                    </section>
+                </section>
+            </section>
+            ${post.legenda ? `<p class="post-legenda">${escHtml(post.legenda)}</p>` : ''}
+            ${midia ? `<section class="post-midia">${midiaHtml}</section>` : ''}
+            <section class="post-acoes">
+                <span class="post-reagir-btn"><span class="post-reagir-icone">🔥</span><span class="post-reacoes-total">${post.total_reacoes || 0}</span></span>
+                <span class="post-comentar-btn"><i class="fas fa-comment"></i><span class="post-comentarios-total">${post.total_comentarios || 0}</span></span>
+            </section>
+        </section>`;
+}
+
+async function carregarFeedGymSquad() {
+    if (feedState.carregando || !feedState.hasMore) return;
+    feedState.carregando = true;
+    try {
+        const data = await fetch(`/api/gymsquads/${GYMSQUAD_ID}/feed?last_id=${feedState.lastId ?? ''}`).then(r => r.json());
+        if (feedState.primeira && !data.posts.length) {
+            feedVazio.style.display = 'block';
+        }
+        feedState.primeira = false;
+        feedLista.insertAdjacentHTML('beforeend', data.posts.map(renderFeedItem).join(''));
+        feedState.hasMore = data.hasMore;
+        feedState.lastId = data.lastId;
+        if (!feedState.hasMore) feedObserver.disconnect();
+    } catch (_) {}
+    feedState.carregando = false;
+}
+
+const feedObserver = new IntersectionObserver(entries => {
+    if (entries[0].isIntersecting) carregarFeedGymSquad();
+});
+feedObserver.observe(feedSentinel);
+
+// ── Composer do feed do grupo (mesmo padrão do feed principal) ──────────────
+const composeTextarea = document.getElementById('gymsquad-compose-textarea');
+const composeMediaBtn = document.getElementById('gymsquad-compose-media-btn');
+const composeFileInput = document.getElementById('gymsquad-compose-file-input');
+const composePreview = document.getElementById('gymsquad-compose-preview');
+const composeSubmitBtn = document.getElementById('gymsquad-compose-submit-btn');
+const composeMsg = document.getElementById('gymsquad-compose-msg');
+let composeSelectedFiles = [];
+
+function atualizarBotaoPublicarGymSquad() {
+    composeSubmitBtn.disabled = !composeTextarea.value.trim() && composeSelectedFiles.length === 0;
+}
+
+composeTextarea?.addEventListener('input', () => {
+    composeTextarea.style.height = 'auto';
+    composeTextarea.style.height = composeTextarea.scrollHeight + 'px';
+    atualizarBotaoPublicarGymSquad();
+});
+
+composeMediaBtn?.addEventListener('click', () => composeFileInput.click());
+
+composeFileInput?.addEventListener('change', () => {
+    const novos = Array.from(composeFileInput.files || []);
+    composeSelectedFiles = composeSelectedFiles.concat(novos).slice(0, 10);
+    composeFileInput.value = '';
+    renderComposePreview();
+    atualizarBotaoPublicarGymSquad();
+});
+
+function renderComposePreview() {
+    composePreview.innerHTML = '';
+    composeSelectedFiles.forEach((file, idx) => {
+        const url = URL.createObjectURL(file);
+        const item = document.createElement('section');
+        item.className = 'compose-preview-item';
+        item.innerHTML = file.type.startsWith('video')
+            ? `<video src="${url}" muted></video>`
+            : `<img src="${url}" alt="">`;
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'compose-preview-remove';
+        removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+        removeBtn.addEventListener('click', () => {
+            composeSelectedFiles.splice(idx, 1);
+            renderComposePreview();
+            atualizarBotaoPublicarGymSquad();
+        });
+        item.appendChild(removeBtn);
+        composePreview.appendChild(item);
+    });
+}
+
+function resetComposeGymSquad() {
+    composeTextarea.value = '';
+    composeTextarea.style.height = 'auto';
+    composeSelectedFiles = [];
+    renderComposePreview();
+    atualizarBotaoPublicarGymSquad();
+}
+
+function mostrarMensagemGymSquad(texto, tipo) {
+    composeMsg.textContent = texto;
+    composeMsg.className = 'feed-compose-msg feed-compose-msg-' + tipo;
+    composeMsg.style.display = 'block';
+    setTimeout(() => { composeMsg.style.display = 'none'; }, 5000);
+}
+
+composeSubmitBtn?.addEventListener('click', async () => {
+    if (composeSubmitBtn.disabled) return;
+    composeSubmitBtn.disabled = true;
+    const textoOriginal = composeSubmitBtn.textContent;
+    composeSubmitBtn.textContent = 'Publicando...';
+
+    const formData = new FormData();
+    if (composeTextarea.value.trim()) formData.append('legenda', composeTextarea.value.trim());
+    formData.append('gymsquad_id', GYMSQUAD_ID);
+    composeSelectedFiles.forEach(file => formData.append('midias', file));
+
+    try {
+        const data = await fetch('/api/posts', { method: 'POST', body: formData }).then(r => r.json());
+        if (!data.ok) {
+            mostrarMensagemGymSquad(data.erro || 'Erro ao publicar post.', 'erro');
+            return;
+        }
+        mostrarMensagemGymSquad(data.mensagem, data.status === 'em_revisao' ? 'aviso' : 'ok');
+        resetComposeGymSquad();
+        if (data.status === 'ativo') {
+            feedState = { hasMore: true, lastId: null, carregando: false, primeira: true };
+            feedLista.innerHTML = '';
+            feedVazio.style.display = 'none';
+            feedObserver.observe(feedSentinel);
+            carregarFeedGymSquad();
+        }
+    } catch (_) {
+        mostrarMensagemGymSquad('Erro ao publicar post.', 'erro');
+    } finally {
+        composeSubmitBtn.textContent = textoOriginal;
+        atualizarBotaoPublicarGymSquad();
+    }
+});
+
+// ── Registrar km (tipo distância) ───────────────────────────────────────────
+const modalKm = document.getElementById('modal-gymsquad-km');
+document.getElementById('btn-abrir-km')?.addEventListener('click', () => {
+    const hoje = new Date().toISOString().slice(0, 10);
+    document.getElementById('gymsquad-km-data').value = hoje;
+    document.getElementById('gymsquad-km-data').max = hoje;
+    modalKm.classList.add('open');
+});
+document.getElementById('modal-km-fechar')?.addEventListener('click', () => modalKm.classList.remove('open'));
+modalKm.addEventListener('click', e => { if (e.target === modalKm) modalKm.classList.remove('open'); });
+
+document.getElementById('btn-salvar-km')?.addEventListener('click', async () => {
+    const km = parseFloat(document.getElementById('gymsquad-km-valor').value);
+    const data = document.getElementById('gymsquad-km-data').value;
+    if (!km || km <= 0) { alert('Informe a distância.'); return; }
+    if (!data) { alert('Informe a data.'); return; }
+    const btn = document.getElementById('btn-salvar-km');
+    btn.disabled = true;
+    try {
+        const r = await fetch(`/api/gymsquads/${GYMSQUAD_ID}/distancia`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ km, data }),
+        }).then(x => x.json());
+        if (r.ok) {
+            modalKm.classList.remove('open');
+            if (r.placar) renderPlacar(r.placar);
+        } else {
+            alert(r.erro || 'Erro ao registrar.');
+        }
+    } catch (_) {
+        alert('Erro ao registrar.');
+    } finally {
+        btn.disabled = false;
+    }
+});
+
+// ── Vincular post existente (tipo personalizado) ────────────────────────────
+const modalVincular = document.getElementById('modal-gymsquad-vincular');
+document.getElementById('btn-abrir-vincular')?.addEventListener('click', async () => {
+    modalVincular.classList.add('open');
+    const lista = document.getElementById('gymsquad-meus-posts-lista');
+    lista.innerHTML = '<p style="font-size:.82rem;color:#666;margin:0">Carregando...</p>';
+    try {
+        const data = await fetch(`/api/gymsquads/${GYMSQUAD_ID}/meus-posts`).then(r => r.json());
+        if (!data.posts?.length) {
+            lista.innerHTML = '<p style="font-size:.82rem;color:#666;margin:0">Nenhum post disponível. Publique algo no feed primeiro.</p>';
+            return;
+        }
+        lista.innerHTML = data.posts.map(p => `
+            <button type="button" class="gymsquad-meu-post-item" data-post-id="${p.id}">
+                ${p.thumb ? `<img src="${escHtml(p.thumb.url)}" alt="">` : '<span class="gymsquad-meu-post-sem-midia"><i class="fas fa-file-alt"></i></span>'}
+                <span class="gymsquad-meu-post-legenda">${escHtml((p.legenda || '').slice(0, 60)) || '(sem legenda)'}</span>
+            </button>`).join('');
+    } catch (_) {
+        lista.innerHTML = '<p style="font-size:.82rem;color:#666;margin:0">Erro ao carregar.</p>';
+    }
+});
+document.getElementById('modal-vincular-fechar')?.addEventListener('click', () => modalVincular.classList.remove('open'));
+modalVincular.addEventListener('click', e => { if (e.target === modalVincular) modalVincular.classList.remove('open'); });
+
+document.getElementById('gymsquad-meus-posts-lista')?.addEventListener('click', async e => {
+    const item = e.target.closest('.gymsquad-meu-post-item');
+    if (!item) return;
+    item.disabled = true;
+    try {
+        const r = await fetch(`/api/gymsquads/${GYMSQUAD_ID}/posts`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ post_id: parseInt(item.dataset.postId, 10) }),
+        }).then(x => x.json());
+        if (r.ok) {
+            modalVincular.classList.remove('open');
+            feedState = { hasMore: true, lastId: null, carregando: false, primeira: true };
+            feedLista.innerHTML = '';
+            feedVazio.style.display = 'none';
+            feedObserver.observe(feedSentinel);
+            carregarFeedGymSquad();
+        } else {
+            alert(r.erro || 'Erro ao vincular post.');
+            item.disabled = false;
+        }
+    } catch (_) {
+        item.disabled = false;
+    }
+});
+
+// ── Encerrar desafio (admin) ─────────────────────────────────────────────────
+document.getElementById('btn-encerrar-gymsquad')?.addEventListener('click', async () => {
+    if (!confirm('Encerrar este desafio? O vencedor será definido pelo placar atual.')) return;
+    const btn = document.getElementById('btn-encerrar-gymsquad');
+    btn.disabled = true;
+    try {
+        const r = await fetch(`/api/gymsquads/${GYMSQUAD_ID}/encerrar`, { method: 'POST' }).then(x => x.json());
+        if (r.ok) {
+            location.reload();
+        } else {
+            alert(r.erro || 'Erro ao encerrar.');
+            btn.disabled = false;
+        }
+    } catch (_) {
+        btn.disabled = false;
+    }
+});
+</script>
+
+</body>
+</html>

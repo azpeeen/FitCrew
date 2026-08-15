@@ -1,0 +1,252 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 75%;
+    height: 100%;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    color: #FFFFFF;
+    overflow-x: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+
+h1 {
+    font-size: 2.5rem;
+}
+
+h2 {
+    font-size: 2rem;
+}
+
+p {
+    font-size: 1.1rem;
+}
+
+a {
+    font-size: 1rem;
+}
+
+/* ── Banners de status ── */
+.planos-banner {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    max-width: 860px;
+    margin: 0 auto 2.4rem;
+    padding: 1.4rem 2rem;
+    border-radius: 10px;
+    font-size: 1.05rem;
+    font-weight: 500;
+}
+
+.planos-banner i { font-size: 1.4rem; flex-shrink: 0; }
+.planos-banner p { margin: 0; }
+
+.planos-banner--aviso {
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    color: #856404;
+}
+
+
+.plans-hero {
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('/images/banner-forms.png');
+    background-size: cover;
+    background-position: center;
+    color: white;
+    text-align: center;
+    padding: 100px 20px;
+    margin-bottom: 50px;
+}
+
+.plans-hero h1 {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.plans-hero p {
+    font-size: 1.2rem;
+    max-width: 800px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+.plans-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 30px;
+    padding: 0 20px;
+    max-width: 1200px;
+    margin: 0 auto 80px;
+}
+
+.plan-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    width: 300px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.plan-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+}
+
+.card-gymbro { background: #C5A349; color: #1f1f1f; }
+.card-black { background: #000; color: #fff; }
+
+.plan-name {
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #333;
+    text-align: center;
+}
+
+.plan-price {
+    font-size: 2rem;
+    font-weight: bold;
+    margin: 20px 0;
+    color: #333;
+    text-align: center;
+}
+
+.plan-price span {
+    font-size: 1rem;
+    color: #666;
+    font-weight: normal;
+}
+
+.plan-features {
+    padding: 0;
+    margin: 20px 0;
+    min-height: 120px;
+}
+
+.plan-features li {
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+    color: #555;
+    position: relative;
+    padding-left: 25px;
+}
+
+.plan-features li:before {
+    content: "•";
+    color: #cfcfcf;
+    font-weight: bold;
+    display: inline-block;
+    width: 1em;
+    margin-left: -1em;
+    position: absolute;
+    left: 0;
+}
+
+.gymbro .plan-features li:before {
+    color: #C5A349;
+}
+
+.blaok .plan-features li:before {
+    color: #000;
+}
+
+.plan-button {
+    display: block;
+    padding: 14px 24px;
+    background: #FFD700;
+    color: #000;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 15px;
+    margin-top: 20px;
+    transition: background 0.2s, transform 0.1s;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: none;
+    width: 100%;
+    cursor: pointer;
+}
+
+.plan-button:hover {
+    background: #FFC200;
+    transform: translateY(-1px);
+}
+
+.plan-button:active {
+    transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+    .plans-hero {
+        padding: 60px 20px;
+    }
+    
+    .plans-hero h1 {
+        font-size: 2rem;
+    }
+    
+    .plans-hero p {
+        font-size: 1rem;
+    }
+    
+    .plans-container {
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+    }
+    
+    .plan-card {
+        width: 90%;
+        max-width: 350px;
+    }
+}
+
+.plan-card.gymbro {
+    position: relative;
+}
+
+.plan-card.gymbro:after {
+    content: "MAIS POPULAR";
+    position: absolute;
+    top: 10px;
+    right: -30px;
+    background: #2196F3;
+    color: white;
+    padding: 5px 30px;
+    transform: rotate(45deg);
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.plans-legal-note {
+    text-align: center;
+    font-size: 0.78rem;
+    color: #777;
+    margin: 1.5rem auto 2.5rem;
+    max-width: 700px;
+    padding: 0 1.2rem;
+    line-height: 1.65;
+}
+.plans-legal-note a { color: #FFD700; }
+.plans-legal-note .fa-info-circle { margin-right: 0.3rem; color: #FFD700; }

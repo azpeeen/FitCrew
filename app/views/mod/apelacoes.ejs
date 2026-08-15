@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apelações — FitCrew Moderação</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin.css">
+    <link rel="stylesheet" href="/css/mod.css">
+</head>
+<body class="admin-body">
+<section class="admin-wrapper">
+    <%- include('../partials/mod-sidebar') %>
+    <section class="admin-content">
+        <%- include('../partials/mod-topbar') %>
+        <main class="admin-main">
+            <h1 class="admin-page-title">Apelações</h1>
+            <p class="admin-page-subtitle">Pedidos de revisão de contas suspensas ou banidas</p>
+
+            <% if (!apelacoes.length) { %>
+            <section class="admin-empty"><i class="fas fa-circle-check"></i> Nenhuma apelação pendente.</section>
+            <% } %>
+
+            <% apelacoes.forEach(a => { %>
+            <section class="mod-apelacao-card" data-apelacao-id="<%= a.id %>">
+                <section class="mod-usuario-header">
+                    <img src="<%= a.foto_perfil || '/images/avatar.png' %>" alt="" class="mod-avatar">
+                    <section class="mod-usuario-info">
+                        <section class="mod-usuario-nome"><%= a.nome %> <span class="text-muted">@<%= a.username || '—' %></span></section>
+                        <section class="text-muted" style="font-size:0.78rem">
+                            <%= a.tipo_acao === 'banimento' ? 'Conta banida' : 'Suspenso' %>
+                            <% if (a.suspenso_ate) { %> até <%= new Date(a.suspenso_ate).toLocaleString('pt-BR') %><% } %>
+                        </section>
+                    </section>
+                    <span class="badge badge-info"><%= a.tipo_acao %></span>
+                </section>
+
+                <p class="mod-denuncia-texto">"<%= a.mensagem %>"</p>
+
+                <section class="mod-usuario-acoes">
+                    <textarea class="admin-textarea mod-resposta-input" placeholder="Resposta ao usuário (opcional)" maxlength="500"></textarea>
+                    <section class="mod-usuario-botoes">
+                        <button type="button" class="btn btn-gold btn-sm" data-aceitar="1"><i class="fas fa-check"></i> Aceitar apelação</button>
+                        <button type="button" class="btn btn-danger btn-sm" data-aceitar="0"><i class="fas fa-times"></i> Recusar</button>
+                    </section>
+                </section>
+            </section>
+            <% }) %>
+        </main>
+    </section>
+</section>
+
+<script>
+document.querySelectorAll('.mod-apelacao-card').forEach(function (card) {
+    const apelacaoId = card.dataset.apelacaoId;
+    const respostaInput = card.querySelector('.mod-resposta-input');
+
+    card.querySelector('.mod-usuario-botoes').addEventListener('click', async function (e) {
+        const btn = e.target.closest('button[data-aceitar]');
+        if (!btn) return;
+        const aceitar = btn.dataset.aceitar === '1';
+        const resposta = respostaInput.value.trim();
+
+        card.querySelectorAll('button').forEach(b => b.disabled = true);
+        try {
+            const r = await fetch(`/mod/api/apelacao/${apelacaoId}/responder`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ aceitar, resposta }),
+            }).then(x => x.json());
+            if (r.ok) {
+                card.remove();
+            } else {
+                alert(r.erro || 'Erro ao responder apelação.');
+                card.querySelectorAll('button').forEach(b => b.disabled = false);
+            }
+        } catch (_) {
+            card.querySelectorAll('button').forEach(b => b.disabled = false);
+        }
+    });
+});
+</script>
+</body>
+</html>

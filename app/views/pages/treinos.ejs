@@ -1,0 +1,923 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<%- include('../partials/seo') %>
+<link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+<link rel="stylesheet" href="/css/header.css">
+<link rel="stylesheet" href="/css/footer.css">
+<link rel="stylesheet" href="/css/area-aluno.css">
+<link rel="stylesheet" href="/css/treinos.css">
+<link rel="stylesheet" href="/css/compartilhar-feed.css">
+</head>
+<body>
+
+<%- include('../partials/header-aluno') %>
+
+<section class="aluno-dashboard">
+    <section class="sidebar-overlay" id="sidebarOverlay"></section>
+
+    <!-- SIDEBAR -->
+    <section class="aluno-sidebar">
+        <section class="aluno-profile">
+            <section class="avatar">
+                <img id="sidebar-avatar" src="<%= user.profile_photo || '/images/avatar.png' %>" alt="Avatar do Aluno">
+            </section>
+            <h2><%= user.nome %></h2>
+            <p data-translate="sidebar.role">Aluno FitCrew</p>
+        </section>
+        <ul class="aluno-menu">
+            <li class="menu-section-label">Principal</li>
+            <li><a href="/feed"><i class="fas fa-home"></i> Feed</a></li>
+            <li><a href="/metricas"><i class="fas fa-tachometer-alt"></i> Minhas Métricas</a></li>
+
+            <li class="menu-section-label">Social</li>
+            <li><a href="/amizades"><i class="fas fa-user-friends"></i> Amigos</a></li>
+            <li><a href="/chat"><i class="fas fa-comment"></i> Mensagens</a></li>
+            <li><a href="/buscar"><i class="fas fa-search"></i> Buscar pessoas</a></li>
+            <li><a href="/gymsquads"><i class="fas fa-medal"></i> GymSquads</a></li>
+
+            <li class="menu-section-label">Treino</li>
+            <li><a href="/treinos" class="active" data-translate="sidebar.treinos"><i class="fas fa-dumbbell"></i> Meus Treinos</a></li>
+            <li><a href="/evolucao" data-translate="sidebar.evolucao"><i class="fas fa-chart-line"></i> Evolução</a></li>
+
+            <li class="menu-section-label">Saúde</li>
+            <li><a href="/nutricao" data-translate="sidebar.nutricao"><i class="fas fa-utensils"></i> Nutrição</a></li>
+            <li><a href="/imc-form"><i class="fas fa-clipboard-list"></i> Medidas</a></li>
+
+            <li class="menu-section-label">IA</li>
+            <% if (user && (user.planoSlug === 'gymbro' || user.planoSlug === 'black')) { %>
+            <li><a href="/ai/chat" data-translate="sidebar.ai"><i class="fas fa-robot"></i> Personal Trainer IA</a></li>
+            <% } else { %>
+            <li><a href="/meu-plano?upgrade=1" class="menu-locked" data-translate="sidebar.ai"><i class="fas fa-robot"></i> Personal Trainer IA 🔒</a></li>
+            <% } %>
+            <% if (user && user.planoSlug === 'black') { %>
+            <li><a href="/ai/avaliacao" data-translate="sidebar.avaliacao"><i class="fas fa-camera"></i> Avaliação Corporal</a></li>
+            <% } else { %>
+            <li><a href="/meu-plano?upgrade=1" class="menu-locked" data-translate="sidebar.avaliacao"><i class="fas fa-camera"></i> Avaliação Corporal 🔒</a></li>
+            <% } %>
+
+            <li class="menu-section-label">Academia</li>
+            <li class="sidebar-scan-item"><a href="/scan"><i class="fas fa-qrcode"></i> Check-in / Scan</a></li>
+            <li><a href="/suporte" data-translate="sidebar.suporte"><i class="fas fa-headset"></i> Suporte</a></li>
+
+            <li class="menu-section-label">Conta</li>
+            <li><a href="/perfil/<%= user.username || user.id %>"><i class="fas fa-user-circle"></i> Meu Perfil</a></li>
+            <li><a href="/conquistas" data-translate="sidebar.conquistas"><i class="fas fa-trophy"></i> Conquistas</a></li>
+            <li><a href="/meu-plano" data-translate="sidebar.plano"><i class="fas fa-file-alt"></i> Meu Plano</a></li>
+            <li><a href="/config" data-translate="sidebar.config"><i class="fas fa-cog"></i> Configurações</a></li>
+            <li>
+                <button class="sidebar-logout-btn" type="button">
+                    <i class="fas fa-sign-out-alt"></i> Sair da conta
+                </button>
+            </li>
+        </ul>
+    </section>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <section class="aluno-main">
+        <section class="dashboard-top">
+            <h1><i class="fas fa-dumbbell"></i> <span data-i18n="treinos.title">Meus Treinos</span></h1>
+            <p data-i18n="treinos.subtitle">Registre suas sessões e acompanhe seu progresso</p>
+        </section>
+
+        <!-- CHECK-IN CARD -->
+        <section class="checkin-card" id="checkinCard">
+            <i class="fas fa-circle-notch fa-spin" style="color:#555;font-size:1.3rem"></i>
+        </section>
+
+        <!-- PLANO DA IA — PRINCIPAL -->
+        <% if (iaPlanos && iaPlanos.length > 0) { %>
+        <section class="ia-plano-section">
+            <section class="ia-plano-header">
+                <h2><i class="fas fa-robot"></i> <span data-i18n="treinos.plans.title">Seus Planos de Treino</span></h2>
+                <a href="/ai/chat" class="btn-pedir-ia btn-pedir-ia--sm"><i class="fas fa-plus"></i> <span data-i18n="treinos.plans.new">Novo treino</span></a>
+            </section>
+            <%- include('../partials/ai-disclaimer') %>
+            <!-- TABS -->
+            <section class="ia-tabs-nav">
+                <% iaPlanos.forEach((plano, idx) => { %>
+                <% const letra = String.fromCharCode(65 + idx); %>
+                <button class="ia-tab-btn <%= idx === 0 ? 'active' : '' %>" data-tab="<%= idx %>">
+                    <span class="ia-tab-nome">Treino <%= letra %></span>
+                    <span class="ia-tab-del" data-plan-id="<%= plano.id %>" title="Deletar treino"><i class="fas fa-trash-alt"></i></span>
+                </button>
+                <% }) %>
+            </section>
+            <!-- CONTEÚDOS -->
+            <% iaPlanos.forEach((plano, idx) => { %>
+            <% const letra = String.fromCharCode(65 + idx); %>
+            <section class="ia-tab-content <%= idx === 0 ? 'active' : '' %>" data-tab="<%= idx %>">
+                <section class="ia-plano-card">
+                    <h3><%= plano.nome %></h3>
+                    <% if (plano.descricao) { %>
+                    <p class="ia-plano-desc"><%= plano.descricao %></p>
+                    <% } %>
+                    <section class="ia-plano-social">
+                        <% if (plano.modo_colaboracao === 'editavel') { %>
+                        <span class="treino-badge-editavel"><i class="fas fa-pencil-alt"></i> Editável</span>
+                        <% } %>
+                        <section class="treino-membros-avatares" data-plan-id="<%= plano.id %>"></section>
+                        <button class="btn-convidar-treino" type="button"
+                            data-plan-id="<%= plano.id %>"
+                            data-plan-nome="<%= plano.nome %>">
+                            <i class="fas fa-user-plus"></i> Convidar
+                        </button>
+                    </section>
+                    <ul class="ia-exercicios-lista">
+                        <% plano.exercicios_json.forEach(ex => { %>
+                        <li>
+                            <% if (ex.gif_url) { %>
+                            <section class="ia-ex-gif">
+                                <img src="<%= ex.gif_url %>" alt="<%= ex.nome_pt %>">
+                            </section>
+                            <% } else { %>
+                            <section class="ia-ex-gif-placeholder">
+                                <span class="placeholder-icon">🏋️</span>
+                                <span class="placeholder-text">GIF em breve</span>
+                            </section>
+                            <% } %>
+                            <section class="ia-ex-nome"><%= ex.nome_pt %></section>
+                            <section class="ia-ex-detalhe"><%= ex.series %>x<%= ex.repeticoes %> · Descanso: <%= ex.descanso_segundos %>s · <%= ex.carga_sugerida %></section>
+                        </li>
+                        <% }) %>
+                    </ul>
+                    <section class="ia-plano-actions">
+                        <button class="btn-iniciar-treino" type="button" data-exec-plan="<%= plano.id %>"><i class="fas fa-play"></i> <span data-i18n="treinos.start">Iniciar Treino</span></button>
+                        <a href="/ai/chat" class="btn-pedir-ia"><i class="fas fa-robot"></i> Pedir novo treino à IA</a>
+                    </section>
+                </section>
+            </section>
+            <% }) %>
+        </section>
+        <% } else { %>
+        <section class="ia-plano-vazio">
+            <i class="fas fa-robot"></i>
+            <h3>Nenhum plano de treino gerado ainda</h3>
+            <% if (user && (user.planoSlug === 'gymbro' || user.planoSlug === 'black')) { %>
+            <p>Converse com o GymBot para criar seu plano personalizado.</p>
+            <a href="/ai/chat" class="btn-pedir-ia"><i class="fas fa-robot"></i> Gerar treino com IA</a>
+            <% } else { %>
+            <p>Faça upgrade para o plano GymBro ou Black para usar o Personal Trainer IA.</p>
+            <a href="/meu-plano?upgrade=1" class="btn-pedir-ia"><i class="fas fa-lock"></i> Ver planos</a>
+            <% } %>
+        </section>
+        <% } %>
+
+        <!-- TREINOS QUE PARTICIPO (compartilhados por amigos) -->
+        <% if (treinosCompartilhados && treinosCompartilhados.length) { %>
+        <section class="ia-plano-section treinos-participo-section">
+            <section class="ia-plano-header">
+                <h2><i class="fas fa-users"></i> Treinos que participo</h2>
+            </section>
+            <section class="treinos-grid">
+                <% treinosCompartilhados.forEach(t => { %>
+                <section class="treino-card-v2 tipo-forca treino-compartilhado-card">
+                    <section class="card-header-v2">
+                        <section class="card-icon-v2"><i class="fas fa-dumbbell"></i></section>
+                        <section class="card-badges">
+                            <% if (t.modo_colaboracao === 'editavel') { %>
+                            <span class="treino-badge-editavel"><i class="fas fa-pencil-alt"></i> Editável</span>
+                            <% } %>
+                        </section>
+                    </section>
+                    <h3 class="card-title-v2"><%= t.nome %></h3>
+                    <section class="treino-compartilhado-dono">
+                        <img src="<%= t.dono_foto || '/images/avatar.png' %>" alt="<%= t.dono_nome %>">
+                        <span>por <%= t.dono_nome %></span>
+                    </section>
+                    <p class="card-duracao"><i class="fas fa-list-ul"></i> <%= (t.exercicios_json || []).length %> exercícios</p>
+                    <section class="treino-compartilhado-acoes">
+                        <button class="btn-iniciar-treino" type="button" data-exec-plan="<%= t.id %>">
+                            <i class="fas fa-play"></i> Iniciar
+                        </button>
+                        <button class="btn-sair-treino" type="button" data-plan-id="<%= t.id %>">
+                            <i class="fas fa-sign-out-alt"></i> Sair
+                        </button>
+                    </section>
+                </section>
+                <% }) %>
+            </section>
+        </section>
+        <% } %>
+
+        <!-- REGISTRAR TREINO — COLAPSÁVEL -->
+        <details class="registrar-collapse">
+            <summary><i class="fas fa-plus-circle"></i> Registrar treino de hoje</summary>
+            <section class="registrar-collapse-body">
+                <button class="btn-registrar" id="btnAbrirModal">
+                    <i class="fas fa-plus"></i> Abrir formulário de registro
+                </button>
+            </section>
+        </details>
+
+        <!-- STATS RÁPIDOS (preenchidos via JS do localStorage) -->
+        <section class="treinos-stats">
+            <section class="stat-box">
+                <section class="stat-icon"><i class="fas fa-calendar-check"></i></section>
+                <section class="stat-num" id="statTotal">0</section>
+                <section class="stat-label">Treinos Registrados</section>
+            </section>
+            <section class="stat-box">
+                <section class="stat-icon"><i class="fas fa-clock"></i></section>
+                <section class="stat-num" id="statTempo">0</section>
+                <section class="stat-label">Minutos no Total</section>
+            </section>
+            <section class="stat-box">
+                <section class="stat-icon"><i class="fas fa-fire"></i></section>
+                <section class="stat-num" id="statCardio">0</section>
+                <section class="stat-label">Min de Cardio</section>
+            </section>
+            <section class="stat-box">
+                <section class="stat-icon"><i class="fas fa-weight-hanging"></i></section>
+                <section class="stat-num" id="statPeso">—</section>
+                <section class="stat-label">Maior Carga (kg)</section>
+            </section>
+        </section>
+
+        <!-- TOOLBAR -->
+        <section class="treinos-toolbar">
+            <section class="filtros-tabs">
+                <button class="filtro-btn active" data-filtro="todos">Todos</button>
+                <button class="filtro-btn" data-filtro="Força">💪 Força</button>
+                <button class="filtro-btn" data-filtro="Cardio">🔥 Cardio</button>
+                <button class="filtro-btn" data-filtro="Alongamento">🧘 Alongamento</button>
+            </section>
+        </section>
+
+        <!-- MEUS TREINOS (banco de dados) -->
+        <% if (workouts && workouts.length > 0) { %>
+        <p class="treinos-section-title">Meus Treinos</p>
+        <section class="treinos-grid">
+            <% workouts.forEach(w => { %>
+            <%
+                const tc = w.tipo === 'Cardio' ? 'tipo-cardio' : w.tipo === 'Alongamento' ? 'tipo-along' : 'tipo-forca';
+                const ic = w.tipo === 'Cardio' ? 'fa-running' : w.tipo === 'Alongamento' ? 'fa-leaf' : 'fa-dumbbell';
+                const exs = w.exercicios_nomes ? w.exercicios_nomes.split(', ') : [];
+            %>
+            <section class="treino-card-v2 <%= tc %>">
+                <section class="card-header-v2">
+                    <section class="card-icon-v2"><i class="fas <%= ic %>"></i></section>
+                    <section class="card-badges">
+                        <% if (w.tipo) { %><span class="badge-tipo"><%= w.tipo %></span><% } %>
+                    </section>
+                </section>
+                <h3 class="card-title-v2"><%= w.nome %></h3>
+                <% if (w.duracao) { %>
+                <p class="card-duracao"><i class="fas fa-clock"></i> <%= w.duracao %> minutos</p>
+                <% } %>
+                <% if (exs.length > 0) { %>
+                <ul class="card-exercicios">
+                    <% exs.slice(0, 4).forEach(ex => { %><li><%= ex %></li><% }) %>
+                </ul>
+                <% } %>
+                <button class="btn-registrar btn-preencher-modal" type="button" style="margin-top:0.5rem; width:100%; justify-content:center"
+                        data-nome="<%= w.nome %>" data-tipo="<%= w.tipo || 'Força' %>" data-duracao="<%= w.duracao || 45 %>">
+                    <i class="fas fa-plus"></i> Registrar sessão
+                </button>
+            </section>
+            <% }) %>
+        </section>
+        <% } %>
+
+        <!-- TREINOS REGISTRADOS (localStorage) -->
+        <p class="treinos-section-title">Seus Treinos Registrados</p>
+        <section class="treinos-grid" id="gridRegistrados"></section>
+
+        <!-- SUGESTÕES DE TREINO -->
+        <p class="treinos-section-title" style="margin-top:0.5rem">Sugestões de Treino</p>
+        <section class="treinos-grid" id="gridSugestoes">
+            <% sugestoes.forEach(t => { %>
+            <%
+                let tipoClass = 'tipo-forca';
+                if (t.tipo === 'Cardio')      tipoClass = 'tipo-cardio';
+                if (t.tipo === 'Alongamento') tipoClass = 'tipo-along';
+            %>
+            <section class="treino-card-v2 <%= tipoClass %>" data-tipo="<%= t.tipo %>">
+                <section class="card-header-v2">
+                    <section class="card-icon-v2">
+                        <i class="fas <%= t.icone %>"></i>
+                    </section>
+                    <section class="card-badges">
+                        <span class="badge-tipo"><%= t.tipo %></span>
+                    </section>
+                </section>
+                <h3 class="card-title-v2"><%= t.nome %></h3>
+                <p class="card-duracao">
+                    <i class="fas fa-clock"></i> <%= t.duracao %> minutos
+                </p>
+                <ul class="card-exercicios">
+                    <% t.exercicios.forEach(ex => { %>
+                        <li><%= ex %></li>
+                    <% }) %>
+                </ul>
+                <button class="btn-registrar btn-preencher-modal" type="button" style="margin-top:0.5rem; width:100%; justify-content:center"
+                        data-nome="<%= t.nome %>" data-tipo="<%= t.tipo %>" data-duracao="<%= t.duracao %>">
+                    <i class="fas fa-plus"></i> Usar este treino
+                </button>
+            </section>
+            <% }) %>
+        </section>
+
+    </section>
+</section>
+
+<!-- MODAL REGISTRAR TREINO -->
+<section class="modal-overlay" id="modalOverlay">
+    <section class="modal-box">
+        <section class="modal-header">
+            <h2><i class="fas fa-plus-circle"></i> Registrar Treino</h2>
+            <button class="modal-close" id="btnFecharModal"><i class="fas fa-times"></i></button>
+        </section>
+
+        <section class="modal-field">
+            <label>Nome do Treino</label>
+            <input type="text" id="mNome" placeholder="Ex: Treino de Peito">
+        </section>
+
+        <section class="modal-row">
+            <section class="modal-field">
+                <label>Tipo</label>
+                <select id="mTipo">
+                    <option value="Força">💪 Força</option>
+                    <option value="Cardio">🔥 Cardio</option>
+                    <option value="Alongamento">🧘 Alongamento</option>
+                </select>
+            </section>
+            <section class="modal-field">
+                <label>Duração (min)</label>
+                <input type="number" id="mDuracao" placeholder="Ex: 50" min="1" max="300">
+            </section>
+        </section>
+
+        <!-- Campos Força -->
+        <section class="modal-campo-forca" id="camposForca">
+            <p class="modal-divider">Detalhes — Força</p>
+            <section class="modal-row">
+                <section class="modal-field">
+                    <label>Maior carga (kg)</label>
+                    <input type="number" id="mPeso" placeholder="Ex: 60" min="0" step="0.5">
+                </section>
+                <section class="modal-field">
+                    <label>Séries</label>
+                    <input type="number" id="mSeries" placeholder="Ex: 4" min="1">
+                </section>
+            </section>
+            <section class="modal-field">
+                <label>Repetições por série</label>
+                <input type="number" id="mReps" placeholder="Ex: 12" min="1">
+            </section>
+        </section>
+
+        <!-- Campos Cardio -->
+        <section class="modal-campo-cardio" id="camposCardio">
+            <p class="modal-divider">Detalhes — Cardio</p>
+            <section class="modal-row">
+                <section class="modal-field">
+                    <label>Tempo de cardio (min)</label>
+                    <input type="number" id="mCardioMin" placeholder="Ex: 30" min="1">
+                </section>
+                <section class="modal-field">
+                    <label>Intensidade</label>
+                    <select id="mIntensidade">
+                        <option value="leve">Leve</option>
+                        <option value="moderada" selected>Moderada</option>
+                        <option value="intensa">Intensa</option>
+                    </select>
+                </section>
+            </section>
+        </section>
+
+        <section class="modal-field" style="margin-top:0.5rem">
+            <label>Observações (opcional)</label>
+            <textarea id="mObs" placeholder="Como foi o treino? Algo que queira registrar..."></textarea>
+        </section>
+
+        <button class="btn-salvar-treino" id="btnSalvarTreino">
+            <i class="fas fa-check"></i> Salvar Treino
+        </button>
+    </section>
+</section>
+
+<!-- MODAL CONVIDAR PARA O TREINO (F12) -->
+<section class="modal-overlay" id="modal-convidar-treino">
+    <section class="modal-box">
+        <section class="modal-header">
+            <h2 id="modal-convidar-titulo"><i class="fas fa-user-plus"></i> Convidar para o treino</h2>
+            <button type="button" class="modal-close" id="modal-convidar-fechar"><i class="fas fa-times"></i></button>
+        </section>
+
+        <section class="modal-convidar-busca">
+            <input type="text" id="convidar-busca-input"
+                placeholder="Buscar amigo pelo nome ou @username"
+                class="modal-convidar-input">
+        </section>
+
+        <section id="convidar-amigos-lista" class="modal-convidar-lista"></section>
+
+        <section class="modal-convidar-modo">
+            <label class="modal-convidar-modo-label">Permissão:</label>
+            <section class="modal-convidar-modo-opts">
+                <label>
+                    <input type="radio" name="modo_colaboracao" value="readonly" checked> Somente visualizar
+                </label>
+                <label>
+                    <input type="radio" name="modo_colaboracao" value="editavel"> Pode editar
+                </label>
+            </section>
+        </section>
+    </section>
+</section>
+
+<!-- MODAL CONFIRMAR DELEÇÃO -->
+<section class="modal-overlay" id="confirmModal">
+    <section class="confirm-modal-box">
+        <section class="confirm-modal-icon"><i class="fas fa-trash-alt"></i></section>
+        <h3 class="confirm-modal-title">Deletar treino?</h3>
+        <p class="confirm-modal-desc">Esta ação não pode ser desfeita.</p>
+        <section class="confirm-modal-btns">
+            <button class="confirm-btn-cancel" id="confirmBtnCancel">Cancelar</button>
+            <button class="confirm-btn-delete" id="confirmBtnDelete">Deletar</button>
+        </section>
+    </section>
+</section>
+
+<%- include('../partials/footer') %>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script>window.GYMBROS_USER_ID = '<%= user.id %>';</script>
+<script src="/js/compartilhar-feed.js"></script>
+<script>
+// ─── Check-in ────────────────────────────────────────────
+(async function initCheckin() {
+    const card = document.getElementById('checkinCard');
+
+    function streakHtml(n) {
+        const t = window.__t || (k => k);
+        if (n > 0) return `<span class="checkin-streak-badge"><i class="fas fa-fire"></i> ${n} dia${n > 1 ? 's' : ''} seguido${n > 1 ? 's' : ''}</span>`;
+        return `<span class="checkin-streak-zero">${t('treinos.checkin.streak')}</span>`;
+    }
+
+    function renderCheckedIn(created_at, streak) {
+        const t = window.__t || (k => k);
+        const hora = created_at
+            ? new Date(created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+            : '';
+        card.innerHTML = `
+            <section class="checkin-body">
+                <section class="checkin-icon checkin-icon--done"><i class="fas fa-check-circle"></i></section>
+                <section class="checkin-info">
+                    <h4 class="checkin-title">${t('treinos.checkin.done')}</h4>
+                    <p class="checkin-sub">Registrado hoje${hora ? ' às ' + hora : ''}</p>
+                    ${streakHtml(streak)}
+                </section>
+            </section>`;
+    }
+
+    function renderPending(streak) {
+        const t = window.__t || (k => k);
+        card.innerHTML = `
+            <section class="checkin-body">
+                <section class="checkin-icon"><i class="fas fa-dumbbell"></i></section>
+                <section class="checkin-info">
+                    <h4 class="checkin-title">${t('treinos.checkin.title')}</h4>
+                    <p class="checkin-sub">${t('treinos.checkin.sub')}</p>
+                    ${streakHtml(streak)}
+                </section>
+            </section>
+            <button class="checkin-btn" id="btnCheckin"><i class="fas fa-check"></i> ${t('treinos.checkin.btn')}</button>`;
+
+        document.getElementById('btnCheckin').addEventListener('click', async () => {
+            const btn = document.getElementById('btnCheckin');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i>';
+            try {
+                const r    = await fetch('/treinos/checkin', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+                const data = await r.json();
+                const s    = await fetch('/treinos/checkin/status').then(x => x.json());
+                renderCheckedIn(data.ok ? data.created_at : null, s.streak || 0);
+
+                if (data.ok && window.abrirModalCompartilhar) {
+                    if (data.novasConquistas?.length) {
+                        const top = data.novasConquistas[0];
+                        await window.abrirModalCompartilhar({
+                            tipo: 'conquista',
+                            ref_tipo: 'conquista',
+                            payload: { conquista_nome: top.nome, conquista_icone: top.icone },
+                        });
+                    }
+                    await window.abrirModalCompartilhar({
+                        tipo: 'checkin',
+                        ref_id: data.checkinId,
+                        ref_tipo: 'checkin',
+                        payload: { gym_nome: 'Academia' },
+                    });
+                }
+            } catch {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fas fa-check"></i> ${(window.__t || (k=>k))('treinos.checkin.btn')}`;
+            }
+        });
+    }
+
+    try {
+        const s = await fetch('/treinos/checkin/status').then(r => r.json());
+        if (s.checkedInToday) renderCheckedIn(s.lastCheckin, s.streak || 0);
+        else renderPending(s.streak || 0);
+    } catch {
+        card.innerHTML = '';
+    }
+})();
+</script>
+
+<style>
+.ia-tab-btn { display: inline-flex; align-items: center; gap: 0.45rem; }
+.ia-tab-del { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 4px; font-size: 0.7rem; color: #aaa; transition: color 0.15s, background 0.15s; }
+.ia-tab-del:hover { color: #e74c3c; background: rgba(231,76,60,0.12); }
+</style>
+<script>
+document.querySelectorAll('.ia-tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.ia-tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.ia-tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelector(`.ia-tab-content[data-tab="${btn.dataset.tab}"]`).classList.add('active');
+    });
+});
+
+// ── Colapsável mobile — exercícios IA ────────────────────────
+function initExColapsavel() {
+    if (window.innerWidth > 768) return;
+    document.querySelectorAll('.ia-exercicios-lista').forEach(lista => {
+        if (lista.dataset.colInited) return;
+        lista.dataset.colInited = '1';
+        const items = Array.from(lista.querySelectorAll('li'));
+        if (items.length <= 4) return;
+        items.forEach((li, i) => { if (i >= 4) li.classList.add('ia-ex-hidden'); });
+        const btn = document.createElement('button');
+        btn.className = 'ia-ex-ver-mais';
+        btn.textContent = `Ver todos (${items.length} exercícios)`;
+        let expanded = false;
+        btn.addEventListener('click', () => {
+            expanded = !expanded;
+            items.forEach((li, i) => {
+                if (i < 4) return;
+                if (expanded) {
+                    li.classList.remove('ia-ex-hidden');
+                    li.style.animationDelay = `${(i - 4) * 35}ms`;
+                    li.classList.add('ia-ex-fade-in');
+                    li.addEventListener('animationend', () => {
+                        li.classList.remove('ia-ex-fade-in');
+                        li.style.animationDelay = '';
+                    }, { once: true });
+                } else {
+                    li.classList.add('ia-ex-hidden');
+                }
+            });
+            btn.textContent = expanded ? 'Ver menos' : `Ver todos (${items.length} exercícios)`;
+        });
+        lista.after(btn);
+    });
+}
+initExColapsavel();
+
+// ── Colapsável mobile — treinos-grid ─────────────────────────
+function initTreinosColapsavel(grid) {
+    if (window.innerWidth > 768) return;
+    // Limpa botão anterior se houver
+    const old = grid.nextElementSibling;
+    if (old && old.classList.contains('treinos-ver-mais')) old.remove();
+
+    const cards = Array.from(grid.querySelectorAll('.treino-card-v2'));
+    if (cards.length <= 4) return;
+
+    cards.forEach((c, i) => {
+        c.classList.remove('card-hidden', 'card-fade-in');
+        if (i >= 4) c.classList.add('card-hidden');
+    });
+
+    const btn = document.createElement('button');
+    btn.className = 'treinos-ver-mais';
+    btn.textContent = `Ver todos (${cards.length} treinos)`;
+    let expanded = false;
+
+    btn.addEventListener('click', () => {
+        expanded = !expanded;
+        cards.forEach((c, i) => {
+            if (i < 4) return;
+            if (expanded) {
+                c.classList.remove('card-hidden');
+                c.style.animationDelay = `${(i - 4) * 40}ms`;
+                c.classList.add('card-fade-in');
+                c.addEventListener('animationend', () => {
+                    c.classList.remove('card-fade-in');
+                    c.style.animationDelay = '';
+                }, { once: true });
+            } else {
+                c.classList.add('card-hidden');
+            }
+        });
+        btn.textContent = expanded ? 'Ver menos' : `Ver todos (${cards.length} treinos)`;
+    });
+
+    grid.after(btn);
+}
+
+let _confirmResolve = null;
+const confirmModal = document.getElementById('confirmModal');
+document.getElementById('confirmBtnDelete').addEventListener('click', () => {
+    confirmModal.classList.remove('open');
+    if (_confirmResolve) { _confirmResolve(true); _confirmResolve = null; }
+});
+document.getElementById('confirmBtnCancel').addEventListener('click', () => {
+    confirmModal.classList.remove('open');
+    if (_confirmResolve) { _confirmResolve(false); _confirmResolve = null; }
+});
+confirmModal.addEventListener('click', e => {
+    if (e.target === confirmModal) {
+        confirmModal.classList.remove('open');
+        if (_confirmResolve) { _confirmResolve(false); _confirmResolve = null; }
+    }
+});
+function confirmarDelecao() {
+    return new Promise(resolve => { _confirmResolve = resolve; confirmModal.classList.add('open'); });
+}
+
+async function deletarPlanoIA(e, planoId, el) {
+    e.stopPropagation();
+    if (!await confirmarDelecao()) return;
+    fetch(`/treinos/plano/${planoId}`, { method: 'DELETE' })
+        .then(r => r.json())
+        .then(data => {
+            if (!data.ok) { alert(data.error || 'Erro ao deletar.'); return; }
+            const tabBtn     = el.closest('.ia-tab-btn');
+            const tabIdx     = tabBtn.dataset.tab;
+            const tabContent = document.querySelector(`.ia-tab-content[data-tab="${tabIdx}"]`);
+            tabBtn.remove();
+            if (tabContent) tabContent.remove();
+            const firstBtn = document.querySelector('.ia-tab-btn');
+            if (firstBtn) {
+                firstBtn.classList.add('active');
+                const firstContent = document.querySelector(`.ia-tab-content[data-tab="${firstBtn.dataset.tab}"]`);
+                if (firstContent) firstContent.classList.add('active');
+            } else {
+                document.querySelector('.ia-plano-section').outerHTML =
+                    `<section class="ia-plano-vazio">
+                        <i class="fas fa-robot"></i>
+                        <h3>Nenhum plano de treino gerado ainda</h3>
+                        <p>Converse com o GymBot para criar seu plano personalizado.</p>
+                        <a href="/ai/chat" class="btn-pedir-ia"><i class="fas fa-robot"></i> Gerar treino com IA</a>
+                    </section>`;
+            }
+        })
+        .catch(() => alert('Erro ao deletar treino.'));
+}
+
+// Delegação do ícone de deletar aba (sem onclick inline — CSP)
+document.querySelectorAll('.ia-tab-del').forEach(function (del) {
+    del.addEventListener('click', function (e) {
+        deletarPlanoIA(e, Number(del.dataset.planId), del);
+    });
+});
+</script>
+<script>
+const _uid        = (window.GYMBROS_USER_ID || 'guest').replace(/\D/g, '');
+const STORAGE_KEY = `gymbros_treinos_${_uid}`;
+const EVO_KEY     = `gymbros_evolucao_${_uid}`;
+
+let filtroAtivo = 'todos';
+
+// ─── Helpers localStorage ───────────────────────────────
+function getTreinos() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+    catch { return []; }
+}
+
+function salvarTreinos(lista) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(lista));
+}
+
+// ─── Stats ──────────────────────────────────────────────
+function atualizarStats() {
+    const lista = getTreinos();
+    const total     = lista.length;
+    const tempo     = lista.reduce((a, t) => a + (parseInt(t.duracao) || 0), 0);
+    const cardio    = lista.filter(t => t.tipo === 'Cardio').reduce((a, t) => a + (parseInt(t.cardioMin) || parseInt(t.duracao) || 0), 0);
+    const pesos     = lista.map(t => parseFloat(t.peso) || 0).filter(v => v > 0);
+    const maiorPeso = pesos.length ? Math.max(...pesos) : null;
+
+    document.getElementById('statTotal').textContent  = total;
+    document.getElementById('statTempo').textContent  = tempo;
+    document.getElementById('statCardio').textContent = cardio;
+    document.getElementById('statPeso').textContent   = maiorPeso !== null ? maiorPeso + 'kg' : '—';
+}
+
+// ─── Render treinos registrados ─────────────────────────
+function tipoClass(tipo) {
+    if (tipo === 'Cardio')      return 'tipo-cardio';
+    if (tipo === 'Alongamento') return 'tipo-along';
+    return 'tipo-forca';
+}
+
+function tipoIcon(tipo) {
+    if (tipo === 'Cardio')      return 'fa-running';
+    if (tipo === 'Alongamento') return 'fa-leaf';
+    return 'fa-dumbbell';
+}
+
+function renderRegistrados() {
+    const grid = document.getElementById('gridRegistrados');
+    const lista = getTreinos();
+
+    const filtrados = filtroAtivo === 'todos'
+        ? lista
+        : lista.filter(t => t.tipo === filtroAtivo);
+
+    if (filtrados.length === 0) {
+        grid.innerHTML = `<section class="treinos-empty">
+            <i class="fas fa-clipboard"></i>
+            ${lista.length === 0
+                ? 'Nenhum treino registrado ainda. Clique em <strong>Registrar Treino</strong> para começar!'
+                : 'Nenhum treino deste tipo registrado.'}
+        </section>`;
+        return;
+    }
+
+    // Ordena do mais recente pro mais antigo
+    const ordenados = [...filtrados].sort((a, b) => b.timestamp - a.timestamp);
+
+    grid.innerHTML = ordenados.map(t => {
+        const tc = tipoClass(t.tipo);
+        const ic = tipoIcon(t.tipo);
+
+        let statsHtml = '';
+        if (t.tipo === 'Força' && (t.peso || t.series || t.reps)) {
+            statsHtml = `<section class="card-stats-reg">
+                ${t.peso   ? `<section class="stat-reg"><span class="sr-val">${t.peso}kg</span><span class="sr-label">Carga</span></section>` : ''}
+                ${t.series ? `<section class="stat-reg"><span class="sr-val">${t.series}x</span><span class="sr-label">Séries</span></section>` : ''}
+                ${t.reps   ? `<section class="stat-reg"><span class="sr-val">${t.reps}</span><span class="sr-label">Reps</span></section>` : ''}
+            </section>`;
+        } else if (t.tipo === 'Cardio' && t.cardioMin) {
+            statsHtml = `<section class="card-stats-reg">
+                <section class="stat-reg"><span class="sr-val">${t.cardioMin}min</span><span class="sr-label">Cardio</span></section>
+                ${t.intensidade ? `<section class="stat-reg"><span class="sr-val" style="font-size:0.8rem">${t.intensidade}</span><span class="sr-label">Intensidade</span></section>` : ''}
+            </section>`;
+        }
+
+        const obsHtml = t.obs ? `<p class="card-obs">"${t.obs}"</p>` : '';
+
+        return `<section class="treino-card-v2 ${tc} registrado" data-tipo="${t.tipo}">
+            <button class="btn-del-treino" type="button" data-timestamp="${t.timestamp}" title="Remover">
+                <i class="fas fa-trash"></i>
+            </button>
+            <section class="card-header-v2">
+                <section class="card-icon-v2"><i class="fas ${ic}"></i></section>
+                <section class="card-badges">
+                    <span class="badge-tipo">${t.tipo}</span>
+                    <span class="badge-data">${t.data}</span>
+                </section>
+            </section>
+            <h3 class="card-title-v2">${t.nome}</h3>
+            <p class="card-duracao"><i class="fas fa-clock"></i> ${t.duracao} minutos</p>
+            ${statsHtml}
+            ${obsHtml}
+        </section>`;
+    }).join('');
+    initTreinosColapsavel(grid);
+}
+
+// ─── Deletar ────────────────────────────────────────────
+function deletarTreino(timestamp) {
+    const lista = getTreinos().filter(t => t.timestamp !== timestamp);
+    salvarTreinos(lista);
+    // Remove do histórico de evolução também
+    const evo = JSON.parse(localStorage.getItem(EVO_KEY) || '[]').filter(e => !(e.tipo === 'treino' && e.timestamp === timestamp));
+    localStorage.setItem(EVO_KEY, JSON.stringify(evo));
+    renderRegistrados();
+    atualizarStats();
+}
+
+// ─── Filtros ─────────────────────────────────────────────
+document.querySelectorAll('.filtro-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        filtroAtivo = btn.dataset.filtro;
+        renderRegistrados();
+
+        // Filtra também sugestões
+        const tipo = filtroAtivo;
+        document.querySelectorAll('#gridSugestoes .treino-card-v2').forEach(card => {
+            const cardTipo = card.dataset.tipo;
+            card.style.display = (tipo === 'todos' || cardTipo === tipo) ? '' : 'none';
+        });
+    });
+});
+
+// ─── Modal ───────────────────────────────────────────────
+const modal   = document.getElementById('modalOverlay');
+const mTipo   = document.getElementById('mTipo');
+
+document.getElementById('btnAbrirModal').addEventListener('click', () => abrirModal());
+document.getElementById('btnFecharModal').addEventListener('click', fecharModal);
+modal.addEventListener('click', e => { if (e.target === modal) fecharModal(); });
+
+function abrirModal() { modal.classList.add('open'); atualizarCamposModal(); }
+function fecharModal() { modal.classList.remove('open'); }
+
+function preencherModal(nome, tipo, duracao) {
+    document.getElementById('mNome').value    = nome;
+    document.getElementById('mTipo').value    = tipo;
+    document.getElementById('mDuracao').value = duracao;
+    abrirModal();
+}
+
+function atualizarCamposModal() {
+    const tipo = mTipo.value;
+    document.getElementById('camposForca').classList.toggle('show', tipo === 'Força');
+    document.getElementById('camposCardio').classList.toggle('show', tipo === 'Cardio');
+}
+
+mTipo.addEventListener('change', atualizarCamposModal);
+
+document.getElementById('btnSalvarTreino').addEventListener('click', () => {
+    const nome    = document.getElementById('mNome').value.trim();
+    const tipo    = mTipo.value;
+    const duracao = document.getElementById('mDuracao').value;
+
+    if (!nome || !duracao) {
+        alert('Preencha nome e duração antes de salvar.');
+        return;
+    }
+
+    const agora = Date.now();
+    const registro = {
+        timestamp: agora,
+        data:      new Date().toLocaleDateString('pt-BR'),
+        nome, tipo,
+        duracao:   parseInt(duracao),
+        obs:       document.getElementById('mObs').value.trim()
+    };
+
+    if (tipo === 'Força') {
+        registro.peso   = document.getElementById('mPeso').value   || null;
+        registro.series = document.getElementById('mSeries').value || null;
+        registro.reps   = document.getElementById('mReps').value   || null;
+    }
+    if (tipo === 'Cardio') {
+        registro.cardioMin   = document.getElementById('mCardioMin').value   || null;
+        registro.intensidade = document.getElementById('mIntensidade').value || null;
+    }
+
+    // Salva no localStorage de treinos
+    const lista = getTreinos();
+    lista.push(registro);
+    salvarTreinos(lista);
+
+    // Salva no histórico de evolução
+    const evo = JSON.parse(localStorage.getItem(EVO_KEY) || '[]');
+    evo.push({ tipo: 'treino', timestamp: agora, data: registro.data, dados: registro });
+    localStorage.setItem(EVO_KEY, JSON.stringify(evo));
+
+    fecharModal();
+    limparModal();
+    renderRegistrados();
+    atualizarStats();
+});
+
+function limparModal() {
+    ['mNome','mDuracao','mPeso','mSeries','mReps','mCardioMin','mObs'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+    document.getElementById('mTipo').value = 'Força';
+    atualizarCamposModal();
+}
+
+// ─── Init ────────────────────────────────────────────────
+renderRegistrados();
+atualizarStats();
+atualizarCamposModal();
+
+// Botões "Registrar sessão" / "Usar este treino" (sem onclick inline — CSP)
+document.querySelectorAll('.btn-preencher-modal').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+        preencherModal(btn.dataset.nome, btn.dataset.tipo, btn.dataset.duracao);
+    });
+});
+
+// Deletar treino registrado — delegação (cards gerados via innerHTML)
+document.getElementById('gridRegistrados')?.addEventListener('click', function (e) {
+    const btn = e.target.closest('.btn-del-treino');
+    if (!btn) return;
+    deletarTreino(Number(btn.dataset.timestamp));
+});
+
+// Colapsável nos grids estáticos (workouts do DB + sugestões)
+document.querySelectorAll('.treinos-grid:not(#gridRegistrados):not(#gridSugestoes)').forEach(initTreinosColapsavel);
+initTreinosColapsavel(document.getElementById('gridSugestoes'));
+</script>
+<script src="/js/treinos-social.js" defer></script>
+</body>
+</html>

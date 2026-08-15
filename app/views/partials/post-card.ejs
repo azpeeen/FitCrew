@@ -1,0 +1,92 @@
+<%
+const REACAO_EMOJI = { fogo: '🔥', musculo: '💪', surpresa: '😮', parabens: '🎉', forca: '⚡' };
+%>
+<section class="post-card" data-post-id="<%= post.id %>">
+    <section class="post-header">
+        <a href="/u/<%= post.autor_username || post.autor_id %>">
+            <img class="post-avatar" src="<%= post.autor_foto || '/images/avatar.png' %>" alt="<%= post.autor_nome %>">
+        </a>
+        <section class="post-header-info">
+            <a href="/u/<%= post.autor_username || post.autor_id %>" class="post-author-name"><%= post.autor_nome %></a>
+            <section class="post-header-sub">
+                <% if (post.autor_username) { %><span class="post-author-username">@<%= post.autor_username %></span><span class="post-dot-sep">·</span><% } %>
+                <span class="post-time" data-time="<%= new Date(post.created_at).toISOString() %>">agora</span>
+            </section>
+        </section>
+        <button class="post-menu-btn" type="button" data-post-id="<%= post.id %>" data-own="<%= post.souAutor ? '1' : '0' %>">
+            <i class="fas fa-ellipsis-h"></i>
+        </button>
+        <section class="post-menu-dropdown" style="display:none">
+            <% if (post.souAutor) { %>
+            <button type="button" class="post-menu-action" data-action="remover"><i class="fas fa-trash"></i> Remover</button>
+            <% } else { %>
+            <button type="button" class="post-menu-action" data-action="denunciar"><i class="fas fa-flag"></i> Denunciar</button>
+            <% } %>
+        </section>
+    </section>
+
+    <% if (post.legenda) { %>
+    <p class="post-legenda"><%= post.legenda %></p>
+    <% } %>
+
+    <% if (post.midias && post.midias.length) { %>
+    <section class="post-midia <%= post.midias.length > 1 ? 'post-carrossel' : '' %>">
+        <section class="post-midia-track">
+            <% post.midias.forEach(function(m) { %>
+                <% if (m.tipo === 'video') { %>
+                <video class="post-midia-item" src="<%= m.url %>" controls playsinline></video>
+                <% } else { %>
+                <img class="post-midia-item" src="<%= m.url %>" alt="Post de <%= post.autor_nome %>" loading="lazy">
+                <% } %>
+            <% }); %>
+        </section>
+        <% if (post.midias.length > 1) { %>
+        <section class="post-carrossel-dots">
+            <% post.midias.forEach(function(m, i) { %>
+            <span class="post-dot <%= i === 0 ? 'active' : '' %>"></span>
+            <% }); %>
+        </section>
+        <% } %>
+    </section>
+    <% } %>
+
+    <section class="post-acoes">
+        <section class="post-reacoes-wrap">
+            <button class="post-reagir-btn <%= post.minhaReacao ? 'ativo' : '' %>" type="button" data-post-id="<%= post.id %>">
+                <span class="post-reagir-icone"><%= REACAO_EMOJI[post.minhaReacao] || '🔥' %></span>
+                <span class="post-reacoes-total"><%= post.total_reacoes || 0 %></span>
+            </button>
+            <section class="post-reacao-picker" data-post-id="<%= post.id %>">
+                <button type="button" class="reacao-opcao" data-tipo="fogo"     title="Fogo">🔥</button>
+                <button type="button" class="reacao-opcao" data-tipo="musculo"  title="Força">💪</button>
+                <button type="button" class="reacao-opcao" data-tipo="surpresa" title="Surpresa">😮</button>
+                <button type="button" class="reacao-opcao" data-tipo="parabens" title="Parabéns">🎉</button>
+                <button type="button" class="reacao-opcao" data-tipo="forca"    title="Energia">⚡</button>
+            </section>
+        </section>
+
+        <button class="post-comentar-btn" type="button" data-post-id="<%= post.id %>">
+            <i class="fas fa-comment"></i>
+            <span class="post-comentarios-total"><%= post.total_comentarios || 0 %></span>
+        </button>
+    </section>
+
+    <section class="post-comentarios" id="comentarios-<%= post.id %>" style="display:none">
+        <section class="post-comentarios-lista" id="lista-comentarios-<%= post.id %>"></section>
+
+        <section class="post-comentario-input-wrap">
+            <img src="<%= (typeof user !== 'undefined' && user && user.profile_photo) || '/images/avatar.png' %>"
+                class="post-comentario-avatar" alt="Você">
+            <section class="post-comentario-input-container">
+                <input type="text"
+                    class="post-comentario-input"
+                    data-post-id="<%= post.id %>"
+                    placeholder="Adicione um comentário... @mencione alguém"
+                    maxlength="1000">
+                <button type="button" class="post-comentario-enviar" data-post-id="<%= post.id %>">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </section>
+        </section>
+    </section>
+</section>

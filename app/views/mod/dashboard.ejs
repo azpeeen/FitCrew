@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Moderação — FitCrew</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin.css">
+    <link rel="stylesheet" href="/css/mod.css">
+</head>
+<body class="admin-body">
+<section class="admin-wrapper">
+    <%- include('../partials/mod-sidebar') %>
+    <section class="admin-content">
+        <%- include('../partials/mod-topbar') %>
+        <main class="admin-main">
+            <h1 class="admin-page-title">Visão geral</h1>
+            <p class="admin-page-subtitle">Estado atual da moderação de conteúdo e contas</p>
+
+            <section class="admin-kpi-grid">
+                <section class="admin-kpi">
+                    <section class="admin-kpi-icon error"><i class="fas fa-flag"></i></section>
+                    <section>
+                        <section class="admin-kpi-label">Denúncias pendentes</section>
+                        <section class="admin-kpi-value"><%= stats.denuncias_pendentes %></section>
+                    </section>
+                </section>
+                <section class="admin-kpi">
+                    <section class="admin-kpi-icon"><i class="fas fa-pause-circle"></i></section>
+                    <section>
+                        <section class="admin-kpi-label">Suspensos</section>
+                        <section class="admin-kpi-value"><%= stats.usuarios_suspensos %></section>
+                    </section>
+                </section>
+                <section class="admin-kpi">
+                    <section class="admin-kpi-icon error"><i class="fas fa-ban"></i></section>
+                    <section>
+                        <section class="admin-kpi-label">Banidos</section>
+                        <section class="admin-kpi-value"><%= stats.usuarios_banidos %></section>
+                    </section>
+                </section>
+                <section class="admin-kpi">
+                    <section class="admin-kpi-icon info"><i class="fas fa-gavel"></i></section>
+                    <section>
+                        <section class="admin-kpi-label">Apelações pendentes</section>
+                        <section class="admin-kpi-value"><%= stats.apelacoes_pendentes %></section>
+                    </section>
+                </section>
+                <section class="admin-kpi">
+                    <section class="admin-kpi-icon success"><i class="fas fa-trash"></i></section>
+                    <section>
+                        <section class="admin-kpi-label">Remoções hoje</section>
+                        <section class="admin-kpi-value"><%= stats.removidos_hoje %></section>
+                    </section>
+                </section>
+            </section>
+
+            <section class="admin-card">
+                <section class="admin-card-header">
+                    <span class="admin-card-title">Usuários mais denunciados</span>
+                    <a href="/mod/denuncias" class="btn btn-outline btn-sm">Ver denúncias</a>
+                </section>
+                <section class="admin-card-body no-pad">
+                    <% if (!top_denunciados.length) { %>
+                    <section class="admin-empty">
+                        <i class="fas fa-circle-check"></i>
+                        Nenhuma denúncia pendente no momento.
+                    </section>
+                    <% } else { %>
+                    <table class="admin-table">
+                        <thead><tr><th>Usuário</th><th>Denúncias pendentes</th><th></th></tr></thead>
+                        <tbody>
+                            <% top_denunciados.forEach(u => { %>
+                            <tr>
+                                <td>
+                                    <img src="<%= u.foto_perfil || '/images/avatar.png' %>" alt="" class="mod-avatar-sm">
+                                    <%= u.nome %> <span class="text-muted">@<%= u.username %></span>
+                                </td>
+                                <td><span class="badge badge-error"><%= u.total_denuncias %></span></td>
+                                <td><a href="/mod/usuarios?q=<%= encodeURIComponent(u.username || u.nome) %>" class="btn btn-outline btn-sm">Ver</a></td>
+                            </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                    <% } %>
+                </section>
+            </section>
+        </main>
+    </section>
+</section>
+</body>
+</html>

@@ -1,0 +1,418 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<%- include('../partials/seo') %>
+<link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+<link rel="stylesheet" href="/css/header.css">
+<link rel="stylesheet" href="/css/footer.css">
+<link rel="stylesheet" href="/css/area-aluno.css">
+<link rel="stylesheet" href="/css/ai-avaliacao.css">
+</head>
+<body>
+
+<%- include('../partials/header-aluno') %>
+
+<section class="aluno-dashboard">
+    <section class="sidebar-overlay" id="sidebarOverlay"></section>
+
+    <!-- SIDEBAR -->
+    <section class="aluno-sidebar">
+        <section class="aluno-profile">
+            <section class="avatar">
+                <img id="sidebar-avatar" src="<%= user.profile_photo || '/images/avatar.png' %>" alt="Avatar do Aluno">
+            </section>
+            <h2><%= user.nome %></h2>
+            <p data-translate="sidebar.role">Aluno FitCrew</p>
+        </section>
+        <ul class="aluno-menu">
+            <li class="menu-section-label">Principal</li>
+            <li><a href="/feed"><i class="fas fa-home"></i> Feed</a></li>
+            <li><a href="/metricas"><i class="fas fa-tachometer-alt"></i> Minhas Métricas</a></li>
+
+            <li class="menu-section-label">Social</li>
+            <li><a href="/amizades"><i class="fas fa-user-friends"></i> Amigos</a></li>
+            <li><a href="/chat"><i class="fas fa-comment"></i> Mensagens</a></li>
+            <li><a href="/buscar"><i class="fas fa-search"></i> Buscar pessoas</a></li>
+            <li><a href="/gymsquads"><i class="fas fa-medal"></i> GymSquads</a></li>
+
+            <li class="menu-section-label">Treino</li>
+            <li><a href="/treinos" data-translate="sidebar.treinos"><i class="fas fa-dumbbell"></i> Meus Treinos</a></li>
+            <li><a href="/evolucao" data-translate="sidebar.evolucao"><i class="fas fa-chart-line"></i> Evolução</a></li>
+
+            <li class="menu-section-label">Saúde</li>
+            <li><a href="/nutricao" data-translate="sidebar.nutricao"><i class="fas fa-utensils"></i> Nutrição</a></li>
+            <li><a href="/imc-form"><i class="fas fa-clipboard-list"></i> Medidas</a></li>
+
+            <li class="menu-section-label">IA</li>
+            <% if (user && (user.planoSlug === 'gymbro' || user.planoSlug === 'black')) { %>
+            <li><a href="/ai/chat" data-translate="sidebar.ai"><i class="fas fa-robot"></i> Personal Trainer IA</a></li>
+            <% } else { %>
+            <li><a href="/meu-plano?upgrade=1" class="menu-locked" data-translate="sidebar.ai"><i class="fas fa-robot"></i> Personal Trainer IA 🔒</a></li>
+            <% } %>
+            <% if (user && user.planoSlug === 'black') { %>
+            <li><a href="/ai/avaliacao" class="active" data-translate="sidebar.avaliacao"><i class="fas fa-camera"></i> Avaliação Corporal</a></li>
+            <% } else { %>
+            <li><a href="/meu-plano?upgrade=1" class="menu-locked" data-translate="sidebar.avaliacao"><i class="fas fa-camera"></i> Avaliação Corporal 🔒</a></li>
+            <% } %>
+
+            <li class="menu-section-label">Academia</li>
+            <li class="sidebar-scan-item"><a href="/scan"><i class="fas fa-qrcode"></i> Check-in / Scan</a></li>
+            <li><a href="/suporte" data-translate="sidebar.suporte"><i class="fas fa-headset"></i> Suporte</a></li>
+
+            <li class="menu-section-label">Conta</li>
+            <li><a href="/perfil/<%= user.username || user.id %>"><i class="fas fa-user-circle"></i> Meu Perfil</a></li>
+            <li><a href="/conquistas" data-translate="sidebar.conquistas"><i class="fas fa-trophy"></i> Conquistas</a></li>
+            <li><a href="/meu-plano" data-translate="sidebar.plano"><i class="fas fa-file-alt"></i> Meu Plano</a></li>
+            <li><a href="/config" data-translate="sidebar.config"><i class="fas fa-cog"></i> Configurações</a></li>
+            <li>
+                <button class="sidebar-logout-btn" type="button">
+                    <i class="fas fa-sign-out-alt"></i> Sair da conta
+                </button>
+            </li>
+        </ul>
+    </section>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <section class="aluno-main">
+        <section class="dashboard-top">
+            <h1><i class="fas fa-camera"></i> <span data-i18n="body.title">Avaliação Corporal com IA</span></h1>
+            <p data-i18n="body.subtitle">Envie suas fotos e receba uma análise estimativa de composição corporal</p>
+        </section>
+
+        <!-- FORMULÁRIO DE UPLOAD -->
+        <section class="imc-form-card">
+
+            <section class="imc-step-header">
+                <i class="fas fa-camera imc-step-icon"></i>
+                <section>
+                    <h2 data-i18n="body.photos.title">Enviar Fotos</h2>
+                    <p data-i18n="body.photos.desc">Foto frontal obrigatória — lateral e posterior opcionais</p>
+                </section>
+            </section>
+
+            <section class="avaliacao-upload-grid">
+
+                <!-- Foto frontal -->
+                <section class="upload-slot" id="slot-frontal">
+                    <input type="file" id="input-frontal" accept="image/*" aria-label="Foto frontal">
+                    <img class="slot-preview" id="preview-frontal" alt="Pré-visualização frontal">
+                    <i class="fas fa-user slot-icon"></i>
+                    <span class="slot-label" data-i18n="body.photo.front">Foto Frontal</span>
+                    <span class="slot-required" data-i18n="body.required">* obrigatório</span>
+                </section>
+
+                <!-- Foto lateral -->
+                <section class="upload-slot" id="slot-lateral">
+                    <input type="file" id="input-lateral" accept="image/*" aria-label="Foto lateral">
+                    <img class="slot-preview" id="preview-lateral" alt="Pré-visualização lateral">
+                    <i class="fas fa-user-circle slot-icon"></i>
+                    <span class="slot-label" data-i18n="body.photo.side">Foto Lateral</span>
+                    <span class="slot-required" data-i18n="body.optional">opcional</span>
+                </section>
+
+                <!-- Foto posterior -->
+                <section class="upload-slot" id="slot-posterior">
+                    <input type="file" id="input-posterior" accept="image/*" aria-label="Foto posterior">
+                    <img class="slot-preview" id="preview-posterior" alt="Pré-visualização posterior">
+                    <i class="fas fa-walking slot-icon"></i>
+                    <span class="slot-label" data-i18n="body.photo.back">Foto Posterior</span>
+                    <span class="slot-required" data-i18n="body.optional">opcional</span>
+                </section>
+
+            </section>
+
+            <!-- LGPD -->
+            <label class="avaliacao-lgpd">
+                <input type="checkbox" id="consentimento">
+                Concordo com o uso temporário das minhas fotos para análise de composição corporal por IA. As imagens <strong>&nbsp;não serão armazenadas permanentemente&nbsp;</strong> e são processadas somente para gerar este relatório.
+            </label>
+
+            <button class="btn-analisar" id="btnAnalisar" disabled>
+                <i class="fas fa-search"></i> <span data-i18n="body.analyze">Analisar</span>
+            </button>
+
+            <!-- Loading -->
+            <section class="avaliacao-loading" id="loading">
+                <section class="avaliacao-spinner"></section>
+                <span>Analisando imagem com IA... aguarde alguns segundos</span>
+            </section>
+
+            <!-- Erro -->
+            <section class="avaliacao-erro" id="erroBox"></section>
+
+        </section>
+
+        <!-- RESULTADO -->
+        <section class="avaliacao-resultado" id="resultado">
+
+            <!-- Composição corporal -->
+            <section class="result-card" id="card-composicao">
+                <h3><i class="fas fa-chart-pie"></i> Composição Corporal Estimada</h3>
+                <section class="composicao-grid">
+                    <section class="composicao-item">
+                        <p class="ci-label">% Gordura Estimado</p>
+                        <p class="ci-value" id="res-gordura">—</p>
+                        <p class="ci-sub" id="res-margem">±?%</p>
+                    </section>
+                    <section class="composicao-item">
+                        <p class="ci-label">Massa Muscular</p>
+                        <p class="ci-value" id="res-massa">—</p>
+                    </section>
+                    <section class="composicao-item">
+                        <p class="ci-label">Região Predominante</p>
+                        <p class="ci-value" style="font-size:1rem" id="res-regiao">—</p>
+                    </section>
+                    <section class="composicao-item">
+                        <p class="ci-label">IMC Visual</p>
+                        <p class="ci-value" style="font-size:1rem" id="res-imc-visual">—</p>
+                    </section>
+                </section>
+            </section>
+
+            <!-- Pontos positivos -->
+            <section class="result-card">
+                <h3><i class="fas fa-thumbs-up"></i> Pontos Positivos</h3>
+                <ul class="result-list" id="res-positivos"></ul>
+            </section>
+
+            <!-- Áreas de melhoria -->
+            <section class="result-card">
+                <h3><i class="fas fa-fire-alt"></i> Áreas de Melhoria</h3>
+                <ul class="result-list negativa" id="res-melhoria"></ul>
+            </section>
+
+            <!-- Recomendações -->
+            <section class="result-card">
+                <h3><i class="fas fa-lightbulb"></i> Recomendações</h3>
+                <section class="rec-block">
+                    <p class="rec-titulo">🏋️ Treino</p>
+                    <p class="rec-texto" id="res-rec-treino">—</p>
+                </section>
+                <section class="rec-block">
+                    <p class="rec-titulo">🥗 Nutrição</p>
+                    <p class="rec-texto" id="res-rec-nutricao">—</p>
+                </section>
+            </section>
+
+            <!-- Aviso -->
+            <section class="result-aviso">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span id="res-aviso">Esta análise é estimativa visual e não substitui avaliação profissional.</span>
+            </section>
+
+        </section>
+
+    </section>
+
+    <!-- HISTÓRICO DE AVALIAÇÕES -->
+    <% if (typeof avaliacoes !== 'undefined' && avaliacoes.length > 0) { %>
+    <section class="imc-form-card" style="margin-top:2rem">
+        <section class="imc-step-header">
+            <i class="fas fa-history imc-step-icon"></i>
+            <section>
+                <h2>Avaliações Anteriores</h2>
+                <p><%= avaliacoes.length %> avaliação(ões) registrada(s)</p>
+            </section>
+        </section>
+
+        <% avaliacoes.forEach(a => { %>
+        <% const c = a.analise?.composicao || {}; %>
+        <section style="border:1px solid #2a2a2a; border-radius:8px; padding:1rem; margin-top:1rem">
+            <p style="color:#888; font-size:0.85rem; margin-bottom:0.6rem">
+                <i class="fas fa-calendar-alt"></i> <%= a.data_fmt %>
+            </p>
+            <section style="display:flex; gap:1rem; flex-wrap:wrap">
+                <% if (c.percentual_gordura_estimado) { %>
+                <span style="background:#1a1a1a; padding:0.3rem 0.7rem; border-radius:4px; font-size:0.85rem">
+                    Gordura: <strong style="color:#FFD700"><%= c.percentual_gordura_estimado %></strong>
+                </span>
+                <% } %>
+                <% if (c.massa_muscular_aparente) { %>
+                <span style="background:#1a1a1a; padding:0.3rem 0.7rem; border-radius:4px; font-size:0.85rem">
+                    Músculo: <strong style="color:#4fc3f7"><%= c.massa_muscular_aparente %></strong>
+                </span>
+                <% } %>
+                <% if (c.regiao_predominante) { %>
+                <span style="background:#1a1a1a; padding:0.3rem 0.7rem; border-radius:4px; font-size:0.85rem">
+                    Região: <strong><%= c.regiao_predominante %></strong>
+                </span>
+                <% } %>
+                <% if (a.analise?.classificacao_imc_visual) { %>
+                <span style="background:#1a1a1a; padding:0.3rem 0.7rem; border-radius:4px; font-size:0.85rem">
+                    IMC visual: <strong><%= a.analise.classificacao_imc_visual %></strong>
+                </span>
+                <% } %>
+            </section>
+        </section>
+        <% }) %>
+    </section>
+    <% } %>
+
+</section>
+
+<%- include('../partials/footer') %><script>window.GYMBROS_USER_ID = '<%= user.id %>';</script>
+<script>
+const _uid = (window.GYMBROS_USER_ID || 'guest').replace(/\D/g, '');
+// Converte arquivo para base64
+function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
+// Configura cada slot de upload
+function setupSlot(inputId, slotId, previewId) {
+    const input   = document.getElementById(inputId);
+    const slot    = document.getElementById(slotId);
+    const preview = document.getElementById(previewId);
+    let currentBlobUrl = null;
+
+    input.addEventListener('change', () => {
+        const file = input.files[0];
+        if (!file) return;
+
+        if (currentBlobUrl) URL.revokeObjectURL(currentBlobUrl);
+        currentBlobUrl = URL.createObjectURL(file);
+        preview.src = currentBlobUrl;
+        slot.classList.add('has-image');
+        updateButton();
+    });
+}
+
+setupSlot('input-frontal',   'slot-frontal',   'preview-frontal');
+setupSlot('input-lateral',   'slot-lateral',   'preview-lateral');
+setupSlot('input-posterior', 'slot-posterior', 'preview-posterior');
+
+const consentimento = document.getElementById('consentimento');
+const btnAnalisar   = document.getElementById('btnAnalisar');
+
+function updateButton() {
+    const temFrontal = document.getElementById('input-frontal').files.length > 0;
+    const temConsent = consentimento.checked;
+    btnAnalisar.disabled = !(temFrontal && temConsent);
+}
+
+consentimento.addEventListener('change', updateButton);
+
+// Análise
+btnAnalisar.addEventListener('click', async () => {
+    const erroBox  = document.getElementById('erroBox');
+    const loading  = document.getElementById('loading');
+    const resultado = document.getElementById('resultado');
+
+    erroBox.textContent  = '';
+    erroBox.classList.remove('visible');
+    resultado.classList.remove('visible');
+
+    // Converte imagens para base64
+    const frontalFile   = document.getElementById('input-frontal').files[0];
+    const lateralFile   = document.getElementById('input-lateral').files[0];
+    const posteriorFile = document.getElementById('input-posterior').files[0];
+
+    const fotoFrontal   = frontalFile   ? await fileToBase64(frontalFile)   : null;
+    const fotoLateral   = lateralFile   ? await fileToBase64(lateralFile)   : null;
+    const fotoPosterior = posteriorFile ? await fileToBase64(posteriorFile) : null;
+
+    loading.classList.add('visible');
+    btnAnalisar.disabled = true;
+
+    try {
+        const res = await fetch('/ai/avaliacao', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fotoFrontal, fotoLateral, fotoPosterior })
+        });
+
+        const data = await res.json();
+        loading.classList.remove('visible');
+
+        if (!res.ok || data.erro) {
+            erroBox.textContent = data.erro || 'Erro ao processar a avaliação.';
+            erroBox.classList.add('visible');
+            updateButton();
+            return;
+        }
+
+        renderResultado(data.resultado);
+        resultado.classList.add('visible');
+        resultado.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        // Salva na sessão (para o GymBot ter acesso) e no localStorage (histórico de evolução)
+        salvarAvaliacao(data.resultado);
+
+    } catch (err) {
+        loading.classList.remove('visible');
+        erroBox.textContent = 'Erro de conexão. Verifique sua internet e tente novamente.';
+        erroBox.classList.add('visible');
+    } finally {
+        updateButton();
+    }
+});
+
+// Salva avaliação na sessão do servidor e no localStorage
+async function salvarAvaliacao(resultado) {
+    const dataHoje = new Date().toLocaleDateString('pt-BR');
+
+    // Salva na sessão para o GymBot
+    try {
+        await fetch('/ai/avaliacao-salvar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ resultado })
+        });
+    } catch (e) { console.warn('Não foi possível salvar avaliação na sessão.', e); }
+
+    // Salva no localStorage para o histórico de evolução
+    const historico = JSON.parse(localStorage.getItem(`gymbros_evolucao_${_uid}`) || '[]');
+    historico.push({
+        tipo: 'avaliacao',
+        data: dataHoje,
+        timestamp: Date.now(),
+        dados: resultado
+    });
+    localStorage.setItem(`gymbros_evolucao_${_uid}`, JSON.stringify(historico));
+}
+
+function renderResultado(r) {
+    const c = r.composicao || {};
+
+    document.getElementById('res-gordura').textContent    = c.percentual_gordura_estimado || '—';
+    document.getElementById('res-margem').textContent     = c.margem_erro || '';
+    document.getElementById('res-massa').textContent      = c.massa_muscular_aparente || '—';
+    document.getElementById('res-regiao').textContent     = c.regiao_predominante || '—';
+    document.getElementById('res-imc-visual').textContent = r.classificacao_imc_visual || '—';
+
+    // Pontos positivos
+    const posEl = document.getElementById('res-positivos');
+    posEl.innerHTML = '';
+    (r.pontos_positivos || []).forEach(p => {
+        const li = document.createElement('li');
+        li.textContent = p;
+        posEl.appendChild(li);
+    });
+
+    // Áreas de melhoria
+    const melEl = document.getElementById('res-melhoria');
+    melEl.innerHTML = '';
+    (r.areas_melhoria || []).forEach(a => {
+        const li = document.createElement('li');
+        li.textContent = a;
+        melEl.appendChild(li);
+    });
+
+    // Recomendações
+    document.getElementById('res-rec-treino').textContent   = (r.recomendacoes || {}).treino   || '—';
+    document.getElementById('res-rec-nutricao').textContent = (r.recomendacoes || {}).nutricao || '—';
+
+    // Aviso
+    document.getElementById('res-aviso').textContent = r.aviso || 'Esta análise é estimativa visual e não substitui avaliação profissional.';
+}
+</script>
+</body>
+</html>

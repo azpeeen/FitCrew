@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<%- include('../partials/seo') %>
+<link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+<link rel="stylesheet" href="/css/header.css">
+<link rel="stylesheet" href="/css/footer.css">
+<link rel="stylesheet" href="/css/area-aluno.css">
+<link rel="stylesheet" href="/css/editar-perfil.css"></head>
+<body>
+<%- include('../partials/header-aluno') %>
+
+<section class="aluno-dashboard">
+    <section class="sidebar-overlay" id="sidebarOverlay"></section>
+    <%- include('../partials/sidebar-aluno') %>
+
+    <section class="aluno-main">
+
+        <section class="ep-header">
+            <h1 class="ep-header-title"><i class="fas fa-user-edit"></i> Editar Perfil</h1>
+            <a href="/perfil/<%= usuario.username || user.id %>" class="ep-btn-ver">
+                <i class="fas fa-eye"></i> Ver perfil público
+            </a>
+        </section>
+
+        <% if (query.erro === 'username_taken') { %>
+        <section class="ep-alert ep-alert--error">Username já está em uso. Escolha outro.</section>
+        <% } else if (query.erro === 'username_invalido') { %>
+        <section class="ep-alert ep-alert--error">Username inválido. Use letras, números e _ (3–30 caracteres).</section>
+        <% } else if (query.erro === 'foto_invalida') { %>
+        <section class="ep-alert ep-alert--error">Formato de foto inválido. Use JPEG, PNG ou WebP.</section>
+        <% } else if (query.salvo) { %>
+        <section class="ep-alert ep-alert--success">Perfil salvo com sucesso!</section>
+        <% } %>
+
+        <form class="ep-form" action="/perfil/editar" method="POST" enctype="multipart/form-data">
+
+            <!-- FOTO -->
+            <section class="ep-section">
+                <h2 class="ep-section-title">Foto de perfil</h2>
+                <section class="ep-foto-wrapper">
+                    <img id="fotoPreview"
+                         src="<%= usuario.profile_photo || '/images/avatar.png' %>"
+                         alt="Foto de perfil"
+                         class="ep-foto-preview">
+                    <section>
+                        <label for="fotoInput" class="ep-foto-btn">
+                            <i class="fas fa-camera"></i> Alterar foto
+                        </label>
+                        <p class="ep-foto-hint">JPEG, PNG ou WebP · máx. 5 MB</p>
+                    </section>
+                    <input type="file" id="fotoInput" name="foto" accept="image/jpeg,image/png,image/webp" style="display:none">
+                </section>
+            </section>
+
+            <!-- INFORMAÇÕES -->
+            <section class="ep-section">
+                <h2 class="ep-section-title">Informações</h2>
+
+                <section class="ep-field">
+                    <label for="ep-nome">Nome</label>
+                    <input type="text" id="ep-nome" name="nome"
+                           value="<%= usuario.nome || '' %>" maxlength="60" required>
+                </section>
+
+                <section class="ep-field">
+                    <label for="ep-username">
+                        Username
+                        <span class="ep-field-hint">Aparece no link do seu perfil</span>
+                    </label>
+                    <section class="ep-input-prefix">
+                        <span>fitcrew/perfil/</span>
+                        <input type="text" id="ep-username" name="username"
+                               value="<%= usuario.username || '' %>"
+                               placeholder="seuusuario"
+                               maxlength="30"
+                               pattern="[a-zA-Z0-9_]{3,30}">
+                    </section>
+                </section>
+
+                <section class="ep-field">
+                    <label for="ep-bio">
+                        Bio
+                        <span class="ep-field-hint" id="bioCount"><%= (usuario.bio || '').length %>/150</span>
+                    </label>
+                    <textarea id="ep-bio" name="bio" maxlength="150" rows="3"
+                              placeholder="Conte um pouco sobre você..."><%= usuario.bio || '' %></textarea>
+                </section>
+
+                <section class="ep-field">
+                    <label for="ep-instagram">Instagram</label>
+                    <section class="ep-input-prefix ep-input-prefix--insta">
+                        <span><i class="fab fa-instagram"></i> @</span>
+                        <input type="text" id="ep-instagram" name="instagram_username"
+                               value="<%= usuario.instagram_username || '' %>"
+                               placeholder="seuusuario"
+                               maxlength="60">
+                    </section>
+                </section>
+            </section>
+
+            <!-- MEDALHAS DESTACADAS -->
+            <% if (conquistas.length > 0) { %>
+            <section class="ep-section">
+                <h2 class="ep-section-title">
+                    Medalhas destacadas
+                    <span class="ep-section-hint">Escolha até 3 para exibir no seu perfil</span>
+                </h2>
+                <section class="ep-medalhas-grid">
+                    <% const tierColors = { bronze: '#CD7F32', prata: '#C0C0C0', ouro: '#FFD700', platina: '#E5E4E2', diamante: '#89CFF0' }; %>
+                    <% conquistas.forEach(c => { %>
+                    <%
+                        const isSelected = medalhasDestaque.includes(c.slug);
+                        const cor = tierColors[c.tier] || '#888';
+                    %>
+                    <label class="ep-medalha-card<%= isSelected ? ' selected' : '' %>"
+                           style="--tier-color: <%= cor %>">
+                        <input type="checkbox" name="medalhas_destaque"
+                               value="<%= c.slug %>"
+                               <%= isSelected ? 'checked' : '' %>
+                               class="ep-medalha-check">
+                        <span class="ep-medalha-icon"><%= c.icone %></span>
+                        <span class="ep-medalha-nome"><%= c.nome %></span>
+                        <span class="ep-medalha-tier"><%= c.tier %></span>
+                        <span class="ep-medalha-selected-icon"><i class="fas fa-check-circle"></i></span>
+                    </label>
+                    <% }) %>
+                </section>
+                <p class="ep-medalhas-hint" id="medalhasHint"></p>
+            </section>
+            <% } %>
+
+            <button type="submit" class="ep-btn-salvar">
+                <i class="fas fa-save"></i> Salvar perfil
+            </button>
+
+        </form>
+
+    </section>
+</section>
+
+<%- include('../partials/footer') %>
+
+<script>
+// Preview da foto
+document.getElementById('fotoInput').addEventListener('change', function (e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function (ev) { document.getElementById('fotoPreview').src = ev.target.result; };
+    reader.readAsDataURL(file);
+});
+
+// Contador bio
+const bioEl   = document.getElementById('ep-bio');
+const bioCount = document.getElementById('bioCount');
+function updateBio() { bioCount.textContent = bioEl.value.length + '/150'; }
+bioEl.addEventListener('input', updateBio);
+
+// Máx 3 medalhas
+const checkboxes = document.querySelectorAll('.ep-medalha-check');
+const hint = document.getElementById('medalhasHint');
+function updateMedalhas() {
+    const checked = document.querySelectorAll('.ep-medalha-check:checked');
+    checkboxes.forEach(function (cb) {
+        var card = cb.closest('.ep-medalha-card');
+        card.classList.toggle('selected', cb.checked);
+        if (!cb.checked && checked.length >= 3) {
+            cb.disabled = true;
+            card.classList.add('disabled');
+        } else {
+            cb.disabled = false;
+            card.classList.remove('disabled');
+        }
+    });
+    if (hint) hint.textContent = checked.length >= 3 ? 'Máximo de 3 medalhas atingido' : '';
+}
+checkboxes.forEach(function (cb) { cb.addEventListener('change', updateMedalhas); });
+updateMedalhas();
+
+</script>
+</body>
+</html>

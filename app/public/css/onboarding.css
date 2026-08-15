@@ -1,0 +1,333 @@
+/* ── Onboarding ──────────────────────────────── */
+.onboarding-body {
+  background: #0f0f0f;
+  color: #f0f0f0;
+  font-family: 'Inter', Arial, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+}
+
+.onboarding-header {
+  padding: 16px 24px;
+  background: #C98B1D;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.onboarding-header-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: #000;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.onboarding-header-logo img {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+}
+
+.onboarding-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+}
+
+.onboarding-card {
+  background: #111;
+  border: 1px solid #222;
+  border-radius: 20px;
+  padding: 40px 36px;
+  width: 100%;
+  max-width: 440px;
+  box-sizing: border-box;
+}
+
+/* Barra de progresso */
+.onboarding-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 32px;
+}
+
+.onboarding-progress-step {
+  flex: 1;
+  height: 3px;
+  background: #222;
+  border-radius: 2px;
+  transition: background 0.3s;
+}
+
+.onboarding-progress-step.ativo {
+  background: #C98B1D;
+}
+
+.onboarding-progress-label {
+  font-size: 0.75rem;
+  color: #555;
+  white-space: nowrap;
+}
+
+/* Step content */
+.onboarding-step-icon {
+  font-size: 2.5rem;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.onboarding-step-title {
+  font-size: 1.3rem;
+  font-weight: 800;
+  margin: 0 0 8px;
+}
+
+.onboarding-step-sub {
+  font-size: 0.875rem;
+  color: #888;
+  margin: 0 0 28px;
+  line-height: 1.5;
+}
+
+/* Input username */
+.onboarding-input-wrap {
+  display: flex;
+  align-items: center;
+  background: #1a1a1a;
+  border: 1.5px solid #333;
+  border-radius: 10px;
+  padding: 12px 16px;
+  gap: 6px;
+  transition: border-color 0.15s;
+  margin-bottom: 8px;
+}
+
+.onboarding-input-wrap:focus-within {
+  border-color: #C98B1D;
+}
+
+.onboarding-at {
+  color: #888;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.onboarding-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #f0f0f0;
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+.onboarding-feedback {
+  font-size: 0.8rem;
+  margin-bottom: 20px;
+  min-height: 20px;
+}
+
+.onboarding-feedback.ok    { color: #22c55e; }
+.onboarding-feedback.erro  { color: #ef4444; }
+.onboarding-feedback.check { color: #888; }
+
+/* Foto */
+.onboarding-foto-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.onboarding-foto-preview {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #C98B1D;
+}
+
+.onboarding-foto-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 20px;
+  border: 1px solid #333;
+  background: transparent;
+  color: #f0f0f0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.15s;
+}
+
+.onboarding-foto-btn:hover {
+  border-color: #C98B1D;
+  color: #C98B1D;
+}
+
+/* Bio */
+.onboarding-textarea {
+  width: 100%;
+  height: 100px;
+  background: #1a1a1a;
+  border: 1.5px solid #333;
+  border-radius: 10px;
+  padding: 12px 16px;
+  color: #f0f0f0;
+  font-size: 0.875rem;
+  font-family: inherit;
+  resize: none;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+  margin-bottom: 4px;
+}
+
+.onboarding-textarea:focus { border-color: #C98B1D; }
+
+.onboarding-bio-count {
+  font-size: 0.72rem;
+  color: #555;
+  text-align: right;
+  margin-bottom: 24px;
+}
+
+/* Sugestões */
+.onboarding-sugestoes-title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  margin: 0 0 12px;
+  color: #888;
+}
+
+.onboarding-sugestoes-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 28px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.onboarding-loading {
+  text-align: center;
+  padding: 16px;
+  color: #555;
+}
+
+.onboarding-sugestao-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: #1a1a1a;
+  border-radius: 10px;
+  border: 1px solid #222;
+}
+
+.onboarding-sugestao-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.onboarding-sugestao-info { flex: 1; min-width: 0; }
+
+.onboarding-sugestao-nome {
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.onboarding-sugestao-username {
+  font-size: 0.75rem;
+  color: #666;
+}
+
+.onboarding-sugestao-btn {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 5px 14px;
+  border-radius: 20px;
+  border: 1.5px solid #C98B1D;
+  background: transparent;
+  color: #C98B1D;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+
+.onboarding-sugestao-btn:hover,
+.onboarding-sugestao-btn.enviado {
+  background: #C98B1D;
+  color: #000;
+}
+
+/* Ações */
+.onboarding-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+
+.onboarding-skip {
+  background: transparent;
+  border: none;
+  color: #555;
+  font-size: 0.875rem;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 8px 0;
+  transition: color 0.15s;
+}
+
+.onboarding-skip:hover { color: #888; }
+
+.onboarding-next,
+.onboarding-finish {
+  background: #C98B1D;
+  color: #000;
+  border: none;
+  padding: 11px 24px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity 0.15s;
+}
+
+.onboarding-next:hover,
+.onboarding-finish:hover { opacity: 0.85; }
+
+.onboarding-finish {
+  font-size: 1rem;
+  padding: 13px 28px;
+}
+
+@media (max-width: 480px) {
+  .onboarding-card {
+    padding: 28px 20px;
+    border-radius: 16px;
+  }
+}

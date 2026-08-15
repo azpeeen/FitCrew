@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Usuários — FitCrew Moderação</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin.css">
+    <link rel="stylesheet" href="/css/mod.css">
+</head>
+<body class="admin-body">
+<section class="admin-wrapper">
+    <%- include('../partials/mod-sidebar') %>
+    <section class="admin-content">
+        <%- include('../partials/mod-topbar') %>
+        <main class="admin-main">
+            <h1 class="admin-page-title">Usuários</h1>
+            <p class="admin-page-subtitle">Busque, filtre e aplique ações de moderação</p>
+
+            <form method="GET" action="/mod/usuarios" class="mod-busca-form">
+                <section class="admin-search">
+                    <i class="fas fa-search"></i>
+                    <input type="text" name="q" value="<%= q %>" placeholder="Nome, @usuário ou e-mail">
+                </section>
+                <input type="hidden" name="filtro" value="<%= filtro %>">
+                <button type="submit" class="btn btn-outline btn-sm">Buscar</button>
+            </form>
+
+            <section class="mod-filtros">
+                <a href="/mod/usuarios?filtro=todos&q=<%= encodeURIComponent(q) %>" class="mod-filtro-btn <%= filtro==='todos' ? 'active' : '' %>">Todos</a>
+                <a href="/mod/usuarios?filtro=suspensos&q=<%= encodeURIComponent(q) %>" class="mod-filtro-btn <%= filtro==='suspensos' ? 'active' : '' %>">Suspensos</a>
+                <a href="/mod/usuarios?filtro=banidos&q=<%= encodeURIComponent(q) %>" class="mod-filtro-btn <%= filtro==='banidos' ? 'active' : '' %>">Banidos</a>
+            </section>
+
+            <% if (!usuarios.length) { %>
+            <section class="admin-empty"><i class="fas fa-user-slash"></i> Nenhum usuário encontrado.</section>
+            <% } %>
+
+            <% usuarios.forEach(u => { %>
+            <section class="mod-usuario-card" data-user-id="<%= u.id %>">
+                <section class="mod-usuario-header">
+                    <img src="<%= u.foto_perfil || '/images/avatar.png' %>" alt="" class="mod-avatar">
+                    <section class="mod-usuario-info">
+                        <section class="mod-usuario-nome"><%= u.nome %> <span class="text-muted">@<%= u.username || '—' %></span></section>
+                        <section class="text-muted" style="font-size:0.78rem"><%= u.email %></section>
+                    </section>
+                    <span class="badge <%= u.status_conta==='ativo' ? 'badge-success' : u.status_conta==='suspenso' ? 'badge-warning' : 'badge-error' %>">
+                        <%= u.status_conta %>
+                    </span>
+                    <% if (u.total_denuncias > 0) { %>
+                    <span class="badge badge-error"><i class="fas fa-flag"></i> <%= u.total_denuncias %></span>
+                    <% } %>
+                </section>
+
+                <% if (u.status_conta !== 'ativo') { %>
+                <p class="text-muted" style="font-size:0.8rem;margin-top:6px">
+                    <% if (u.suspenso_ate) { %>até <%= new Date(u.suspenso_ate).toLocaleString('pt-BR') %> · <% } %>
+                    <%= u.motivo_suspensao || 'sem motivo registrado' %>
+                </p>
+                <% } %>
+
+                <section class="mod-usuario-acoes">
+                    <input type="text" class="admin-input mod-motivo-input" placeholder="Motivo (opcional)" maxlength="500">
+                    <section class="mod-usuario-botoes">
+                        <button type="button" class="btn btn-outline btn-sm" data-action="suspender" data-dias="1">Suspender 1d</button>
+                        <button type="button" class="btn btn-outline btn-sm" data-action="suspender" data-dias="3">3d</button>
+                        <button type="button" class="btn btn-outline btn-sm" data-action="suspender" data-dias="7">7d</button>
+                        <button type="button" class="btn btn-outline btn-sm" data-action="suspender" data-dias="30">30d</button>
+                        <button type="button" class="btn btn-danger btn-sm" data-action="banir">Banir</button>
+                        <button type="button" class="btn btn-outline btn-sm" data-action="avisar">Avisar</button>
+                        <% if (u.status_conta !== 'ativo') { %>
+                        <button type="button" class="btn btn-outline btn-sm" data-action="reativar">Reativar</button>
+                        <% } %>
+                    </section>
+                </section>
+            </section>
+            <% }) %>
+
+            <% if (totalPaginas > 1) { %>
+            <section class="mod-paginacao">
+                <% for (let p = 1; p <= totalPaginas; p++) { %>
+                <a href="/mod/usuarios?filtro=<%= filtro %>&q=<%= encodeURIComponent(q) %>&page=<%= p %>" class="mod-pag-btn <%= p === page ? 'active' : '' %>"><%= p %></a>
+                <% } %>
+            </section>
+            <% } %>
+        </main>
+    </section>
+</section>
+
+<script>
+document.querySelectorAll('.mod-usuario-card').forEach(function (card) {
+    const userId = card.dataset.userId;
+    const motivoInput = card.querySelector('.mod-motivo-input');
+
+    card.querySelector('.mod-usuario-botoes').addEventListener('click', async function (e) {
+        const btn = e.target.closest('button[data-action]');
+        if (!btn) return;
+        const acao = btn.dataset.action;
+        const dias = btn.dataset.dias || null;
+        const motivo = motivoInput.value.trim();
+
+        btn.disabled = true;
+        try {
+            const r = await fetch('/mod/api/acao/usuario', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: userId, acao, dias, motivo }),
+            }).then(x => x.json());
+            if (r.ok) {
+                location.reload();
+            } else {
+                alert(r.erro || 'Erro ao executar ação.');
+                btn.disabled = false;
+            }
+        } catch (_) {
+            btn.disabled = false;
+        }
+    });
+});
+</script>
+</body>
+</html>

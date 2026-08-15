@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<%- include('../partials/seo') %>
+<link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+<link rel="stylesheet" href="/css/header.css">
+<link rel="stylesheet" href="/css/footer.css">
+<link rel="stylesheet" href="/css/area-aluno.css">
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin></head>
+<body>
+
+<%- include('../partials/header-aluno') %>
+
+<section class="aluno-dashboard">
+    <section class="sidebar-overlay" id="sidebarOverlay"></section>
+    <%- include('../partials/sidebar-aluno') %>
+
+    <section class="aluno-main">
+        <section class="amizades-layout">
+
+            <section class="amizades-header">
+                <h1 class="amizades-titulo"><i class="fas fa-user-friends"></i> Amigos</h1>
+                <a href="/buscar" class="amizades-buscar-btn">
+                    <i class="fas fa-search"></i> Encontrar pessoas
+                </a>
+            </section>
+
+            <!-- Abas -->
+            <section class="amizades-abas">
+                <button class="amizade-aba active" id="aba-amigos" type="button">
+                    Amigos <span class="aba-badge"><%= amigos.length %></span>
+                </button>
+                <button class="amizade-aba" id="aba-agenda" type="button">
+                    Agenda
+                </button>
+            </section>
+
+            <!-- CONTEÚDO: AMIGOS -->
+            <section id="conteudo-amigos">
+
+            <% if (solicitacoes.length > 0) { %>
+            <section class="amizades-section">
+                <h2 class="amizades-section-title">
+                    Solicitações recebidas
+                    <span class="amizades-count-badge"><%= solicitacoes.length %></span>
+                </h2>
+                <section class="amizades-grid" id="solicitacoes-grid">
+                    <% solicitacoes.forEach(s => { %>
+                    <section class="amigo-card" id="sol-<%= s.friendship_id %>">
+                        <img src="<%= s.foto_perfil || '/images/avatar.png' %>" class="amigo-avatar" alt="<%= s.nome %>">
+                        <section class="amigo-info">
+                            <section class="amigo-nome"><%= s.nome %></section>
+                            <section class="amigo-username">@<%= s.username %></section>
+                        </section>
+                        <section class="amizades-acoes">
+                            <button class="amizades-btn amizades-btn--aceitar" data-fid="<%= s.friendship_id %>">
+                                <i class="fas fa-check"></i> Aceitar
+                            </button>
+                            <button class="amizades-btn amizades-btn--recusar" data-fid="<%= s.friendship_id %>">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </section>
+                    </section>
+                    <% }) %>
+                </section>
+            </section>
+            <% } %>
+
+            <section class="amizades-section">
+                <h2 class="amizades-section-title">
+                    Amigos
+                    <span class="amizades-count-badge"><%= amigos.length %></span>
+                </h2>
+                <% if (amigos.length === 0) { %>
+                <section class="amizades-vazio">
+                    <i class="fas fa-user-friends" style="font-size:2.5rem;opacity:.15;display:block;margin-bottom:14px"></i>
+                    Você ainda não tem amigos por aqui.<br>
+                    <a href="/buscar" style="color:#C98B1D;text-decoration:none">Buscar pessoas →</a>
+                </section>
+                <% } else { %>
+                <section class="amizades-grid">
+                    <% amigos.forEach(a => { %>
+                    <section class="amigo-card">
+                        <img src="<%= a.foto_perfil || '/images/avatar.png' %>" class="amigo-avatar" alt="<%= a.nome %>">
+                        <section class="amigo-info">
+                            <section class="amigo-nome"><%= a.nome %></section>
+                            <section class="amigo-username">@<%= a.username %></section>
+                        </section>
+                        <a href="/u/<%= a.username %>" class="btn-ver-perfil">
+                            <i class="fas fa-user"></i> Ver perfil
+                        </a>
+                        <button class="amizades-btn amizades-btn--remover" data-uid="<%= a.id %>">
+                            <i class="fas fa-user-minus"></i>
+                        </button>
+                    </section>
+                    <% }) %>
+                </section>
+                <% } %>
+            </section>
+
+            </section>
+
+            <!-- CONTEÚDO: AGENDA -->
+            <section id="conteudo-agenda" style="display:none">
+                <section class="agenda-header">
+                    <h2 class="agenda-titulo">Agenda</h2>
+                    <button type="button" class="btn-criar-evento" id="btn-criar-evento">
+                        <i class="fas fa-plus"></i> Criar evento
+                    </button>
+                </section>
+
+                <section id="agenda-proximos">
+                    <section class="agenda-loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </section>
+                </section>
+
+                <section id="agenda-historico" style="display:none">
+                    <h3 class="agenda-secao-titulo">Histórico</h3>
+                    <section id="agenda-historico-lista"></section>
+                </section>
+            </section>
+
+        </section>
+    </section>
+</section>
+
+<!-- MODAL: CRIAR EVENTO -->
+<section id="modal-criar-evento" class="modal-overlay">
+    <section class="modal-box">
+        <section class="modal-header">
+            <h2><i class="fas fa-calendar-plus"></i> Criar evento de treino</h2>
+            <button type="button" class="modal-close" id="modal-evento-fechar"><i class="fas fa-times"></i></button>
+        </section>
+
+        <section class="form-group">
+            <label class="form-label">Nome do evento *</label>
+            <input type="text" id="evento-nome" class="form-input"
+                placeholder="Ex: Treino de Peito" maxlength="200">
+        </section>
+
+        <section class="form-group">
+            <label class="form-label">Data e hora *</label>
+            <input type="datetime-local" id="evento-data" class="form-input">
+        </section>
+
+        <section class="form-group">
+            <label class="form-label">Descrição</label>
+            <textarea id="evento-descricao" class="form-textarea"
+                placeholder="Detalhes do treino..." maxlength="500"></textarea>
+        </section>
+
+        <section class="form-group">
+            <label class="form-label">Convidar amigos *</label>
+            <% if (amigos.length === 0) { %>
+            <p style="font-size:.82rem;color:#666;margin:0">Você ainda não tem amigos para convidar.</p>
+            <% } else { %>
+            <section id="evento-amigos-lista" class="evento-amigos-lista">
+                <% amigos.forEach(a => { %>
+                <label class="evento-amigo-item">
+                    <input type="checkbox" class="evento-amigo-check" value="<%= a.id %>">
+                    <img src="<%= a.foto_perfil || '/images/avatar.png' %>"
+                         class="evento-amigo-avatar" alt="<%= a.nome %>">
+                    <section>
+                        <section class="evento-amigo-nome"><%= a.nome %></section>
+                        <section class="evento-amigo-username">@<%= a.username %></section>
+                    </section>
+                </label>
+                <% }) %>
+            </section>
+            <% } %>
+        </section>
+
+        <button type="button" class="btn-gold-full" id="btn-salvar-evento">
+            Criar evento
+        </button>
+    </section>
+</section>
+
+<!-- MODAL: CONFIRMAR CANCELAMENTO DE EVENTO -->
+<section class="modal-overlay" id="confirmCancelarModal">
+    <section class="confirm-modal-box">
+        <section class="confirm-modal-icon"><i class="fas fa-calendar-xmark"></i></section>
+        <h3 class="confirm-modal-title">Cancelar evento?</h3>
+        <p class="confirm-modal-desc">Os participantes confirmados serão notificados.</p>
+        <section class="confirm-modal-btns">
+            <button class="confirm-btn-cancel" id="confirmCancelarVoltar" type="button">Voltar</button>
+            <button class="confirm-btn-delete" id="confirmCancelarConfirmar" type="button">Cancelar evento</button>
+        </section>
+    </section>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    document.addEventListener('click', async e => {
+        const aceitar = e.target.closest('.amizades-btn--aceitar');
+        if (aceitar) {
+            aceitar.disabled = true;
+            aceitar.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            const fid = aceitar.dataset.fid;
+            const r = await fetch(`/api/amizades/${fid}/aceitar`, { method: 'POST' }).then(x => x.json()).catch(() => ({ ok: false }));
+            if (r.ok) {
+                document.getElementById('sol-' + fid)?.remove();
+            } else {
+                aceitar.disabled = false;
+                aceitar.innerHTML = '<i class="fas fa-check"></i> Aceitar';
+            }
+            return;
+        }
+
+        const recusar = e.target.closest('.amizades-btn--recusar');
+        if (recusar) {
+            recusar.disabled = true;
+            const fid = recusar.dataset.fid;
+            const r = await fetch(`/api/amizades/${fid}/recusar`, { method: 'POST' }).then(x => x.json()).catch(() => ({ ok: false }));
+            if (r.ok) {
+                document.getElementById('sol-' + fid)?.remove();
+            } else {
+                recusar.disabled = false;
+            }
+            return;
+        }
+
+        const remover = e.target.closest('.amizades-btn--remover');
+        if (remover) {
+            if (!confirm('Remover amigo?')) return;
+            remover.disabled = true;
+            const uid = remover.dataset.uid;
+            const r = await fetch(`/api/amizades/${uid}`, { method: 'DELETE' }).then(x => x.json()).catch(() => ({ ok: false }));
+            if (r.ok) {
+                remover.closest('.amizades-card')?.remove();
+            } else {
+                remover.disabled = false;
+            }
+        }
+    });
+
+});
+
+// ─── F13: Agenda com amigos ──────────────────────────────────────────────────
+const MEU_ID = <%= user.id %>;
+
+function escHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+}
+
+function formatarDataEvento(iso) {
+    const d = new Date(iso);
+    const opcoes = { weekday: 'short', day: 'numeric', month: 'short' };
+    const data = d.toLocaleDateString('pt-BR', opcoes);
+    const hora = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    return `${data} · ${hora}`;
+}
+
+const RESPOSTA_LABELS = {
+    confirmado: '✓ Você vai',
+    talvez: '? Você talvez vá',
+    recusado: '✗ Você não vai',
+};
+
+function renderRespostaBloco(evento) {
+    const passado = new Date(evento.data_hora) < new Date();
+    const euSouCriador = evento.criador_id === MEU_ID;
+    const meuStatus = evento.meu_status;
+    const jaRespondeu = meuStatus === 'confirmado' || meuStatus === 'talvez' || meuStatus === 'recusado';
+
+    if (euSouCriador) return '';
+
+    if (jaRespondeu) {
+        return `<section class="evento-meu-status evento-status--${meuStatus}">${RESPOSTA_LABELS[meuStatus]}</section>`;
+    }
+
+    if (!passado) {
+        return `<section class="evento-respostas" data-evento-id="${evento.id}">
+            <button type="button" class="btn-resp" data-evento-id="${evento.id}" data-status="confirmado">✓ Vou</button>
+            <button type="button" class="btn-resp" data-evento-id="${evento.id}" data-status="talvez">? Talvez</button>
+            <button type="button" class="btn-resp btn-resp--recusar" data-evento-id="${evento.id}" data-status="recusado">✗ Não vou</button>
+        </section>`;
+    }
+
+    return '';
+}
+
+// Substitui os botões de resposta de um evento pelo badge de status —
+// idempotente: se o card não estiver na página ou já tiver sido trocado, não faz nada.
+// Usada tanto pelo clique local quanto pelo evento 'agenda:atualizar' disparado
+// pelo dropdown de notificações (header-aluno.ejs), mantendo os dois sincronizados.
+function aplicarRespostaEventoAgenda(eventoId, status) {
+    const respostasEl = document.querySelector(`.evento-respostas[data-evento-id="${eventoId}"]`);
+    if (!respostasEl) return;
+    respostasEl.outerHTML = `<section class="evento-meu-status evento-status--${status}">${RESPOSTA_LABELS[status]}</section>`;
+}
+
+function renderEventoCard(evento) {
+    const passado = new Date(evento.data_hora) < new Date();
+    const euSouCriador = evento.criador_id === MEU_ID;
+    const botoesResposta = renderRespostaBloco(evento);
+
+    const cancelarBtn = euSouCriador && !passado
+        ? `<button class="btn-cancelar-evento" type="button" data-evento-id="${evento.id}">Cancelar evento</button>`
+        : '';
+
+    return `
+        <section class="evento-card ${passado ? 'evento-card--passado' : ''}" data-evento-id="${evento.id}">
+            <section class="evento-card-header">
+                <section class="evento-card-info">
+                    <section class="evento-card-nome">${escHtml(evento.nome)}</section>
+                    <section class="evento-card-data">
+                        <i class="fas fa-calendar"></i> ${formatarDataEvento(evento.data_hora)}
+                    </section>
+                    ${evento.descricao ? `<section class="evento-card-desc">${escHtml(evento.descricao)}</section>` : ''}
+                </section>
+                ${cancelarBtn}
+            </section>
+
+            <section class="evento-card-stats">
+                <span class="evento-stat evento-stat--confirmado">
+                    <i class="fas fa-check"></i> ${evento.total_confirmados} vão
+                </span>
+                <span class="evento-stat evento-stat--pendente">
+                    <i class="fas fa-clock"></i> ${evento.total_pendentes} pendentes
+                </span>
+            </section>
+
+            ${botoesResposta}
+        </section>`;
+}
+
+let agendaCarregada = false;
+
+// Disparado pelo header-aluno.ejs quando um convite de evento é respondido
+// pelo dropdown de notificações — mantém a agenda sincronizada.
+window.addEventListener('agenda:atualizar', e => {
+    agendaCarregada = false;
+    const detalhe = e.detail;
+    if (detalhe?.eventoId) aplicarRespostaEventoAgenda(detalhe.eventoId, detalhe.status);
+});
+
+async function carregarAgenda() {
+    if (agendaCarregada) return;
+    agendaCarregada = true;
+
+    const el = document.getElementById('agenda-proximos');
+    el.innerHTML = '<section class="agenda-loading"><i class="fas fa-spinner fa-spin"></i></section>';
+
+    try {
+        const data = await fetch('/api/agenda').then(r => r.json());
+
+        if (!data.proximos?.length) {
+            el.innerHTML = `
+                <section class="agenda-empty">
+                    <i class="fas fa-calendar-plus"></i>
+                    <p>Nenhum treino agendado</p>
+                    <small>Crie um evento e convide seus amigos!</small>
+                </section>`;
+        } else {
+            el.innerHTML = `
+                <h3 class="agenda-secao-titulo">Próximos</h3>
+                ${data.proximos.map(renderEventoCard).join('')}`;
+        }
+
+        if (data.historico?.length) {
+            document.getElementById('agenda-historico').style.display = 'block';
+            document.getElementById('agenda-historico-lista').innerHTML =
+                data.historico.map(renderEventoCard).join('');
+        } else {
+            document.getElementById('agenda-historico').style.display = 'none';
+        }
+    } catch (_) {
+        el.innerHTML = '<section class="agenda-loading">Erro ao carregar</section>';
+    }
+}
+
+// ── Abas ──────────────────────────────────────────────────────────────────
+document.getElementById('aba-amigos')?.addEventListener('click', () => {
+    document.getElementById('conteudo-amigos').style.display = 'block';
+    document.getElementById('conteudo-agenda').style.display = 'none';
+    document.getElementById('aba-amigos').classList.add('active');
+    document.getElementById('aba-agenda').classList.remove('active');
+});
+
+document.getElementById('aba-agenda')?.addEventListener('click', () => {
+    document.getElementById('conteudo-amigos').style.display = 'none';
+    document.getElementById('conteudo-agenda').style.display = 'block';
+    document.getElementById('aba-amigos').classList.remove('active');
+    document.getElementById('aba-agenda').classList.add('active');
+    carregarAgenda();
+});
+
+// ── Respostas e cancelamento (delegação) ────────────────────────────────────
+let eventoParaCancelar = null;
+const confirmCancelarModal = document.getElementById('confirmCancelarModal');
+
+document.getElementById('conteudo-agenda')?.addEventListener('click', async e => {
+    const btnResp = e.target.closest('.btn-resp');
+    if (btnResp) {
+        const eventoId = btnResp.dataset.eventoId;
+        const status = btnResp.dataset.status;
+        const respostasEl = btnResp.closest('.evento-respostas');
+        respostasEl?.querySelectorAll('button').forEach(b => b.disabled = true);
+        try {
+            const r = await fetch(`/api/agenda/evento/${eventoId}/responder`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status }),
+            }).then(x => x.json());
+            if (r.ok) {
+                // Feedback instantâneo: troca os botões pelo badge de status
+                aplicarRespostaEventoAgenda(eventoId, status);
+                // Marca a agenda como desatualizada — próxima abertura recarrega do servidor
+                agendaCarregada = false;
+                // Sincroniza o dropdown de notificações (header-aluno.ejs), se visível
+                window.dispatchEvent(new CustomEvent('agenda:atualizar', { detail: { eventoId, status } }));
+                return;
+            }
+        } catch (_) {}
+        respostasEl?.querySelectorAll('button').forEach(b => b.disabled = false);
+        return;
+    }
+
+    const btnCancelar = e.target.closest('.btn-cancelar-evento');
+    if (btnCancelar) {
+        eventoParaCancelar = btnCancelar.dataset.eventoId;
+        confirmCancelarModal.classList.add('open');
+    }
+});
+
+confirmCancelarModal.addEventListener('click', e => {
+    if (e.target === confirmCancelarModal) confirmCancelarModal.classList.remove('open');
+});
+document.getElementById('confirmCancelarVoltar').addEventListener('click', () => {
+    confirmCancelarModal.classList.remove('open');
+    eventoParaCancelar = null;
+});
+document.getElementById('confirmCancelarConfirmar').addEventListener('click', async () => {
+    if (!eventoParaCancelar) return;
+    const eventoId = eventoParaCancelar;
+    confirmCancelarModal.classList.remove('open');
+    eventoParaCancelar = null;
+    try {
+        const r = await fetch(`/api/agenda/evento/${eventoId}`, { method: 'DELETE' }).then(x => x.json());
+        if (r.ok) {
+            agendaCarregada = false;
+            carregarAgenda();
+        }
+    } catch (_) {}
+});
+
+// ── Modal criar evento ──────────────────────────────────────────────────────
+const modalCriarEvento = document.getElementById('modal-criar-evento');
+
+document.getElementById('btn-criar-evento')?.addEventListener('click', () => {
+    modalCriarEvento.classList.add('open');
+});
+
+document.getElementById('modal-evento-fechar')?.addEventListener('click', () => {
+    modalCriarEvento.classList.remove('open');
+});
+
+modalCriarEvento.addEventListener('click', e => {
+    if (e.target === modalCriarEvento) modalCriarEvento.classList.remove('open');
+});
+
+document.getElementById('btn-salvar-evento')?.addEventListener('click', async () => {
+    const nome = document.getElementById('evento-nome').value.trim();
+    const dataHora = document.getElementById('evento-data').value;
+    const descricao = document.getElementById('evento-descricao').value.trim();
+    const convidados = Array.from(document.querySelectorAll('.evento-amigo-check:checked'))
+        .map(el => parseInt(el.value, 10));
+
+    if (!nome) { alert('Nome obrigatório.'); return; }
+    if (!dataHora) { alert('Data e hora obrigatórias.'); return; }
+    if (!convidados.length) { alert('Convide pelo menos um amigo.'); return; }
+
+    const btn = document.getElementById('btn-salvar-evento');
+    btn.disabled = true;
+    btn.textContent = 'Criando...';
+
+    try {
+        const r = await fetch('/api/agenda/evento', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nome, data_hora: dataHora, descricao, convidados }),
+        }).then(x => x.json());
+
+        if (r.ok) {
+            modalCriarEvento.classList.remove('open');
+            document.getElementById('evento-nome').value = '';
+            document.getElementById('evento-data').value = '';
+            document.getElementById('evento-descricao').value = '';
+            document.querySelectorAll('.evento-amigo-check:checked').forEach(el => el.checked = false);
+            agendaCarregada = false;
+            document.getElementById('aba-agenda').click();
+        } else {
+            alert(r.erro || 'Erro ao criar evento.');
+        }
+    } catch (_) {
+        alert('Erro ao criar evento.');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Criar evento';
+    }
+});
+</script>
+
+</body>
+</html>

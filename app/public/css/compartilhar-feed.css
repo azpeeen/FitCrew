@@ -1,0 +1,166 @@
+.compartilhar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.compartilhar-box {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 320px;
+  width: 90%;
+  text-align: center;
+}
+
+.compartilhar-icone {
+  font-size: 2rem;
+  margin-bottom: 8px;
+}
+
+.compartilhar-titulo {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #f0f0f0;
+  margin: 0 0 6px;
+}
+
+.compartilhar-texto {
+  font-size: 0.85rem;
+  color: #888;
+  margin: 0 0 20px;
+  line-height: 1.4;
+}
+
+.compartilhar-botoes {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.compartilhar-btn-nao,
+.compartilhar-btn-sim {
+  padding: 9px 20px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.875rem;
+}
+
+.compartilhar-btn-nao {
+  border: 1px solid #333;
+  background: transparent;
+  color: #888;
+}
+.compartilhar-btn-nao:hover {
+  border-color: #555;
+  color: #f0f0f0;
+}
+
+.compartilhar-btn-sim {
+  border: none;
+  background: #c98b1d;
+  color: #000;
+  font-weight: 700;
+}
+.compartilhar-btn-sim:hover {
+  opacity: 0.9;
+}
+
+.story-delete-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100000;
+  padding: 20px;
+}
+
+.story-delete-box {
+  width: min(92vw, 380px);
+  background: linear-gradient(145deg, #1b1b1b, #121212);
+  border: 1px solid rgba(201, 139, 29, 0.25);
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+  padding: 24px 22px 20px;
+  text-align: center;
+  animation: storyDeletePop 0.22s ease;
+}
+
+.story-delete-icon {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 14px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(231, 76, 60, 0.16);
+  color: #ff6b6b;
+  font-size: 1.35rem;
+}
+
+.story-delete-title {
+  margin: 0 0 8px;
+  color: #f5f5f5;
+  font-size: 1.08rem;
+  font-weight: 800;
+}
+
+.story-delete-desc {
+  margin: 0 0 20px;
+  color: #a8a8a8;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.story-delete-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.story-delete-btn {
+  border: none;
+  border-radius: 999px;
+  padding: 10px 16px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.story-delete-btn:hover {
+  transform: translateY(-1px);
+}
+
+.story-delete-btn-cancel {
+  background: transparent;
+  color: #bcbcbc;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.story-delete-btn-danger {
+  background: linear-gradient(135deg, #d64545, #b52f2f);
+  color: #fff;
+}
+
+@keyframes storyDeletePop {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

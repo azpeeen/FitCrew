@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Denúncias — FitCrew Moderação</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin.css">
+    <link rel="stylesheet" href="/css/mod.css">
+</head>
+<body class="admin-body">
+<section class="admin-wrapper">
+    <%- include('../partials/mod-sidebar') %>
+    <section class="admin-content">
+        <%- include('../partials/mod-topbar') %>
+        <main class="admin-main">
+            <h1 class="admin-page-title">Denúncias</h1>
+            <p class="admin-page-subtitle">Conteúdo reportado pela comunidade</p>
+
+            <section class="mod-filtros">
+                <a href="/mod/denuncias?status=pendente" class="mod-filtro-btn <%= status==='pendente' ? 'active' : '' %>">Pendentes</a>
+                <a href="/mod/denuncias?status=resolvida" class="mod-filtro-btn <%= status==='resolvida' ? 'active' : '' %>">Resolvidas</a>
+                <a href="/mod/denuncias?status=ignorada" class="mod-filtro-btn <%= status==='ignorada' ? 'active' : '' %>">Ignoradas</a>
+            </section>
+
+            <% if (!denuncias.length) { %>
+            <section class="admin-empty">
+                <i class="fas fa-circle-check"></i>
+                Nenhuma denúncia <%= status === 'pendente' ? 'pendente' : status === 'resolvida' ? 'resolvida' : 'ignorada' %>.
+            </section>
+            <% } %>
+
+            <% denuncias.forEach(d => { %>
+            <section class="mod-denuncia-card" data-tipo="<%= d.tipo_alvo %>" data-id="<%= d.alvo_id %>" data-autor-id="<%= d.autor_id || '' %>" data-motivo="<%= d.motivo %>">
+                <section class="mod-denuncia-header">
+                    <span class="mod-denuncia-tipo mod-denuncia-tipo--<%= d.tipo_alvo %>">
+                        <i class="fas <%= d.tipo_alvo === 'post' ? 'fa-image' : d.tipo_alvo === 'comentario' ? 'fa-comment' : 'fa-circle-play' %>"></i>
+                        <%= d.tipo_alvo %>
+                    </span>
+                    <span class="text-muted">denunciado por <strong><%= d.denunciante_nome %></strong> @<%= d.denunciante_username %></span>
+                    <span class="badge badge-warning" style="margin-left:auto"><%= d.motivo %></span>
+                </section>
+
+                <% if (d.descricao) { %>
+                <p class="mod-denuncia-descricao">"<%= d.descricao %>"</p>
+                <% } %>
+
+                <section class="mod-denuncia-conteudo">
+                    <% if (d.conteudo_texto === null && !d.autor_id) { %>
+                    <p class="text-muted"><i class="fas fa-triangle-exclamation"></i> Conteúdo não encontrado (pode já ter sido removido).</p>
+                    <% } else { %>
+                    <p class="mod-denuncia-texto"><%= d.conteudo_texto || '(sem texto)' %></p>
+                    <p class="text-muted">Autor: <strong><%= d.autor_nome %></strong> @<%= d.autor_username %></p>
+                    <% } %>
+                </section>
+
+                <% if (status === 'pendente') { %>
+                <section class="mod-denuncia-acoes">
+                    <button type="button" class="btn btn-danger btn-sm" data-action="remover">
+                        <i class="fas fa-trash"></i> Remover conteúdo
+                    </button>
+                    <button type="button" class="btn btn-outline btn-sm" data-action="ignorar">
+                        <i class="fas fa-eye-slash"></i> Ignorar
+                    </button>
+                    <% if (d.autor_id) { %>
+                    <button type="button" class="btn btn-outline btn-sm" data-action="toggle-suspender">
+                        <i class="fas fa-user-clock"></i> Suspender autor
+                    </button>
+                    <% } %>
+                </section>
+                <% if (d.autor_id) { %>
+                <section class="mod-suspender-opcoes" style="display:none">
+                    <span class="text-muted" style="font-size:0.78rem">Duração:</span>
+                    <button type="button" class="btn btn-outline btn-sm" data-suspender-dias="1">1d</button>
+                    <button type="button" class="btn btn-outline btn-sm" data-suspender-dias="3">3d</button>
+                    <button type="button" class="btn btn-outline btn-sm" data-suspender-dias="7">7d</button>
+                    <button type="button" class="btn btn-outline btn-sm" data-suspender-dias="30">30d</button>
+                    <button type="button" class="btn btn-danger btn-sm" data-suspender-banir="1">Banir</button>
+                </section>
+                <% } %>
+                <% } %>
+            </section>
+            <% }) %>
+
+            <% if (totalPaginas > 1) { %>
+            <section class="mod-paginacao">
+                <% for (let p = 1; p <= totalPaginas; p++) { %>
+                <a href="/mod/denuncias?status=<%= status %>&page=<%= p %>" class="mod-pag-btn <%= p === page ? 'active' : '' %>"><%= p %></a>
+                <% } %>
+            </section>
+            <% } %>
+        </main>
+    </section>
+</section>
+
+<script>
+document.querySelectorAll('.mod-denuncia-card').forEach(function (card) {
+    const tipo = card.dataset.tipo;
+    const id   = card.dataset.id;
+    const autorId = card.dataset.autorId;
+
+    card.addEventListener('click', async function (e) {
+        const btn = e.target.closest('button');
+        if (!btn) return;
+
+        if (btn.dataset.action === 'remover' || btn.dataset.action === 'ignorar') {
+            btn.disabled = true;
+            try {
+                const r = await fetch('/mod/api/acao/conteudo', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        tipo, id,
+                        acao: btn.dataset.action === 'remover' ? 'remover' : 'ignorar_denuncia',
+                    }),
+                }).then(x => x.json());
+                if (r.ok) { card.remove(); } else { alert(r.erro || 'Erro ao executar ação.'); btn.disabled = false; }
+            } catch (_) { btn.disabled = false; }
+            return;
+        }
+
+        if (btn.dataset.action === 'toggle-suspender') {
+            const opcoes = card.querySelector('.mod-suspender-opcoes');
+            if (opcoes) opcoes.style.display = opcoes.style.display === 'none' ? 'flex' : 'none';
+            return;
+        }
+
+        if (btn.dataset.suspenderDias || btn.dataset.suspenderBanir) {
+            if (!autorId) return;
+            btn.disabled = true;
+            const acao = btn.dataset.suspenderBanir ? 'banir' : 'suspender';
+            const motivo = 'Denúncia de ' + tipo + ' — motivo: ' + (card.dataset.motivo || 'não especificado');
+            try {
+                const r = await fetch('/mod/api/acao/usuario', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: autorId, acao, dias: btn.dataset.suspenderDias, motivo }),
+                }).then(x => x.json());
+                if (r.ok) { card.querySelector('.mod-suspender-opcoes').style.display = 'none'; alert('Ação aplicada. Ajuste o motivo detalhado em Usuários, se necessário.'); }
+                else { alert(r.erro || 'Erro ao executar ação.'); }
+            } catch (_) {}
+            btn.disabled = false;
+        }
+    });
+});
+</script>
+</body>
+</html>

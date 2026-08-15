@@ -1,0 +1,887 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<%- include('../partials/seo') %>
+<link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+<link rel="stylesheet" href="/css/header.css">
+<link rel="stylesheet" href="/css/area-aluno.css">
+<link rel="stylesheet" href="/css/ai-chat.css">
+</head>
+<body>
+
+<%- include('../partials/header-aluno') %>
+
+<section class="aluno-dashboard">
+    <section class="sidebar-overlay" id="sidebarOverlay"></section>
+
+    <!-- SIDEBAR DE NAVEGAÇÃO -->
+    <section class="aluno-sidebar">
+        <section class="aluno-profile">
+            <section class="avatar">
+                <img id="sidebar-avatar" src="<%= user.profile_photo || '/images/avatar.png' %>" alt="Avatar do Aluno">
+            </section>
+            <h2><%= user.nome %></h2>
+            <p data-translate="sidebar.role">Aluno FitCrew</p>
+        </section>
+        <ul class="aluno-menu">
+            <li class="menu-section-label">Principal</li>
+            <li><a href="/feed"><i class="fas fa-home"></i> Feed</a></li>
+            <li><a href="/metricas"><i class="fas fa-tachometer-alt"></i> Minhas Métricas</a></li>
+
+            <li class="menu-section-label">Social</li>
+            <li><a href="/amizades"><i class="fas fa-user-friends"></i> Amigos</a></li>
+            <li><a href="/chat"><i class="fas fa-comment"></i> Mensagens</a></li>
+            <li><a href="/buscar"><i class="fas fa-search"></i> Buscar pessoas</a></li>
+            <li><a href="/gymsquads"><i class="fas fa-medal"></i> GymSquads</a></li>
+
+            <li class="menu-section-label">Treino</li>
+            <li><a href="/treinos" data-translate="sidebar.treinos"><i class="fas fa-dumbbell"></i> Meus Treinos</a></li>
+            <li><a href="/evolucao" data-translate="sidebar.evolucao"><i class="fas fa-chart-line"></i> Evolução</a></li>
+
+            <li class="menu-section-label">Saúde</li>
+            <li><a href="/nutricao" data-translate="sidebar.nutricao"><i class="fas fa-utensils"></i> Nutrição</a></li>
+            <li><a href="/imc-form"><i class="fas fa-clipboard-list"></i> Medidas</a></li>
+
+            <li class="menu-section-label">IA</li>
+            <% if (user && (user.planoSlug === 'gymbro' || user.planoSlug === 'black')) { %>
+            <li><a href="/ai/chat" class="active" data-translate="sidebar.ai"><i class="fas fa-robot"></i> Personal Trainer IA</a></li>
+            <% } else { %>
+            <li><a href="/meu-plano?upgrade=1" class="menu-locked" data-translate="sidebar.ai"><i class="fas fa-robot"></i> Personal Trainer IA 🔒</a></li>
+            <% } %>
+            <% if (user && user.planoSlug === 'black') { %>
+            <li><a href="/ai/avaliacao" data-translate="sidebar.avaliacao"><i class="fas fa-camera"></i> Avaliação Corporal</a></li>
+            <% } else { %>
+            <li><a href="/meu-plano?upgrade=1" class="menu-locked" data-translate="sidebar.avaliacao"><i class="fas fa-camera"></i> Avaliação Corporal 🔒</a></li>
+            <% } %>
+
+            <li class="menu-section-label">Academia</li>
+            <li class="sidebar-scan-item"><a href="/scan"><i class="fas fa-qrcode"></i> Check-in / Scan</a></li>
+            <li><a href="/suporte" data-translate="sidebar.suporte"><i class="fas fa-headset"></i> Suporte</a></li>
+
+            <li class="menu-section-label">Conta</li>
+            <li><a href="/perfil/<%= user.username || user.id %>"><i class="fas fa-user-circle"></i> Meu Perfil</a></li>
+            <li><a href="/conquistas" data-translate="sidebar.conquistas"><i class="fas fa-trophy"></i> Conquistas</a></li>
+            <li><a href="/meu-plano" data-translate="sidebar.plano"><i class="fas fa-file-alt"></i> Meu Plano</a></li>
+            <li><a href="/config" data-translate="sidebar.config"><i class="fas fa-cog"></i> Configurações</a></li>
+            <li>
+                <button class="sidebar-logout-btn" type="button">
+                    <i class="fas fa-sign-out-alt"></i> Sair da conta
+                </button>
+            </li>
+        </ul>
+    </section>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <section class="aluno-main">
+        <section class="dashboard-top" id="dashboardTop">
+            <h1><i class="fas fa-robot"></i> <span data-i18n="chat.title">Personal Trainer IA</span></h1>
+            <p data-i18n="chat.subtitle">Tire suas dúvidas sobre treinos, exercícios, nutrição e muito mais</p>
+        </section>
+
+        <!-- Overlay escuro para drawer mobile da sidebar de conversas -->
+        <section class="conv-overlay" id="convOverlay"></section>
+
+        <!-- WRAPPER: sidebar de conversas + chat -->
+        <section class="chat-wrapper">
+
+            <!-- SIDEBAR DE CONVERSAS -->
+            <section class="conv-sidebar" id="convSidebar">
+                <section class="conv-sidebar-header">
+                    <span data-i18n="chat.conversations">Conversas</span>
+                    <button id="btnNewConv" title="Nova conversa">+</button>
+                </section>
+                <section class="conv-list" id="convList">
+                    <p class="conv-loading">Carregando...</p>
+                </section>
+            </section>
+
+            <!-- CHAT PRINCIPAL -->
+            <section class="chat-container">
+
+                <!-- CABEÇALHO DO CHAT -->
+                <section class="chat-header" id="chatHeader">
+                    <section class="chat-header-left">
+                        <button class="conv-toggle-btn" id="convToggleBtn" title="Chats">
+                            <i class="fas fa-comments"></i>
+                            <span class="conv-toggle-label">Chats</span>
+                        </button>
+                        <span class="chat-header-title">GymBot</span>
+                    </section>
+                    <section class="chat-header-right">
+                        <button class="fullscreen-btn" id="fullscreenBtn" title="Tela cheia">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                    </section>
+                </section>
+
+                <!-- HISTÓRICO -->
+                <section class="chat-history" id="chatHistory">
+                    <section class="chat-message bot-message">
+                        <section class="chat-bubble">
+                            <strong>GymBot</strong>
+                            <p>Olá, <%= user.nome %>! 💪 Sou o GymBot, seu personal trainer virtual. Como posso te ajudar hoje? Pode me perguntar sobre treinos, exercícios, nutrição ou motivação!</p>
+                        </section>
+                    </section>
+                    <section class="chat-message bot-message disclaimer-message">
+                        <section class="chat-bubble disclaimer-bubble">
+                            <section class="disclaimer-icon"><i class="fas fa-exclamation-triangle"></i></section>
+                            <section class="disclaimer-content">
+                                <strong>Aviso importante</strong>
+                                <p>As respostas da IA têm caráter <strong>informativo e educacional</strong> e <strong>não substituem</strong> a orientação de um médico, nutricionista ou educador físico habilitado. Consulte sempre um profissional de saúde antes de iniciar qualquer programa de treino ou dieta.</p>
+                            </section>
+                        </section>
+                    </section>
+                </section>
+
+                <!-- INDICADOR DE DIGITANDO -->
+                <section class="typing-indicator" id="typingIndicator" style="display: none;">
+                    <section class="chat-bubble">
+                        <span class="dot"></span>
+                        <span class="dot"></span>
+                        <span class="dot"></span>
+                    </section>
+                </section>
+
+                <!-- ÁREA DE INPUT NORMAL -->
+                <section class="chat-input-area" id="chat-input-area">
+                    <button class="mic-btn" id="micBtn" title="Gravar áudio" style="-webkit-user-select:none;user-select:none;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                            <line x1="12" y1="19" x2="12" y2="23"/>
+                            <line x1="8" y1="23" x2="16" y2="23"/>
+                        </svg>
+                    </button>
+                    <input
+                        type="text"
+                        id="chatInput"
+                        placeholder="Digite sua mensagem..."
+                        data-i18n-placeholder="chat.placeholder"
+                        autocomplete="off"
+                        maxlength="500"
+                    />
+                    <button id="sendBtn" type="button">
+                        <i class="fas fa-paper-plane"></i> <span class="btn-label" data-i18n="chat.send">Enviar</span>
+                    </button>
+                </section>
+
+                <!-- ÁREA DE GRAVAÇÃO (substitui input durante gravação) -->
+                <section class="chat-recording-area hidden" id="chat-recording-area">
+
+                    <!-- Lixeira — swipe left mobile -->
+                    <section class="trash-indicator hidden" id="trash-indicator">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2">
+                            <polyline points="3 6 5 6 21 6"/>
+                            <path d="M19 6l-1 14H6L5 6"/>
+                            <path d="M10 11v6M14 11v6"/>
+                            <path d="M9 6V4h6v2"/>
+                        </svg>
+                    </section>
+
+                    <!-- Cancelar desktop -->
+                    <button id="cancel-recording-btn" class="cancel-recording-btn">
+                        <svg width="36" height="36" viewBox="0 0 36 36">
+                            <circle cx="18" cy="18" r="17" fill="none" stroke="#ef4444" stroke-width="2"/>
+                            <circle cx="18" cy="18" r="10" fill="#ef4444"/>
+                        </svg>
+                    </button>
+
+                    <!-- Waveform -->
+                    <section class="recording-waveform">
+                        <canvas id="waveform-canvas"></canvas>
+                    </section>
+
+                    <!-- Timer -->
+                    <section class="recording-timer" id="recording-timer">0:00</section>
+
+                    <!-- Enviar desktop -->
+                    <button id="send-recording-btn" class="send-recording-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="22" y1="2" x2="11" y2="13"/>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                        </svg>
+                    </button>
+
+                    <!-- Lock indicator — swipe up mobile -->
+                    <section class="lock-indicator hidden" id="lock-indicator">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                        </svg>
+                    </section>
+
+                    <!-- Controles lock mode mobile -->
+                    <section class="lock-controls hidden" id="lock-controls">
+                        <button class="cancel-recording-btn" type="button">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2">
+                                <polyline points="3 6 5 6 21 6"/>
+                                <path d="M19 6l-1 14H6L5 6"/>
+                            </svg>
+                        </button>
+                        <button class="send-recording-btn" type="button">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="22" y1="2" x2="11" y2="13"/>
+                                <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                            </svg>
+                        </button>
+                    </section>
+
+                </section>
+
+            </section>
+        </section>
+
+    </section>
+
+</section>
+
+<script>
+const currentUserName = <%- JSON.stringify(user.nome) %>;
+document.getElementById('sendBtn')?.addEventListener('click', () => sendMessage());
+document.querySelector('#lock-controls .cancel-recording-btn')?.addEventListener('click', () => pararGravacao(false));
+document.querySelector('#lock-controls .send-recording-btn')?.addEventListener('click', () => pararGravacao(true));
+
+// ── Refs ─────────────────────────────────────────────────────────────────────
+const chatHistory     = document.getElementById('chatHistory');
+const chatInput       = document.getElementById('chatInput');
+const sendBtn         = document.getElementById('sendBtn');
+const typingIndicator = document.getElementById('typingIndicator');
+const convSidebar     = document.getElementById('convSidebar');
+const convList        = document.getElementById('convList');
+const convToggleBtn   = document.getElementById('convToggleBtn');
+const fullscreenBtn   = document.getElementById('fullscreenBtn');
+const micBtn          = document.getElementById('micBtn');
+const inputArea       = document.getElementById('chat-input-area');
+const recordingArea   = document.getElementById('chat-recording-area');
+const recordingTimer  = document.getElementById('recording-timer');
+const trashIndicator  = document.getElementById('trash-indicator');
+const lockIndicator   = document.getElementById('lock-indicator');
+const lockControls    = document.getElementById('lock-controls');
+const convOverlay     = document.getElementById('convOverlay');
+
+// ── Estado global ─────────────────────────────────────────────────────────────
+let sidebarVisible    = window.innerWidth >= 1024;
+let isFullscreen      = false;
+let mediaRecorder     = null;
+let audioChunks       = [];
+let audioStream       = null;
+let gravando          = false;
+let cancelada         = false;
+let locked            = false;
+let recordingInterval = null;
+let recordingSeconds  = 0;
+let analyser          = null;
+let audioCtx          = null;
+let animFrameId       = null;
+
+// Touch
+let touchStartX = 0, touchStartY = 0, currentTouchX = 0, currentTouchY = 0;
+const LOCK_THRESHOLD   = 80;
+const CANCEL_THRESHOLD = 100;
+
+// ── Sidebar de conversas ─────────────────────────────────────────────────────
+const isMobile = () => window.innerWidth < 768;
+
+function closeMobileSidebar() {
+    convSidebar.classList.remove('open');
+    convOverlay.classList.remove('open');
+}
+
+function initSidebar() {
+    if (isMobile()) {
+        convSidebar.classList.remove('hidden');
+    } else {
+        convSidebar.classList.toggle('hidden', !sidebarVisible);
+    }
+}
+initSidebar();
+
+convToggleBtn.addEventListener('click', () => {
+    if (isMobile()) {
+        const opening = !convSidebar.classList.contains('open');
+        convSidebar.classList.toggle('open', opening);
+        convOverlay.classList.toggle('open', opening);
+    } else {
+        sidebarVisible = !sidebarVisible;
+        convSidebar.classList.toggle('hidden', !sidebarVisible);
+    }
+});
+
+convOverlay.addEventListener('click', closeMobileSidebar);
+
+window.addEventListener('resize', () => {
+    if (!isMobile()) {
+        closeMobileSidebar();
+        convSidebar.classList.toggle('hidden', !sidebarVisible);
+    } else {
+        convSidebar.classList.remove('hidden');
+    }
+});
+
+async function loadConversations() {
+    try {
+        const res  = await fetch('/ai/conversations');
+        const data = await res.json();
+        convList.innerHTML = '';
+        const conversations = data.conversations || [];
+        if (conversations.length === 0) {
+            convList.innerHTML = '<p class="conv-empty">Nenhuma conversa ainda</p>';
+            return;
+        }
+        conversations.forEach(conv => {
+            const wrapper = document.createElement('section');
+            wrapper.style.cssText = 'display:flex;align-items:stretch;';
+
+            const btn = document.createElement('button');
+            btn.classList.add('conv-item');
+            btn.style.cssText = 'flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;';
+            if (conv.ativa) btn.classList.add('active');
+            const date    = new Date(conv.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+            const preview = conv.context_summary
+                ? conv.context_summary.slice(0, 38) + (conv.context_summary.length > 38 ? '…' : '')
+                : `${conv.total_mensagens || 0} msg${(conv.total_mensagens || 0) !== 1 ? 's' : ''}`;
+            btn.textContent = `${date} — ${preview}`;
+            btn.title       = conv.context_summary || `Conversa de ${date}`;
+            btn.onclick     = () => { if (isMobile()) closeMobileSidebar(); activateConversation(conv.id, !!conv.ativa); };
+
+            const delBtn = document.createElement('button');
+            delBtn.title = 'Deletar conversa';
+            delBtn.innerHTML = '<i class="fas fa-trash"></i>';
+            delBtn.style.cssText = 'flex-shrink:0;background:none;border:none;color:#555;cursor:pointer;padding:0 0.55rem;border-radius:0 6px 6px 0;transition:color 0.15s,background 0.15s;';
+            delBtn.onmouseenter = () => { delBtn.style.color = '#e74c3c'; delBtn.style.background = 'rgba(231,76,60,0.1)'; };
+            delBtn.onmouseleave = () => { delBtn.style.color = '#555';    delBtn.style.background = ''; };
+            delBtn.onclick = async e => {
+                e.stopPropagation();
+                if (!confirm('Tem certeza que quer deletar esta conversa?')) return;
+                try {
+                    const r    = await fetch(`/ai/conversations/${conv.id}`, { method: 'DELETE' });
+                    const data = await r.json();
+                    if (data.error) { alert(data.error); return; }
+                    wrapper.remove();
+                    if (data.wasActive) {
+                        await fetch('/ai/conversations/new', { method: 'POST' });
+                        chatHistory.innerHTML = '';
+                        appendMessage(`Olá, ${currentUserName}! 💪 Sou o GymBot, seu personal trainer virtual. Como posso te ajudar hoje?`, 'bot');
+                        await loadConversations();
+                    }
+                } catch { alert('Erro ao deletar conversa.'); }
+            };
+
+            wrapper.appendChild(btn);
+            wrapper.appendChild(delBtn);
+            convList.appendChild(wrapper);
+        });
+    } catch {
+        convList.innerHTML = '<p class="conv-empty">Erro ao carregar</p>';
+    }
+}
+
+async function activateConversation(id, isAlreadyActive) {
+    if (isAlreadyActive) return;
+    try {
+        await fetch(`/ai/conversations/${id}/activate`, { method: 'POST' });
+        const res  = await fetch(`/ai/conversations/${id}/messages`);
+        const data = await res.json();
+        chatHistory.innerHTML = '';
+        (data.messages || []).forEach(m => {
+            let parsed = null;
+            try { if (typeof m.content === 'string' && m.content.startsWith('{')) parsed = JSON.parse(m.content); } catch {}
+            if (m.role === 'user') {
+                appendMessage(m.content, 'user');
+            } else {
+                if (parsed && (parsed.type === 'workout' || parsed.type === 'diet')) {
+                    appendPlan(parsed);
+                } else {
+                    appendMessage(parsed ? (parsed.message || m.content) : m.content, 'bot');
+                }
+            }
+        });
+        chatHistory.scrollTop = chatHistory.scrollHeight;
+        await loadConversations();
+    } catch {
+        appendMessage('Erro ao carregar conversa. Tente novamente.', 'bot');
+    }
+}
+
+document.getElementById('btnNewConv').addEventListener('click', async () => {
+    try {
+        await fetch('/ai/conversations/new', { method: 'POST' });
+        chatHistory.innerHTML = '';
+        appendMessage(`Olá, ${currentUserName}! 💪 Sou o GymBot, seu personal trainer virtual. Como posso te ajudar hoje?`, 'bot');
+        await loadConversations();
+    } catch {
+        appendMessage('Erro ao criar nova conversa.', 'bot');
+    }
+});
+
+// ── Fullscreen ───────────────────────────────────────────────────────────────
+fullscreenBtn.addEventListener('click', () => {
+    isFullscreen = !isFullscreen;
+    document.body.classList.toggle('fullscreen-mode', isFullscreen);
+    fullscreenBtn.innerHTML = isFullscreen
+        ? '<i class="fas fa-compress"></i>'
+        : '<i class="fas fa-expand"></i>';
+    fullscreenBtn.title = isFullscreen ? 'Sair da tela cheia' : 'Tela cheia';
+});
+
+// ── Gravação de áudio ────────────────────────────────────────────────────────
+function formatTime(s) {
+    return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+}
+
+async function iniciarGravacao() {
+    if (gravando) return;
+    try {
+        audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+        const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm'
+            : MediaRecorder.isTypeSupported('audio/mp4') ? 'audio/mp4' : '';
+        mediaRecorder = new MediaRecorder(audioStream, mimeType ? { mimeType } : {});
+        audioChunks   = [];
+
+        // Waveform
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 256;
+        const source = audioCtx.createMediaStreamSource(audioStream);
+        source.connect(analyser);
+
+        mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
+        mediaRecorder.onstop = async () => {
+            if (cancelada || audioChunks.length === 0) { cancelada = false; return; }
+            cancelada = false;
+            const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+            audioStream.getTracks().forEach(t => t.stop());
+            pararWaveform();
+            await processarAudio(blob);
+        };
+
+        mediaRecorder.start(100);
+        gravando         = true;
+        recordingSeconds = 0;
+        recordingTimer.textContent = '0:00';
+
+        inputArea.classList.add('hidden');
+        recordingArea.classList.remove('hidden');
+
+        recordingInterval = setInterval(() => {
+            recordingSeconds++;
+            recordingTimer.textContent = formatTime(recordingSeconds);
+        }, 1000);
+
+        desenharWaveform();
+    } catch {
+        alert('Permita o acesso ao microfone para usar este recurso.');
+    }
+}
+
+function pararGravacao(enviar = true) {
+    if (!mediaRecorder || !gravando) return;
+    gravando = false;
+    locked   = false;
+
+    clearInterval(recordingInterval);
+    pararWaveform();
+
+    if (!enviar) {
+        cancelada = true;
+        audioChunks = [];
+        audioStream?.getTracks().forEach(t => t.stop());
+        if (audioCtx) { audioCtx.close(); audioCtx = null; }
+    }
+
+    mediaRecorder.stop();
+
+    recordingArea.classList.add('hidden');
+    inputArea.classList.remove('hidden');
+    recordingArea.style.background = '';
+    lockIndicator.classList.add('hidden');
+    lockControls.classList.add('hidden');
+    trashIndicator.classList.add('hidden');
+}
+
+function desenharWaveform() {
+    const canvas = document.getElementById('waveform-canvas');
+    canvas.width  = canvas.offsetWidth || 200;
+    canvas.height = 40;
+    const ctx2    = canvas.getContext('2d');
+    const bufLen  = analyser.frequencyBinCount;
+    const data    = new Uint8Array(bufLen);
+
+    function draw() {
+        animFrameId = requestAnimationFrame(draw);
+        analyser.getByteFrequencyData(data);
+        ctx2.clearRect(0, 0, canvas.width, canvas.height);
+        const barW = (canvas.width / bufLen) * 2.5;
+        let x = 0;
+        for (let i = 0; i < bufLen; i++) {
+            const h = (data[i] / 255) * canvas.height;
+            ctx2.fillStyle = 'rgba(255,255,255,0.85)';
+            ctx2.fillRect(x, canvas.height - h, barW, h);
+            x += barW + 1;
+        }
+    }
+    draw();
+}
+
+function pararWaveform() {
+    if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
+    if (audioCtx)    { audioCtx.close(); audioCtx = null; }
+}
+
+async function processarAudio(blob) {
+    const audioUrl = URL.createObjectURL(blob);
+    adicionarMensagemAudio(audioUrl);
+
+    const formData = new FormData();
+    formData.append('audio', blob, 'audio.webm');
+
+    adicionarIndicadorDigitando();
+    try {
+        const res  = await fetch('/ai/transcribe', { method: 'POST', body: formData });
+        const data = await res.json();
+        removerIndicadorDigitando();
+
+        if (data.ok && data.texto) {
+            await enviarMensagemParaIA(data.texto);
+        } else {
+            appendMessage('Não consegui entender o áudio. Pode tentar novamente?', 'bot');
+        }
+    } catch {
+        removerIndicadorDigitando();
+        appendMessage('Erro ao processar o áudio.', 'bot');
+    }
+}
+
+function adicionarMensagemAudio(url) {
+    const wrapper = document.createElement('section');
+    wrapper.classList.add('chat-message', 'user-message');
+
+    const bubble = document.createElement('section');
+    bubble.classList.add('chat-bubble', 'audio-bubble');
+
+    const audioMsg = document.createElement('section');
+    audioMsg.classList.add('audio-message');
+
+    const playBtn = document.createElement('button');
+    playBtn.classList.add('audio-message-play');
+    playBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>`;
+
+    const waveCanvas = document.createElement('canvas');
+    waveCanvas.classList.add('audio-message-waveform');
+    waveCanvas.width  = 120;
+    waveCanvas.height = 32;
+
+    const duration = document.createElement('span');
+    duration.classList.add('audio-message-duration');
+    duration.textContent = formatTime(recordingSeconds);
+
+    const audioEl = document.createElement('audio');
+    audioEl.src   = url;
+    audioEl.style.display = 'none';
+
+    playBtn.addEventListener('click', () => toggleAudio(playBtn, audioEl, duration));
+    audioEl.addEventListener('timeupdate', () => {
+        if (!audioEl.paused) duration.textContent = formatTime(Math.floor(audioEl.currentTime));
+    });
+    audioEl.addEventListener('ended', () => {
+        duration.textContent = formatTime(Math.floor(audioEl.duration) || recordingSeconds);
+        playBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>`;
+    });
+
+    audioMsg.appendChild(playBtn);
+    audioMsg.appendChild(waveCanvas);
+    audioMsg.appendChild(duration);
+    audioMsg.appendChild(audioEl);
+    bubble.appendChild(audioMsg);
+    wrapper.appendChild(bubble);
+    chatHistory.appendChild(wrapper);
+    chatHistory.scrollTop = chatHistory.scrollHeight;
+
+    setTimeout(() => desenharWaveformEstatico(waveCanvas), 50);
+}
+
+function desenharWaveformEstatico(canvas) {
+    canvas.width  = canvas.offsetWidth || 120;
+    canvas.height = 32;
+    const ctx2 = canvas.getContext('2d');
+    const bars = 30;
+    const barW = canvas.width / (bars * 2);
+    for (let i = 0; i < bars; i++) {
+        const h = 4 + Math.abs(Math.sin(i * 0.8) * 16) + Math.random() * 6;
+        const x = i * (barW * 2);
+        const y = (canvas.height - h) / 2;
+        ctx2.fillStyle = 'rgba(31,31,31,0.7)';
+        ctx2.fillRect(x, y, barW, h);
+    }
+}
+
+function toggleAudio(btn, audioEl, durationSpan) {
+    if (audioEl.paused) {
+        document.querySelectorAll('.audio-message audio').forEach(a => {
+            if (a !== audioEl) {
+                a.pause();
+                const sibBtn = a.closest('.audio-message')?.querySelector('.audio-message-play');
+                if (sibBtn) sibBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>`;
+            }
+        });
+        audioEl.play();
+        btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>`;
+    } else {
+        audioEl.pause();
+        btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>`;
+    }
+}
+
+// ── Gestos mobile ────────────────────────────────────────────────────────────
+micBtn.addEventListener('touchstart', e => {
+    e.preventDefault();
+    e.stopPropagation();
+    touchStartX  = e.touches[0].clientX;
+    touchStartY  = e.touches[0].clientY;
+    currentTouchX = touchStartX;
+    currentTouchY = touchStartY;
+    iniciarGravacao();
+}, { passive: false });
+
+micBtn.addEventListener('touchmove', e => {
+    e.preventDefault();
+    currentTouchY = e.touches[0].clientY;
+    currentTouchX = e.touches[0].clientX;
+    const deltaY = touchStartY - currentTouchY;
+    const deltaX = touchStartX - currentTouchX;
+
+    if (deltaY > 20 && deltaY > Math.abs(deltaX)) {
+        lockIndicator.classList.remove('hidden');
+        lockIndicator.style.transform = `translateY(-${deltaY * 0.3}px)`;
+        lockIndicator.style.background = deltaY > LOCK_THRESHOLD * 0.8 ? '#ef4444' : 'white';
+
+        if (deltaY >= LOCK_THRESHOLD && !locked) {
+            locked = true;
+            lockIndicator.classList.add('hidden');
+            lockControls.classList.remove('hidden');
+        }
+        trashIndicator.classList.add('hidden');
+        recordingArea.style.background = '';
+        return;
+    }
+
+    if (deltaX > 20) {
+        const progress = Math.min(deltaX / CANCEL_THRESHOLD, 1);
+        trashIndicator.classList.remove('hidden');
+        trashIndicator.style.opacity   = Math.max(progress, 0.25);
+        trashIndicator.style.transform = progress <= 0.7
+            ? `translateY(calc(-50% - ${progress * 8}px))`
+            : `translateY(calc(-50% - 8px))`;
+        trashIndicator.classList.toggle('tremendo', progress > 0.7);
+
+        const r = Math.round(26  + (239 - 26)  * progress);
+        const g = Math.round(115 + (68  - 115) * progress);
+        const b = Math.round(232 + (68  - 232) * progress);
+        recordingArea.style.background = `rgb(${r},${g},${b})`;
+    } else {
+        trashIndicator.classList.add('hidden');
+        recordingArea.style.background = '';
+    }
+}, { passive: false });
+
+micBtn.addEventListener('touchend', e => {
+    e.preventDefault();
+    const deltaX = touchStartX - currentTouchX;
+    recordingArea.style.background = '';
+    trashIndicator.classList.add('hidden');
+
+    if (!locked) {
+        if (deltaX > CANCEL_THRESHOLD) {
+            audioChunks = [];
+            pararGravacao(false);
+        } else {
+            pararGravacao(true);
+        }
+    }
+}, { passive: false });
+
+// Desktop click
+micBtn.addEventListener('click', e => {
+    if (e.pointerType === 'touch') return;
+    if (!gravando) iniciarGravacao();
+    else pararGravacao(true);
+});
+
+document.getElementById('cancel-recording-btn').addEventListener('click', () => {
+    audioChunks = [];
+    pararGravacao(false);
+});
+document.getElementById('send-recording-btn').addEventListener('click', () => {
+    pararGravacao(true);
+});
+
+// ── Chat core ────────────────────────────────────────────────────────────────
+function adicionarIndicadorDigitando() {
+    typingIndicator.style.display = 'flex';
+    chatHistory.scrollTop = chatHistory.scrollHeight;
+}
+function removerIndicadorDigitando() {
+    typingIndicator.style.display = 'none';
+}
+
+chatInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+});
+
+async function enviarMensagemParaIA(message) {
+    sendBtn.disabled   = true;
+    chatInput.disabled = true;
+    adicionarIndicadorDigitando();
+    try {
+        const response = await fetch('/ai/message', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ message })
+        });
+        const data = await response.json();
+        removerIndicadorDigitando();
+        if (data.reply && (data.reply.type === 'workout' || data.reply.type === 'diet')) {
+            appendPlan(data.reply);
+        } else {
+            const botText = typeof data.reply === 'object' ? data.reply.message : data.reply;
+            appendMessage(botText, 'bot');
+        }
+    } catch {
+        removerIndicadorDigitando();
+        appendMessage('Desculpe, não consegui processar sua mensagem. Tente novamente.', 'bot');
+    } finally {
+        sendBtn.disabled   = false;
+        chatInput.disabled = false;
+        chatInput.focus();
+    }
+}
+
+function appendPlan(reply) {
+    const wrapper = document.createElement('section');
+    wrapper.classList.add('chat-message', 'bot-message');
+    const bubble = document.createElement('section');
+    bubble.classList.add('chat-bubble');
+    const name = document.createElement('strong');
+    name.textContent = 'GymBot';
+    bubble.appendChild(name);
+    const preview = document.createElement('section');
+    preview.classList.add('plan-preview');
+
+    if (reply.type === 'workout') {
+        const plan  = reply.plan || {};
+        const title = document.createElement('h3');
+        title.classList.add('plan-preview-title');
+        title.textContent = plan.nome || '';
+        preview.appendChild(title);
+        (plan.exercicios || []).forEach(ex => {
+            const row = document.createElement('section');
+            row.classList.add('plan-row');
+            row.innerHTML = `<strong>${ex.nome_pt}</strong> — ${ex.series}x ${ex.repeticoes} | Descanso: ${ex.descanso_segundos}s | Carga: ${ex.carga_sugerida}`;
+            preview.appendChild(row);
+        });
+    } else {
+        const plan  = reply.plan || {};
+        const title = document.createElement('h3');
+        title.classList.add('plan-preview-title');
+        title.textContent = plan.nome || '';
+        preview.appendChild(title);
+        const meta = document.createElement('p');
+        meta.classList.add('plan-diet-meta');
+        meta.textContent = `${plan.objetivo_calorico || 0} kcal/dia · Proteína: ${plan.proteina_diaria_g || 0}g`;
+        preview.appendChild(meta);
+        (plan.refeicoes || []).forEach(ref => {
+            const block    = document.createElement('section');
+            block.classList.add('plan-row');
+            const refTitle = document.createElement('strong');
+            refTitle.textContent = `${ref.nome} (${ref.horario_sugerido})`;
+            block.appendChild(refTitle);
+            (ref.alimentos || []).forEach(al => {
+                const alEl = document.createElement('span');
+                alEl.classList.add('plan-alimento');
+                alEl.textContent = `${al.nome} ${al.quantidade} — ${al.kcal} kcal`;
+                block.appendChild(alEl);
+            });
+            preview.appendChild(block);
+        });
+    }
+
+    bubble.appendChild(preview);
+    const actions = document.createElement('section');
+    actions.classList.add('plan-actions');
+    const btnSave = document.createElement('button');
+    btnSave.classList.add('plan-btn', 'plan-btn-confirm');
+    btnSave.textContent = 'Confirmar e salvar';
+    btnSave.onclick = async () => {
+        btnSave.disabled = true;
+        btnAlt.disabled  = true;
+        try {
+            const res  = await fetch('/ai/plan/save', {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body:    JSON.stringify({ type: reply.type, plan: reply.plan })
+            });
+            const data = await res.json();
+            if (!data.ok) {
+                btnSave.disabled = false;
+                btnAlt.disabled  = false;
+                btnSave.textContent = data.error || 'Erro ao salvar';
+            } else {
+                btnSave.textContent = 'Salvo!';
+            }
+        } catch {
+            btnSave.disabled = false;
+            btnAlt.disabled  = false;
+            btnSave.textContent = 'Erro ao salvar';
+        }
+    };
+    const btnAlt = document.createElement('button');
+    btnAlt.classList.add('plan-btn', 'plan-btn-alter');
+    btnAlt.textContent = 'Quero alterar';
+    btnAlt.onclick = () => {
+        actions.remove();
+        chatInput.value = 'quero alterar o plano';
+        sendMessage();
+    };
+    actions.appendChild(btnSave);
+    actions.appendChild(btnAlt);
+    bubble.appendChild(actions);
+    wrapper.appendChild(bubble);
+    chatHistory.appendChild(wrapper);
+    chatHistory.scrollTop = chatHistory.scrollHeight;
+}
+
+function appendMessage(text, sender) {
+    const wrapper = document.createElement('section');
+    wrapper.classList.add('chat-message', sender === 'user' ? 'user-message' : 'bot-message');
+    const bubble = document.createElement('section');
+    bubble.classList.add('chat-bubble');
+    if (sender === 'bot') {
+        const name = document.createElement('strong');
+        name.textContent = 'GymBot';
+        bubble.appendChild(name);
+    }
+    const p = document.createElement('p');
+    p.textContent = text;
+    bubble.appendChild(p);
+    wrapper.appendChild(bubble);
+    chatHistory.appendChild(wrapper);
+    chatHistory.scrollTop = chatHistory.scrollHeight;
+}
+
+async function sendMessage() {
+    const message = chatInput.value.trim();
+    if (!message) return;
+    chatInput.value = '';
+    appendMessage(message, 'user');
+    await enviarMensagemParaIA(message);
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+loadConversations();
+</script>
+</body>
+</html>

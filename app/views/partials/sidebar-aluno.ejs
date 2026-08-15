@@ -1,0 +1,55 @@
+<section class="aluno-sidebar">
+    <section class="aluno-profile">
+        <section class="avatar">
+            <img src="<%= user.profile_photo || '/images/avatar.png' %>" alt="Avatar do Aluno">
+        </section>
+        <h2><%= user.nome %></h2>
+        <p data-translate="sidebar.role">Aluno FitCrew</p>
+    </section>
+    <ul class="aluno-menu">
+        <li class="menu-section-label">Principal</li>
+        <li><a href="/feed"><i class="fas fa-home"></i> Feed</a></li>
+        <li><a href="/metricas"><i class="fas fa-tachometer-alt"></i> Minhas Métricas</a></li>
+
+        <li class="menu-section-label">Social</li>
+        <li><a href="/amizades"><i class="fas fa-user-friends"></i> Amigos</a></li>
+        <li><a href="/chat"><i class="fas fa-comment"></i> Mensagens</a></li>
+        <li><a href="/buscar"><i class="fas fa-search"></i> Buscar pessoas</a></li>
+        <li><a href="/gymsquads"><i class="fas fa-medal"></i> GymSquads</a></li>
+
+        <li class="menu-section-label">Treino</li>
+        <li><a href="/treinos" data-translate="sidebar.treinos"><i class="fas fa-dumbbell"></i> Meus Treinos</a></li>
+        <li><a href="/evolucao" data-translate="sidebar.evolucao"><i class="fas fa-chart-line"></i> Evolução</a></li>
+
+        <li class="menu-section-label">Saúde</li>
+        <li><a href="/nutricao" data-translate="sidebar.nutricao"><i class="fas fa-utensils"></i> Nutrição</a></li>
+        <li><a href="/imc-form"><i class="fas fa-clipboard-list"></i> Medidas</a></li>
+
+        <li class="menu-section-label">IA</li>
+        <% if (user && (user.planoSlug === 'gymbro' || user.planoSlug === 'black')) { %>
+        <li><a href="/ai/chat" data-translate="sidebar.ai"><i class="fas fa-robot"></i> Personal Trainer IA</a></li>
+        <% } else { %>
+        <li><a href="/meu-plano?upgrade=1" class="menu-locked" data-translate="sidebar.ai"><i class="fas fa-robot"></i> Personal Trainer IA 🔒</a></li>
+        <% } %>
+        <% if (user && user.planoSlug === 'black') { %>
+        <li><a href="/ai/avaliacao" data-translate="sidebar.avaliacao"><i class="fas fa-camera"></i> Avaliação Corporal</a></li>
+        <% } else { %>
+        <li><a href="/meu-plano?upgrade=1" class="menu-locked" data-translate="sidebar.avaliacao"><i class="fas fa-camera"></i> Avaliação Corporal 🔒</a></li>
+        <% } %>
+
+        <li class="menu-section-label">Academia</li>
+        <li class="sidebar-scan-item"><a href="/scan"><i class="fas fa-qrcode"></i> Check-in / Scan</a></li>
+        <li><a href="/suporte" data-translate="sidebar.suporte"><i class="fas fa-headset"></i> Suporte</a></li>
+
+        <li class="menu-section-label">Conta</li>
+        <li><a href="/u/<%= user.username %>"><i class="fas fa-user-circle"></i> Meu Perfil</a></li>
+        <li><a href="/conquistas" data-translate="sidebar.conquistas"><i class="fas fa-trophy"></i> Conquistas</a></li>
+        <li><a href="/meu-plano" data-translate="sidebar.plano"><i class="fas fa-file-alt"></i> Meu Plano</a></li>
+        <li><a href="/config" data-translate="sidebar.config"><i class="fas fa-cog"></i> Configurações</a></li>
+        <li>
+            <button class="sidebar-logout-btn" type="button">
+                <i class="fas fa-sign-out-alt"></i> Sair da conta
+            </button>
+        </li>
+    </ul>
+</section>

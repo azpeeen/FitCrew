@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<%- include('../partials/seo') %>
+<link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="/css/replay-treino.css">
+<link rel="stylesheet" href="/css/compartilhar-feed.css">
+</head>
+<body class="replay-page">
+
+<section class="replay-container">
+
+    <header class="replay-topbar">
+        <a href="/treinos" class="replay-back">
+            <i class="fas fa-arrow-left"></i> FitCrew
+        </a>
+    </header>
+
+    <section class="replay-loading" id="replayLoading">
+        <i class="fas fa-spinner fa-spin"></i>
+    </section>
+
+    <section class="replay-erro" id="replayErro" style="display:none">
+        <i class="fas fa-face-frown"></i>
+        <p>Não foi possível carregar o replay deste treino.</p>
+        <a href="/treinos" class="replay-btn replay-btn--outline">Voltar aos treinos</a>
+    </section>
+
+    <section class="replay-content" id="replayContent" style="display:none">
+
+        <section class="replay-header">
+            <h1 class="replay-titulo" id="replayTitulo"></h1>
+            <section class="replay-meta" id="replayMeta"></section>
+        </section>
+
+        <section class="replay-corpo">
+            <svg id="corpo-svg" viewBox="0 0 320 400" xmlns="http://www.w3.org/2000/svg" class="replay-svg">
+
+                <!-- FRENTE (x: 0-160) -->
+                <g id="corpo-frente">
+                    <ellipse cx="80" cy="30" rx="20" ry="24" fill="#1a1a1a" stroke="#333" stroke-width="1"/>
+                    <rect x="73" y="52" width="14" height="14" rx="3" fill="#1a1a1a" stroke="#333" stroke-width="1"/>
+
+                    <path id="svg-peito-e" d="M60,68 Q52,68 48,80 L60,88 L76,82 L76,68 Z" fill="#222" stroke="#333" stroke-width="0.5"/>
+                    <path id="svg-peito-d" d="M100,68 Q108,68 112,80 L100,88 L84,82 L84,68 Z" fill="#222" stroke="#333" stroke-width="0.5"/>
+
+                    <ellipse id="svg-ombro-e" cx="44" cy="72" rx="12" ry="14" fill="#222" stroke="#333" stroke-width="0.5"/>
+                    <ellipse id="svg-ombro-d" cx="116" cy="72" rx="12" ry="14" fill="#222" stroke="#333" stroke-width="0.5"/>
+
+                    <path id="svg-biceps-e" d="M34,86 Q28,92 30,108 L40,106 L44,86 Z" fill="#222" stroke="#333" stroke-width="0.5"/>
+                    <path id="svg-biceps-d" d="M126,86 Q132,92 130,108 L120,106 L116,86 Z" fill="#222" stroke="#333" stroke-width="0.5"/>
+
+                    <path id="svg-antebraco-e" d="M30,110 Q24,118 26,134 L36,132 L40,108 Z" fill="#222" stroke="#333" stroke-width="0.5"/>
+                    <path id="svg-antebraco-d" d="M130,110 Q136,118 134,134 L124,132 L120,108 Z" fill="#222" stroke="#333" stroke-width="0.5"/>
+
+                    <rect id="svg-abdomen" x="60" y="92" width="40" height="52" rx="6" fill="#222" stroke="#333" stroke-width="0.5"/>
+
+                    <path id="svg-quad-e" d="M56,148 Q48,156 50,188 L66,188 L68,148 Z" fill="#222" stroke="#333" stroke-width="0.5"/>
+                    <path id="svg-quad-d" d="M104,148 Q112,156 110,188 L94,188 L92,148 Z" fill="#222" stroke="#333" stroke-width="0.5"/>
+
+                    <path id="svg-panturrilha-e" d="M50,192 Q46,204 48,224 L62,224 L66,192 Z" fill="#222" stroke="#333" stroke-width="0.5"/>
+                    <path id="svg-panturrilha-d" d="M110,192 Q114,204 112,224 L98,224 L94,192 Z" fill="#222" stroke="#333" stroke-width="0.5"/>
+
+                    <path id="svg-cardio" d="M72,74 Q72,68 78,68 Q84,68 84,74 Q84,68 90,68 Q96,68 96,74 Q96,84 84,92 Q72,84 72,74 Z" fill="#222" stroke="#333" stroke-width="0.5" opacity="0.6"/>
+                </g>
+
+                <line x1="160" y1="0" x2="160" y2="400" stroke="#333" stroke-width="1"/>
+
+                <!-- COSTAS (x: 160-320) -->
+                <g id="corpo-costas" transform="translate(160, 0)">
+                    <ellipse cx="80" cy="30" rx="20" ry="24" fill="#1a1a1a" stroke="#333" stroke-width="1"/>
+
+                    <path id="svg-trapezio" d="M60,54 Q80,48 100,54 L96,72 L80,68 L64,72 Z" fill="#222" stroke="#333" stroke-width="0.5"/>
+                    <path id="svg-costas-sup" d="M48,74 L112,74 L108,100 L52,100 Z" fill="#222" stroke="#333" stroke-width="0.5"/>
+
+                    <ellipse cx="44" cy="72" rx="12" ry="14" fill="#222" stroke="#333" stroke-width="0.5"/>
+                    <ellipse cx="116" cy="72" rx="12" ry="14" fill="#222" stroke="#333" stroke-width="0.5"/>
+
+                    <path id="svg-costas-lat-e" d="M48,76 Q36,90 40,118 L60,112 L60,100 L52,100 Z" fill="#222" stroke="#333" stroke-width="0.5"/>
+                    <path id="svg-costas-lat-d" d="M112,76 Q124,90 120,118 L100,112 L100,100 L108,100 Z" fill="#222" stroke="#333" stroke-width="0.5"/>
+
+                    <rect id="svg-coluna" x="76" y="100" width="8" height="48" rx="4" fill="#222" stroke="#333" stroke-width="0.5"/>
+
+                    <path id="svg-triceps-e" d="M34,86 Q28,96 32,110 L42,108 L44,86 Z" fill="#222" stroke="#333" stroke-width="0.5"/>
+                    <path id="svg-triceps-d" d="M126,86 Q132,96 128,110 L118,108 L116,86 Z" fill="#222" stroke="#333" stroke-width="0.5"/>
+
+                    <path id="svg-gluteo-e" d="M56,148 Q44,156 48,178 L76,178 L76,148 Z" fill="#222" stroke="#333" stroke-width="0.5"/>
+                    <path id="svg-gluteo-d" d="M104,148 Q116,156 112,178 L84,178 L84,148 Z" fill="#222" stroke="#333" stroke-width="0.5"/>
+
+                    <path id="svg-posterior-e" d="M48,180 Q44,196 46,216 L66,214 L68,180 Z" fill="#222" stroke="#333" stroke-width="0.5"/>
+                    <path id="svg-posterior-d" d="M112,180 Q116,196 114,216 L94,214 L92,180 Z" fill="#222" stroke="#333" stroke-width="0.5"/>
+
+                    <path id="svg-abdutor-e" d="M44,150 Q36,164 40,184 L52,182 L54,150 Z" fill="#222" stroke="#333" stroke-width="0.5"/>
+                    <path id="svg-abdutor-d" d="M116,150 Q124,164 120,184 L108,182 L106,150 Z" fill="#222" stroke="#333" stroke-width="0.5"/>
+                </g>
+            </svg>
+        </section>
+
+        <section class="replay-exercicios-wrap">
+            <h2 class="replay-secao-titulo">Exercícios</h2>
+            <section class="replay-exercicios" id="replayExercicios"></section>
+        </section>
+
+        <section class="replay-acoes">
+            <button type="button" class="replay-btn replay-btn--gold" id="btnCompartilharFeed">
+                <i class="fas fa-share-nodes"></i> Compartilhar no Feed
+            </button>
+            <button type="button" class="replay-btn replay-btn--outline" id="btnCompartilharStories">
+                <i class="fas fa-book-open"></i> Compartilhar nos Stories
+            </button>
+        </section>
+
+    </section>
+
+</section>
+
+<script src="/js/compartilhar-feed.js"></script>
+<script src="/js/muscle-translate.js"></script>
+<script>
+const SESSAO_ID = <%= sessaoId %>;
+let REPLAY_SESSAO = null;
+
+function escHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+}
+
+// Mapeia body_part/target_muscle (tabela exercises) → IDs das regiões no SVG
+const MUSCLE_MAP = {
+    lats:        ['svg-costas-lat-e', 'svg-costas-lat-d'],
+    traps:       ['svg-trapezio'],
+    'upper back':['svg-costas-sup'],
+    spine:       ['svg-coluna'],
+    pectorals:   ['svg-peito-e', 'svg-peito-d'],
+    delts:       ['svg-ombro-e', 'svg-ombro-d'],
+    biceps:      ['svg-biceps-e', 'svg-biceps-d'],
+    triceps:     ['svg-triceps-e', 'svg-triceps-d'],
+    forearms:    ['svg-antebraco-e', 'svg-antebraco-d'],
+    quads:       ['svg-quad-e', 'svg-quad-d'],
+    hamstrings:  ['svg-posterior-e', 'svg-posterior-d'],
+    glutes:      ['svg-gluteo-e', 'svg-gluteo-d'],
+    abductors:   ['svg-abdutor-e', 'svg-abdutor-d'],
+    calves:      ['svg-panturrilha-e', 'svg-panturrilha-d'],
+    abs:         ['svg-abdomen'],
+    'cardiovascular system': ['svg-cardio'],
+};
+
+function calcularIntensidade(exercicios) {
+    const contagem = {};
+    exercicios.forEach(ex => {
+        if (!ex.concluido) return;
+        [ex.body_part, ex.target_muscle].forEach(m => {
+            if (!m) return;
+            const regioes = MUSCLE_MAP[m] || [];
+            regioes.forEach(r => { contagem[r] = (contagem[r] || 0) + 1; });
+        });
+    });
+    return contagem;
+}
+
+function colorirSVG(intensidade) {
+    const valores = Object.values(intensidade);
+    const maxVal = valores.length ? Math.max(...valores) : 1;
+    Object.entries(intensidade).forEach(([id, val]) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const pct = val / maxVal;
+        el.style.fill = `rgba(201, 139, 29, ${0.3 + pct * 0.7})`;
+        el.style.transition = 'fill 0.6s ease';
+    });
+}
+
+function formatarDuracao(min) {
+    if (min == null) return null;
+    const h = Math.floor(min / 60);
+    const m = min % 60;
+    if (h > 0) return m > 0 ? `${h}h${String(m).padStart(2, '0')}min` : `${h}h`;
+    return `${m}min`;
+}
+
+function formatarData(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    const hoje = new Date();
+    if (d.toDateString() === hoje.toDateString()) return 'Hoje';
+    const ontem = new Date(hoje);
+    ontem.setDate(ontem.getDate() - 1);
+    if (d.toDateString() === ontem.toDateString()) return 'Ontem';
+    return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+}
+
+function renderExercicio(ex) {
+    const nome = ex.name_pt || ex.name || ex.exercise_query;
+    const musculo = ex.target_muscle || ex.body_part;
+    const stats = `${ex.series_realizadas || 0} série${ex.series_realizadas === 1 ? '' : 's'}${ex.carga_usada ? ' · ' + escHtml(ex.carga_usada) : ''}`;
+    const gifHtml = ex.gif_url
+        ? `<img src="${escHtml(ex.gif_url)}" class="replay-ex-gif" alt="" loading="lazy">`
+        : `<span class="replay-ex-gif replay-ex-gif--vazio"><i class="fas fa-dumbbell"></i></span>`;
+
+    return `
+        <section class="replay-ex-card${ex.concluido ? '' : ' replay-ex-card--pendente'}">
+            ${gifHtml}
+            <section class="replay-ex-info">
+                <section class="replay-ex-nome">${escHtml(nome)}</section>
+                <section class="replay-ex-stats">${stats}</section>
+            </section>
+            ${musculo ? `<span class="replay-ex-musculo">${escHtml(translateMuscle(musculo))}</span>` : ''}
+        </section>`;
+}
+
+async function carregarReplay() {
+    try {
+        const data = await fetch(`/api/treinos/sessao/${SESSAO_ID}/replay`).then(r => r.json());
+        if (data.erro) throw new Error(data.erro);
+
+        REPLAY_SESSAO = data.sessao;
+
+        document.getElementById('replayTitulo').textContent = data.sessao.treino_nome || 'Treino';
+
+        const duracao = formatarDuracao(data.sessao.duracao_min);
+        const metaItens = [formatarData(data.sessao.finalizado_em)];
+        if (duracao) metaItens.push(duracao);
+        if (data.sessao.volume_total > 0) metaItens.push(`${data.sessao.volume_total}kg`);
+        document.getElementById('replayMeta').textContent = metaItens.filter(Boolean).join(' · ');
+
+        const intensidade = calcularIntensidade(data.exercicios);
+        colorirSVG(intensidade);
+
+        const lista = document.getElementById('replayExercicios');
+        lista.innerHTML = data.exercicios.length
+            ? data.exercicios.map(renderExercicio).join('')
+            : '<p style="color:#666;font-size:0.85rem;text-align:center">Nenhum exercício registrado nessa sessão.</p>';
+
+        document.getElementById('replayLoading').style.display = 'none';
+        document.getElementById('replayContent').style.display = 'block';
+    } catch (_) {
+        document.getElementById('replayLoading').style.display = 'none';
+        document.getElementById('replayErro').style.display = 'block';
+    }
+}
+carregarReplay();
+
+document.getElementById('btnCompartilharFeed')?.addEventListener('click', async () => {
+    if (!window.abrirModalCompartilhar || !REPLAY_SESSAO) return;
+    await window.abrirModalCompartilhar({
+        tipo: 'treino',
+        ref_id: SESSAO_ID,
+        ref_tipo: 'treino_sessao',
+        payload: {
+            treino_nome: REPLAY_SESSAO.treino_nome,
+            total_exercicios: REPLAY_SESSAO.total_exercicios,
+        },
+    });
+});
+
+document.getElementById('btnCompartilharStories')?.addEventListener('click', () => {
+    window.location.href = '/feed?criar_story=1';
+});
+</script>
+
+</body>
+</html>

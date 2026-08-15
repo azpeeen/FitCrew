@@ -1,0 +1,45 @@
+{
+  "name": "FitCrew",
+  "short_name": "FitCrew",
+  "description": "FitCrew — Sua plataforma fitness",
+  "start_url": "/",
+  "id": "/",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#FFD700",
+  "orientation": "any",
+  "shortcuts": [
+    {
+      "name": "Meus Treinos",
+      "short_name": "Treinos",
+      "url": "/treinos",
+      "icons": [{ "src": "/images/logo.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Nutrição",
+      "short_name": "Nutrição",
+      "url": "/nutricao",
+      "icons": [{ "src": "/images/logo.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Conquistas",
+      "short_name": "Conquistas",
+      "url": "/conquistas",
+      "icons": [{ "src": "/images/logo.png", "sizes": "192x192" }]
+    }
+  ],
+  "icons": [
+    {
+      "src": "/images/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

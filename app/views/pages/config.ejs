@@ -1,0 +1,694 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<%- include('../partials/seo') %>
+<link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+<link rel="stylesheet" href="/css/header.css">
+<link rel="stylesheet" href="/css/footer.css">
+<link rel="stylesheet" href="/css/area-aluno.css">
+<link rel="stylesheet" href="/css/config.css">
+</head>
+<body>
+
+<%- include('../partials/header-aluno') %>
+
+<section class="aluno-dashboard">
+    <section class="sidebar-overlay" id="sidebarOverlay"></section>
+
+    <!-- SIDEBAR -->
+    <section class="aluno-sidebar">
+        <section class="aluno-profile">
+            <section class="avatar">
+                <img id="sidebar-avatar" src="<%= user.profile_photo || '/images/avatar.png' %>" alt="Avatar do Aluno">
+            </section>
+            <h2><%= user.nome %></h2>
+            <p data-translate="sidebar.role">Aluno FitCrew</p>
+        </section>
+        <ul class="aluno-menu">
+            <li class="menu-section-label">Principal</li>
+            <li><a href="/feed"><i class="fas fa-home"></i> Feed</a></li>
+            <li><a href="/metricas"><i class="fas fa-tachometer-alt"></i> Minhas Métricas</a></li>
+
+            <li class="menu-section-label">Social</li>
+            <li><a href="/amizades"><i class="fas fa-user-friends"></i> Amigos</a></li>
+            <li><a href="/chat"><i class="fas fa-comment"></i> Mensagens</a></li>
+            <li><a href="/buscar"><i class="fas fa-search"></i> Buscar pessoas</a></li>
+            <li><a href="/gymsquads"><i class="fas fa-medal"></i> GymSquads</a></li>
+
+            <li class="menu-section-label">Treino</li>
+            <li><a href="/treinos" data-translate="sidebar.treinos"><i class="fas fa-dumbbell"></i> Meus Treinos</a></li>
+            <li><a href="/evolucao" data-translate="sidebar.evolucao"><i class="fas fa-chart-line"></i> Evolução</a></li>
+
+            <li class="menu-section-label">Saúde</li>
+            <li><a href="/nutricao" data-translate="sidebar.nutricao"><i class="fas fa-utensils"></i> Nutrição</a></li>
+            <li><a href="/imc-form"><i class="fas fa-clipboard-list"></i> Medidas</a></li>
+
+            <li class="menu-section-label">IA</li>
+            <% if (user && (user.planoSlug === 'gymbro' || user.planoSlug === 'black')) { %>
+            <li><a href="/ai/chat" data-translate="sidebar.ai"><i class="fas fa-robot"></i> Personal Trainer IA</a></li>
+            <% } else { %>
+            <li><a href="/meu-plano?upgrade=1" class="menu-locked" data-translate="sidebar.ai"><i class="fas fa-robot"></i> Personal Trainer IA 🔒</a></li>
+            <% } %>
+            <% if (user && user.planoSlug === 'black') { %>
+            <li><a href="/ai/avaliacao" data-translate="sidebar.avaliacao"><i class="fas fa-camera"></i> Avaliação Corporal</a></li>
+            <% } else { %>
+            <li><a href="/meu-plano?upgrade=1" class="menu-locked" data-translate="sidebar.avaliacao"><i class="fas fa-camera"></i> Avaliação Corporal 🔒</a></li>
+            <% } %>
+
+            <li class="menu-section-label">Academia</li>
+            <li class="sidebar-scan-item"><a href="/scan"><i class="fas fa-qrcode"></i> Check-in / Scan</a></li>
+            <li><a href="/suporte" data-translate="sidebar.suporte"><i class="fas fa-headset"></i> Suporte</a></li>
+
+            <li class="menu-section-label">Conta</li>
+            <li><a href="/perfil/<%= user.username || user.id %>"><i class="fas fa-user-circle"></i> Meu Perfil</a></li>
+            <li><a href="/conquistas" data-translate="sidebar.conquistas"><i class="fas fa-trophy"></i> Conquistas</a></li>
+            <li><a href="/meu-plano" data-translate="sidebar.plano"><i class="fas fa-file-alt"></i> Meu Plano</a></li>
+            <li><a href="/config" class="active" data-translate="sidebar.config"><i class="fas fa-cog"></i> Configurações</a></li>
+            <li>
+                <button class="sidebar-logout-btn" type="button">
+                    <i class="fas fa-sign-out-alt"></i> Sair da conta
+                </button>
+            </li>
+        </ul>
+    </section>
+
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <section class="aluno-main">
+        <section class="dashboard-top">
+            <h1 data-i18n="config.title">Configurações</h1>
+            <p data-i18n="config.subtitle">Gerencie seu perfil, segurança e preferências</p>
+        </section>
+
+        <section class="cfg-grid">
+
+            <!-- ── CARD PERFIL ──────────────────────────────── -->
+            <section class="cfg-card" id="cfg-perfil">
+                <header class="cfg-card-header">
+                    <span class="cfg-card-icon"><i class="fas fa-user"></i></span>
+                    <h2 data-i18n="config.profile">Perfil</h2>
+                </header>
+
+                <!-- Preview atual + link para editar -->
+                <section class="cfg-avatar-wrap" style="flex-direction:row;align-items:center;gap:16px;">
+                    <img src="<%= user.profile_photo || '/images/avatar.png' %>"
+                         style="width:56px;height:56px;border-radius:50%;border:2px solid #FFD700;object-fit:cover;flex-shrink:0"
+                         alt="Foto de perfil">
+                    <section>
+                        <p style="font-weight:700;margin:0;color:#fff"><%= user.nome %></p>
+                        <p style="font-size:0.8rem;color:#888;margin:4px 0 0">Foto, nome, bio, Instagram e medalhas</p>
+                    </section>
+                </section>
+                <a href="/perfil/editar" class="cfg-btn cfg-btn-gold" style="text-decoration:none;display:inline-flex;align-items:center;gap:8px;">
+                    <i class="fas fa-user-edit"></i> Editar perfil público
+                </a>
+
+                <!-- E-mail -->
+                <form id="form-dados" class="cfg-form" style="margin-top:8px;padding-top:20px;border-top:1px solid #2a2a2a;">
+                    <section class="cfg-field">
+                        <label for="cfg-email">E-mail</label>
+                        <input type="email" id="cfg-email" name="email" value="<%= user.email %>" required>
+                    </section>
+                    <button type="submit" class="cfg-btn cfg-btn-gold">
+                        <i class="fas fa-save"></i> <span class="cfg-btn-text" data-i18n="config.save.changes">Salvar e-mail</span>
+                    </button>
+                    <p class="cfg-feedback" id="cfg-dados-msg"></p>
+                </form>
+            </section>
+
+            <!-- ── CARD SEGURANÇA ───────────────────────────── -->
+            <section class="cfg-card" id="cfg-seguranca">
+                <header class="cfg-card-header">
+                    <span class="cfg-card-icon"><i class="fas fa-lock"></i></span>
+                    <h2 data-i18n="config.security">Segurança</h2>
+                </header>
+
+                <form id="form-senha" class="cfg-form">
+                    <section class="cfg-field">
+                        <label for="cfg-senha-atual">Senha atual</label>
+                        <section class="cfg-input-wrap">
+                            <input type="password" id="cfg-senha-atual" name="senhaAtual" required autocomplete="current-password">
+                            <button type="button" class="cfg-eye" data-target="cfg-senha-atual"><i class="fas fa-eye"></i></button>
+                        </section>
+                    </section>
+                    <section class="cfg-field">
+                        <label for="cfg-nova-senha">Nova senha</label>
+                        <section class="cfg-input-wrap">
+                            <input type="password" id="cfg-nova-senha" name="novaSenha" required autocomplete="new-password" minlength="6">
+                            <button type="button" class="cfg-eye" data-target="cfg-nova-senha"><i class="fas fa-eye"></i></button>
+                        </section>
+                    </section>
+                    <section class="cfg-field">
+                        <label for="cfg-confirma-senha">Confirmar nova senha</label>
+                        <section class="cfg-input-wrap">
+                            <input type="password" id="cfg-confirma-senha" name="confirmarSenha" required autocomplete="new-password" minlength="6">
+                            <button type="button" class="cfg-eye" data-target="cfg-confirma-senha"><i class="fas fa-eye"></i></button>
+                        </section>
+                    </section>
+                    <button type="submit" class="cfg-btn cfg-btn-outline">
+                        <i class="fas fa-key"></i> <span class="cfg-btn-text" data-i18n="config.change.pass">Alterar senha</span>
+                    </button>
+                    <p class="cfg-feedback" id="cfg-senha-msg"></p>
+                </form>
+            </section>
+
+            <!-- ── CARD PREFERÊNCIAS ────────────────────────── -->
+            <section class="cfg-card" id="cfg-prefs">
+                <header class="cfg-card-header">
+                    <span class="cfg-card-icon"><i class="fas fa-sliders-h"></i></span>
+                    <h2 data-i18n="config.prefs">Preferências</h2>
+                </header>
+
+                <section class="cfg-pref-list">
+                    <section class="cfg-pref-row">
+                        <section class="cfg-pref-info">
+                            <strong>Tema</strong>
+                            <span>Aparência escura ou clara da interface</span>
+                        </section>
+                        <button class="cfg-toggle" id="pref-theme" aria-label="Alternar tema">
+                            <span class="cfg-toggle-knob"></span>
+                        </button>
+                    </section>
+
+                    <section class="cfg-pref-row">
+                        <section class="cfg-pref-info">
+                            <strong>Idioma</strong>
+                            <span>Português, English ou Español</span>
+                        </section>
+                        <select class="cfg-select" id="pref-lang">
+                            <option value="pt">🇧🇷 Português</option>
+                            <option value="en">🇺🇸 English</option>
+                            <option value="es">🇪🇸 Español</option>
+                        </select>
+                    </section>
+
+                    <section class="cfg-pref-row">
+                        <section class="cfg-pref-info">
+                            <strong>Notificações push</strong>
+                            <span>Avisos de promoções e novidades</span>
+                        </section>
+                        <button class="cfg-toggle" id="pref-notif" aria-label="Alternar notificações">
+                            <span class="cfg-toggle-knob"></span>
+                        </button>
+                    </section>
+                </section>
+
+            </section>
+
+            <!-- ── CARD NOTIFICAÇÕES ────────────────────────── -->
+            <section class="cfg-card" id="cfg-notificacoes">
+                <header class="cfg-card-header">
+                    <span class="cfg-card-icon"><i class="fas fa-bell"></i></span>
+                    <h2 data-i18n="config.notifications">Notificações</h2>
+                </header>
+
+                <p class="cfg-card-desc">Com que frequência você quer ser lembrado de atualizar seu perfil IMC e fazer avaliação corporal?</p>
+
+                <section class="cfg-pref-list">
+                    <section class="cfg-pref-row">
+                        <section class="cfg-pref-info">
+                            <strong>Notificações push</strong>
+                            <span>Treino, check-in e dicas diretamente no dispositivo</span>
+                        </section>
+                        <button class="cfg-toggle" id="pref-push" aria-label="Ativar notificações push">
+                            <span class="cfg-toggle-knob"></span>
+                        </button>
+                    </section>
+                    <p class="cfg-feedback" id="pushFeedback" style="margin-top:.4rem"></p>
+                    <section class="cfg-pref-row">
+                        <section class="cfg-pref-info">
+                            <strong>Intervalo de lembretes</strong>
+                            <span>Banners na área do aluno</span>
+                        </section>
+                        <select class="cfg-select" id="notifIntervalo" name="dias">
+                            <option value="3"   <%= (user.notification_interval_days == 3)                                          ? 'selected' : '' %>>A cada 3 dias</option>
+                            <option value="7"   <%= (user.notification_interval_days == 7 || !user.notification_interval_days)      ? 'selected' : '' %>>A cada 7 dias (padrão)</option>
+                            <option value="14"  <%= (user.notification_interval_days == 14)                                         ? 'selected' : '' %>>A cada 2 semanas</option>
+                            <option value="30"  <%= (user.notification_interval_days == 30)                                         ? 'selected' : '' %>>A cada mês</option>
+                            <option value="999" <%= (user.notification_interval_days == 999)                                        ? 'selected' : '' %>>Nunca</option>
+                        </select>
+                    </section>
+                </section>
+
+                <button type="button" class="cfg-btn cfg-btn-gold" id="btnSalvarNotif">
+                    <i class="fas fa-save"></i> <span class="cfg-btn-text" data-i18n="config.save.btn">Salvar</span>
+                </button>
+                <p class="cfg-feedback" id="notifFeedback"></p>
+            </section>
+
+            <!-- ── CARD LEMBRETES ───────────────────────────── -->
+            <section class="cfg-card" id="cfg-lembretes">
+                <header class="cfg-card-header">
+                    <span class="cfg-card-icon"><i class="fas fa-bell"></i></span>
+                    <h2 data-i18n="config.reminders">Lembretes</h2>
+                </header>
+
+                <p class="cfg-card-desc">Notificações push agendadas no seu dispositivo. Requer permissão de notificação ativada.</p>
+
+                <section class="cfg-pref-list">
+
+                    <!-- Água -->
+                    <section class="cfg-pref-row">
+                        <section class="cfg-pref-info">
+                            <strong>💧 <span data-i18n="config.water">Lembrete de água</span></strong>
+                            <span>Notificação periódica para se hidratar</span>
+                        </section>
+                        <button class="cfg-toggle" id="pref-agua" aria-label="Ativar lembrete de água">
+                            <span class="cfg-toggle-knob"></span>
+                        </button>
+                    </section>
+                    <section class="cfg-pref-sub" id="agua-sub">
+                        <label for="agua-intervalo">Intervalo</label>
+                        <select class="cfg-select" id="agua-intervalo">
+                            <option value="1">A cada 1 hora</option>
+                            <option value="2">A cada 2 horas (padrão)</option>
+                            <option value="3">A cada 3 horas</option>
+                            <option value="4">A cada 4 horas</option>
+                        </select>
+                    </section>
+
+                    <!-- Sono -->
+                    <section class="cfg-pref-row">
+                        <section class="cfg-pref-info">
+                            <strong>😴 <span data-i18n="config.sleep">Lembrete de sono</span></strong>
+                            <span>Notificação no horário de dormir</span>
+                        </section>
+                        <button class="cfg-toggle" id="pref-sono" aria-label="Ativar lembrete de sono">
+                            <span class="cfg-toggle-knob"></span>
+                        </button>
+                    </section>
+                    <section class="cfg-pref-sub" id="sono-sub">
+                        <label for="sono-horario">Horário</label>
+                        <input type="time" class="cfg-select" id="sono-horario" value="22:30">
+                    </section>
+
+                </section>
+
+                <button type="button" class="cfg-btn cfg-btn-gold" id="btnSalvarLembretes">
+                    <i class="fas fa-save"></i> <span class="cfg-btn-text" data-i18n="config.save.reminders">Salvar lembretes</span>
+                </button>
+                <p class="cfg-feedback" id="lembretesFeedback"></p>
+            </section>
+
+            <!-- ── CARD SEGURANÇA AVANÇADA ─────────────────── -->
+            <section class="cfg-card" id="cfg-avancado">
+                <header class="cfg-card-header">
+                    <span class="cfg-card-icon"><i class="fas fa-shield-halved"></i></span>
+                    <h2>Segurança Avançada</h2>
+                </header>
+
+                <!-- Biometria -->
+                <section class="cfg-avancado-row">
+                    <section class="cfg-avancado-info">
+                        <section class="cfg-avancado-titulo">
+                            <i class="fas fa-fingerprint" style="color:#FFD700"></i>
+                            <strong>Login por Biometria</strong>
+                        </section>
+                        <p class="cfg-card-desc" style="margin:4px 0 0">
+                            Use a digital ou Face ID para confirmar ações sensíveis no app.
+                        </p>
+                    </section>
+                    <section id="bio-status">
+                        <% if (user.webauthn_enabled) { %>
+                        <section class="bio-ativo">
+                            <i class="fas fa-circle-check" style="color:#22c55e"></i>
+                            Ativa
+                        </section>
+                        <button class="btn-bio-remover" type="button">
+                            <i class="fas fa-trash"></i> Remover
+                        </button>
+                        <% } else { %>
+                        <button class="btn-bio-cadastrar" type="button">
+                            <i class="fas fa-fingerprint"></i> Cadastrar biometria
+                        </button>
+                        <% } %>
+                    </section>
+                </section>
+
+                <!-- Divisor -->
+                <section style="border-top: 1px solid rgba(231,76,60,.15); margin: 20px 0;"></section>
+
+                <!-- Excluir conta -->
+                <section class="cfg-avancado-row">
+                    <section class="cfg-avancado-info">
+                        <section class="cfg-avancado-titulo">
+                            <i class="fas fa-triangle-exclamation" style="color:#e74c3c"></i>
+                            <strong style="color:#e74c3c">Excluir conta</strong>
+                        </section>
+                        <p class="cfg-card-desc" style="margin:4px 0 0">
+                            Sua conta ficará agendada para remoção em <strong>30 dias</strong>.
+                            Você pode cancelar fazendo login durante esse período.
+                        </p>
+                    </section>
+                    <section>
+                        <% if (user.status === 'pendente_exclusao') { %>
+                        <section style="font-size:.8rem;color:#e74c3c;margin-bottom:8px;">
+                            <i class="fas fa-clock"></i>
+                            <strong><%= user.diasRestantesExclusao ?? 30 %> dia(s) restante(s)</strong>
+                        </section>
+                        <button class="btn-excluir-conta js-cancelar-exclusao" style="border-color:rgba(34,197,94,.4);color:#22c55e" type="button">
+                            <i class="fas fa-rotate-left"></i> Cancelar exclusão
+                        </button>
+                        <% } else { %>
+                        <button class="btn-excluir-conta js-abrir-exclusao" type="button">
+                            <i class="fas fa-trash-alt"></i> Excluir minha conta
+                        </button>
+                        <% } %>
+                    </section>
+                </section>
+            </section>
+
+        </section><!-- /cfg-grid -->
+
+    </section>
+</section>
+
+<!-- ── MODAL DE EXCLUSÃO ──────────────────────────────────────── -->
+<section class="modal-exclusao-overlay" id="modalExclusao">
+    <section class="modal-exclusao-box">
+        <h3 class="modal-exclusao-title">
+            <i class="fas fa-triangle-exclamation"></i>
+            Excluir conta
+        </h3>
+
+        <section id="aviso-plano" style="display:none" class="modal-exclusao-aviso"></section>
+
+        <p class="modal-exclusao-desc">
+            Sua conta será agendada para exclusão em <strong>30 dias</strong>.
+            Você pode cancelar fazendo login durante esse período.
+        </p>
+        <p class="modal-exclusao-desc" style="color:#e74c3c;font-size:.82rem;">
+            Todos os seus dados pessoais serão removidos permanentemente após 30 dias.
+        </p>
+
+        <section class="modal-exclusao-confirmacao">
+            <p style="font-size:.82rem;color:#888;margin-bottom:12px;">
+                Confirme sua identidade para prosseguir:
+            </p>
+            <section class="modal-exclusao-metodos">
+                <% if (user.webauthn_enabled) { %>
+                <button class="btn-confirmar-bio" type="button">
+                    <i class="fas fa-fingerprint"></i> Usar biometria
+                </button>
+                <% } %>
+                <section class="modal-exclusao-senha">
+                    <input type="password" id="senha-exclusao" class="cfg-field input"
+                           placeholder="Ou digite sua senha"
+                           style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid #333;background:#141414;color:#fff;font-size:.9rem;">
+                </section>
+            </section>
+        </section>
+
+        <section class="modal-exclusao-btns">
+            <button class="btn-cancelar-modal" type="button">Cancelar</button>
+            <button class="btn-confirmar-exclusao" type="button">
+                <i class="fas fa-trash-alt"></i> Excluir conta
+            </button>
+        </section>
+    </section>
+</section>
+
+<%- include('../partials/footer') %>
+<script src="/js/config.js"></script>
+<script>
+// ── Wiring dos botões (sem onclick inline — CSP) ─────────────────────────────
+document.querySelector('.btn-bio-remover')?.addEventListener('click', () => removerBiometria());
+document.querySelector('.btn-bio-cadastrar')?.addEventListener('click', () => cadastrarBiometria());
+document.querySelector('.js-cancelar-exclusao')?.addEventListener('click', () => cancelarExclusao());
+document.querySelector('.js-abrir-exclusao')?.addEventListener('click', () => abrirModalExclusao());
+document.querySelector('.btn-confirmar-bio')?.addEventListener('click', () => confirmarExclusaoBio());
+document.querySelector('.btn-cancelar-modal')?.addEventListener('click', () => fecharModalExclusao());
+document.querySelector('.btn-confirmar-exclusao')?.addEventListener('click', () => confirmarExclusaoSenha());
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+function showToast(msg, tipo = 'info') {
+    const cores = { info: '#FFD700', erro: '#e74c3c', sucesso: '#22c55e' };
+    const toast = document.createElement('section');
+    toast.style.cssText = `
+        position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+        background:#1f1f1f;border:1px solid ${cores[tipo]};
+        color:#fff;padding:14px 22px;border-radius:10px;
+        font-size:.88rem;font-weight:600;z-index:999999;
+        box-shadow:0 8px 32px rgba(0,0,0,.5);max-width:340px;
+        text-align:center;animation:fadeIn .2s ease;
+    `;
+    toast.textContent = msg;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3500);
+}
+
+// ── Mini confirm (substitui confirm() nativo) ─────────────────────────────────
+function showConfirm(msg, onConfirm) {
+    const overlay = document.createElement('section');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:999998;display:flex;align-items:center;justify-content:center;';
+    overlay.innerHTML = `
+        <section style="background:#1f1f1f;border:1px solid #333;border-radius:14px;padding:28px 24px;max-width:320px;width:90%;text-align:center;">
+            <p style="font-size:.92rem;color:#fff;margin:0 0 20px;line-height:1.5;">${msg}</p>
+            <section style="display:flex;gap:10px;justify-content:center;">
+                <button id="mc-cancel" style="padding:9px 20px;border-radius:8px;border:1px solid #444;background:transparent;color:#aaa;font-size:.85rem;cursor:pointer;">Cancelar</button>
+                <button id="mc-ok"     style="padding:9px 20px;border-radius:8px;border:none;background:#e74c3c;color:#fff;font-size:.85rem;font-weight:700;cursor:pointer;">Confirmar</button>
+            </section>
+        </section>`;
+    document.body.appendChild(overlay);
+    overlay.querySelector('#mc-cancel').onclick = () => overlay.remove();
+    overlay.querySelector('#mc-ok').onclick     = () => { overlay.remove(); onConfirm(); };
+}
+
+// ── Cadastrar biometria ───────────────────────────────────────────────────────
+async function cadastrarBiometria() {
+    if (!window.PublicKeyCredential) {
+        showToast('Seu dispositivo não suporta autenticação biométrica.', 'erro');
+        return;
+    }
+    try {
+        const opcoesRes = await fetch('/api/webauthn/registro/opcoes');
+        const opcoes    = await opcoesRes.json();
+        if (opcoes.erro) { showToast(opcoes.erro, 'erro'); return; }
+
+        opcoes.challenge = base64ToBuffer(opcoes.challenge);
+        opcoes.user.id   = base64ToBuffer(opcoes.user.id);
+        if (opcoes.excludeCredentials) {
+            opcoes.excludeCredentials = opcoes.excludeCredentials.map(c => ({
+                ...c, id: base64ToBuffer(c.id)
+            }));
+        }
+
+        const credential = await navigator.credentials.create({ publicKey: opcoes });
+        const credJSON   = credentialToJSON(credential);
+
+        const verRes  = await fetch('/api/webauthn/registro/verificar', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify(credJSON),
+        });
+        const verData = await verRes.json();
+        if (verData.ok) {
+            showToast('Biometria cadastrada com sucesso!', 'sucesso');
+            setTimeout(() => location.reload(), 1200);
+        } else {
+            showToast(verData.erro || 'Falha no registro.', 'erro');
+        }
+    } catch (err) {
+        console.error(err);
+        const msg = err.name === 'NotAllowedError'
+            ? 'Biometria não reconhecida. Mantenha o dedo por mais tempo e tente novamente.'
+            : err.name === 'InvalidStateError'
+            ? 'Esta biometria já está cadastrada neste dispositivo.'
+            : err.name === 'NotSupportedError'
+            ? 'Seu dispositivo não suporta autenticação biométrica.'
+            : err.name === 'SecurityError'
+            ? 'Erro de segurança. Certifique-se de estar acessando via HTTPS.'
+            : err.name === 'AbortError'
+            ? 'Autenticação cancelada. Tente novamente.'
+            : err.name === 'UnknownError'
+            ? 'Erro desconhecido. Tente manter o dedo sobre o sensor por mais tempo.'
+            : 'Erro ao cadastrar biometria. Tente novamente.';
+        showToast(msg, 'erro');
+    }
+}
+
+// ── Remover biometria ─────────────────────────────────────────────────────────
+function removerBiometria() {
+    showConfirm('Deseja remover a biometria deste dispositivo?', async () => {
+        try {
+            const res  = await fetch('/api/webauthn/registro/remover', { method: 'POST' });
+            const data = await res.json();
+            if (data.ok) {
+                showToast('Biometria removida.', 'sucesso');
+                setTimeout(() => location.reload(), 1200);
+            } else {
+                showToast(data.erro || 'Erro ao remover biometria.', 'erro');
+            }
+        } catch (err) { showToast('Erro: ' + err.message, 'erro'); }
+    });
+}
+
+// ── Modal de exclusão ─────────────────────────────────────────────────────────
+async function abrirModalExclusao() {
+    document.getElementById('modalExclusao').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    try {
+        const res  = await fetch('/api/conta/info-exclusao');
+        const data = await res.json();
+        const aviso = document.getElementById('aviso-plano');
+        if (data.temPlanoAtivo) {
+            const expira = data.planoExpira
+                ? new Date(data.planoExpira).toLocaleDateString('pt-BR')
+                : 'data não definida';
+            aviso.innerHTML = `<i class="fas fa-info-circle"></i><span>Você tem o plano <strong>${data.planoNome}</strong> ativo até <strong>${expira}</strong>. Ao excluir, perderá o acesso imediatamente. Não haverá reembolso proporcional.</span>`;
+            aviso.style.display = 'flex';
+        }
+    } catch (_) {}
+}
+
+function fecharModalExclusao() {
+    document.getElementById('modalExclusao').classList.remove('open');
+    document.body.style.overflow = '';
+}
+
+async function confirmarExclusaoSenha() {
+    const senha = document.getElementById('senha-exclusao').value;
+    if (!senha) { showToast('Digite sua senha para confirmar.', 'erro'); return; }
+    await solicitarExclusao({ senha });
+}
+
+async function confirmarExclusaoBio() {
+    try {
+        const opcoesRes = await fetch('/api/webauthn/auth/opcoes');
+        const opcoes    = await opcoesRes.json();
+        if (opcoes.erro) { showToast(opcoes.erro, 'erro'); return; }
+        opcoes.challenge = base64ToBuffer(opcoes.challenge);
+        if (opcoes.allowCredentials) {
+            opcoes.allowCredentials = opcoes.allowCredentials.map(c => ({
+                ...c, id: base64ToBuffer(c.id)
+            }));
+        }
+        const assertion  = await navigator.credentials.get({ publicKey: opcoes });
+        const assertJSON = credentialToJSON(assertion);
+        const verRes  = await fetch('/api/webauthn/auth/verificar', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify(assertJSON),
+        });
+        const verData = await verRes.json();
+        if (!verData.ok) { showToast('Verificação biométrica falhou.', 'erro'); return; }
+        await solicitarExclusao({ webauthn_verificado: true });
+    } catch (err) {
+        const msg = err.name === 'NotAllowedError'
+            ? 'Digital não reconhecida. Mantenha o dedo por mais tempo.'
+            : err.name === 'AbortError'
+            ? 'Verificação cancelada.'
+            : 'Erro na biometria. Tente novamente.';
+        showToast(msg, 'erro');
+    }
+}
+
+async function solicitarExclusao(payload) {
+    const btn = document.querySelector('.btn-confirmar-exclusao');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Aguarde...'; }
+    try {
+        const res  = await fetch('/api/conta/solicitar-exclusao', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify(payload),
+        });
+        const data = await res.json();
+        if (data.ok) {
+            fecharModalExclusao();
+            showToast('Conta agendada para exclusão em 30 dias. Você pode cancelar fazendo login.', 'info');
+            setTimeout(() => { location.href = '/logout'; }, 2500);
+        } else {
+            if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-trash-alt"></i> Excluir conta'; }
+            showToast(data.erro || 'Erro ao solicitar exclusão.', 'erro');
+        }
+    } catch (err) {
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-trash-alt"></i> Excluir conta'; }
+        showToast('Erro: ' + err.message, 'erro');
+    }
+}
+
+async function cancelarExclusao() {
+    const btns = document.querySelectorAll('.js-cancelar-exclusao');
+    btns.forEach(b => { b.disabled = true; b.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Aguarde...'; });
+    try {
+        const res  = await fetch('/api/conta/cancelar-exclusao', { method: 'POST' });
+        const data = await res.json();
+        if (data.ok) {
+            showToast('Que bom ter você de volta, <%= user.nome.split(" ")[0] %>! 🎉 Sua conta está ativa.', 'sucesso');
+            setTimeout(() => location.reload(), 2800);
+        } else {
+            btns.forEach(b => { b.disabled = false; b.innerHTML = '<i class="fas fa-rotate-left"></i> Cancelar exclusão'; });
+            showToast('Erro ao cancelar exclusão.', 'erro');
+        }
+    } catch (err) {
+        btns.forEach(b => { b.disabled = false; b.innerHTML = '<i class="fas fa-rotate-left"></i> Cancelar exclusão'; });
+        showToast('Erro ao cancelar exclusão.', 'erro');
+    }
+}
+
+// ── Helpers WebAuthn ──────────────────────────────────────────────────────────
+function base64ToBuffer(base64) {
+    const b = base64.replace(/-/g, '+').replace(/_/g, '/');
+    const binary = atob(b);
+    const buffer = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) buffer[i] = binary.charCodeAt(i);
+    return buffer.buffer;
+}
+
+function bufferToBase64(buffer) {
+    const bytes = new Uint8Array(buffer);
+    let binary  = '';
+    for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+}
+
+function credentialToJSON(credential) {
+    const response = {};
+
+    if (credential.response) {
+        const proto = Object.getPrototypeOf(credential.response);
+        const keys  = Object.getOwnPropertyNames(proto).filter(k => k !== 'constructor');
+
+        for (const key of keys) {
+            try {
+                const val = credential.response[key];
+                if (typeof val === 'function') continue;
+                if (val instanceof ArrayBuffer) {
+                    response[key] = bufferToBase64(val);
+                } else if (val !== undefined && val !== null) {
+                    response[key] = val;
+                }
+            } catch (_) {}
+        }
+
+        // Garantir campos obrigatórios em todos os browsers/dispositivos
+        const campos = ['clientDataJSON','attestationObject','authenticatorData','signature','userHandle'];
+        for (const campo of campos) {
+            try {
+                const val = credential.response[campo];
+                if (val instanceof ArrayBuffer && !response[campo]) {
+                    response[campo] = bufferToBase64(val);
+                }
+            } catch (_) {}
+        }
+    }
+
+    return {
+        id:                    credential.id,
+        rawId:                 bufferToBase64(credential.rawId),
+        type:                  credential.type,
+        response,
+        clientExtensionResults: credential.getClientExtensionResults?.() || {},
+    };
+}
+
+// Fechar modal ao clicar fora
+document.getElementById('modalExclusao')?.addEventListener('click', function(e) {
+    if (e.target === this) fecharModalExclusao();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,439 @@
+/* ==============================
+   ACADEMIAS — GYMBROS
+   ============================== */
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background: #121212;
+    color: #fff;
+}
+
+main.academias-main {
+    flex: 1;
+}
+
+/* HERO */
+.acad-hero {
+    text-align: center;
+    padding: 3rem 1.5rem 2rem;
+    background: linear-gradient(180deg, #1a1a1a 0%, #121212 100%);
+}
+
+.acad-hero-title {
+    font-size: 2.6rem;
+    font-weight: 800;
+    color: #FFD700;
+    margin-bottom: 0.5rem;
+}
+
+.acad-hero-title i { margin-right: 0.4rem; }
+
+.acad-hero-sub {
+    color: #999;
+    font-size: 1.1rem;
+    margin-bottom: 1.8rem;
+}
+
+/* BARRA DE BUSCA */
+.acad-search-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.btn-geo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #FFD700;
+    color: #1a1a1a;
+    border: none;
+    border-radius: 10px;
+    padding: 0.75rem 1.5rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+}
+
+.btn-geo:hover {
+    background: #e6c200;
+    transform: scale(1.04);
+}
+
+.acad-ou {
+    color: #555;
+    font-size: 0.9rem;
+}
+
+.acad-cep-wrap {
+    display: flex;
+    gap: 0;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1.5px solid #333;
+}
+
+.acad-cep-input {
+    background: #1f1f1f;
+    border: none;
+    color: #fff;
+    padding: 0.7rem 1.1rem;
+    font-size: 1.05rem;
+    outline: none;
+    width: 200px;
+}
+
+.acad-cep-input::placeholder { color: #555; }
+
+.btn-cep-search {
+    background: #333;
+    border: none;
+    color: #FFD700;
+    padding: 0 1rem;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background 0.2s;
+}
+
+.btn-cep-search:hover { background: #444; }
+
+/* STATUS */
+.acad-status {
+    margin-top: 1rem;
+    font-size: 1rem;
+    color: #666;
+    min-height: 1.2em;
+}
+
+.acad-status-loading { color: #FFD700; }
+.acad-status-ok      { color: #81c784; }
+.acad-status-warn    { color: #ffb74d; }
+.acad-status-error   { color: #e57373; }
+
+/* MAPA */
+.acad-map-wrap {
+    width: 100%;
+    height: 450px;
+    border-top: 2px solid #222;
+    border-bottom: 2px solid #222;
+    position: relative;
+}
+
+#map {
+    width: 100%;
+    height: 100%;
+    background: #1a1a1a;
+}
+
+/* Marcadores personalizados */
+.gym-marker,
+.user-marker {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.6);
+}
+
+.gym-marker  { background: #FFD700; color: #1a1a1a; }
+.user-marker { background: #4fc3f7; color: #fff; }
+
+.leaflet-popup-content-wrapper {
+    background: #1f1f1f;
+    color: #fff;
+    border: 1px solid #333;
+    border-radius: 10px;
+}
+
+.leaflet-popup-tip { background: #1f1f1f; }
+
+/* SEÇÃO RESULTADOS */
+.acad-results-section,
+.acad-partners-section {
+    max-width: 1200px;
+    margin: 2.5rem auto;
+    padding: 0 1.5rem;
+}
+
+.acad-section-title {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #FFD700;
+    margin-bottom: 0.4rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.acad-section-sub {
+    color: #666;
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.acad-count-badge {
+    background: #FFD700;
+    color: #1a1a1a;
+    font-size: 0.78rem;
+    font-weight: 800;
+    padding: 0.1rem 0.55rem;
+    border-radius: 20px;
+    margin-left: 0.3rem;
+}
+
+/* GRID RESULTADOS OVERPASS */
+.acad-results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+    margin-top: 1.2rem;
+    margin-bottom: 1rem;
+}
+
+.acad-result-card {
+    background: #1f1f1f;
+    border-radius: 12px;
+    padding: 1.1rem 1.2rem;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    transition: transform 0.2s;
+    cursor: default;
+}
+
+.acad-result-card:hover { transform: translateY(-3px); }
+
+.arc-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: rgba(255,215,0,0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    color: #FFD700;
+    flex-shrink: 0;
+}
+
+.arc-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0;
+}
+
+.arc-detail {
+    font-size: 0.95rem;
+    color: #888;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0;
+}
+
+.arc-detail i { color: #555; width: 12px; }
+
+.arc-detail a { color: #4fc3f7; text-decoration: none; }
+.arc-detail a:hover { text-decoration: underline; }
+
+.arc-map-btn {
+    margin-top: auto;
+    background: #2a2a2a;
+    border: 1.5px solid #333;
+    border-radius: 8px;
+    color: #FFD700;
+    font-size: 0.95rem;
+    font-weight: 700;
+    padding: 0.45rem 0.9rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.arc-map-btn:hover {
+    background: #333;
+    border-color: #FFD700;
+}
+
+/* ==============================
+   PARCEIROS
+   ============================== */
+.academias-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.2rem;
+}
+
+.academia-card {
+    background: #1f1f1f;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+    transition: transform 0.22s, box-shadow 0.22s;
+    position: relative;
+}
+
+.academia-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(to right, #FFD700, #e6c200);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.25s ease;
+}
+
+.academia-card:hover::before { transform: scaleX(1); }
+
+.academia-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 14px 32px rgba(0,0,0,0.7);
+}
+
+.academia-imagem {
+    width: 100%;
+    height: 180px;
+    object-fit: contain;
+    background: #2a2a2a;
+    padding: 1.2rem;
+    display: block;
+    transition: transform 0.3s ease;
+}
+
+.academia-card:hover .academia-imagem { transform: scale(1.04); }
+
+.academia-info { padding: 1.4rem; }
+
+.presencial-badge {
+    display: inline-block;
+    background: rgba(255,215,0,0.15);
+    color: #FFD700;
+    padding: 0.3rem 1rem;
+    border-radius: 20px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.8rem;
+    text-transform: uppercase;
+}
+
+.academia-nome {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 0.6rem;
+}
+
+.academia-horario {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #888;
+    font-size: 1rem;
+    margin-bottom: 0.8rem;
+}
+
+.academia-horario i { color: #FFD700; }
+
+.academia-modalidade {
+    border-top: 1px solid #2a2a2a;
+    padding-top: 0.8rem;
+    margin-top: 0.8rem;
+}
+
+.academia-modalidade h3 {
+    font-size: 0.88rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #555;
+    margin-bottom: 0.4rem;
+}
+
+.academia-modalidade p {
+    font-size: 1rem;
+    color: #999;
+    line-height: 1.5;
+}
+
+/* RESPONSIVO */
+@media (max-width: 768px) {
+    .acad-hero-title { font-size: 1.9rem; }
+    .acad-map-wrap { height: 320px; }
+    .acad-results-grid { grid-template-columns: 1fr; }
+    .academias-grid { grid-template-columns: 1fr; }
+    .acad-search-bar { flex-direction: column; }
+    .acad-cep-wrap { width: 100%; }
+    .acad-cep-input { flex: 1; }
+}
+
+/* ==============================
+   PAINEL DE DETALHES DA ACADEMIA
+   ============================== */
+.academia-detalhes {
+    background: #1a1a1a;
+    border-top: 3px solid #FFD700;
+    border-bottom: 3px solid #FFD700;
+    padding: 24px 32px;
+}
+.academia-detalhes.hidden {
+    display: none;
+}
+.detalhes-inner {
+    max-width: 800px;
+    margin: 0 auto;
+    position: relative;
+}
+.detalhes-fechar {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: none;
+    border: 1px solid #444;
+    color: #aaa;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    transition: 0.2s;
+}
+.detalhes-fechar:hover { border-color: #FFD700; color: #FFD700; }
+#det-nome {
+    color: #FFD700;
+    font-size: 1.3rem;
+    font-weight: bold;
+    margin-bottom: 16px;
+    padding-right: 36px;
+}
+.detalhes-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 32px;
+}
+.det-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #ccc;
+    font-size: 0.9rem;
+}
+.det-item a { color: #FFD700; text-decoration: none; }
+.det-item a:hover { text-decoration: underline; }
+.det-icon { font-size: 1rem; }

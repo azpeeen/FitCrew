@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<%- include('../partials/seo') %>
+<link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+<link rel="stylesheet" href="/css/header.css">
+<link rel="stylesheet" href="/css/area-aluno.css">
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin><style>
+.scan-page {
+    position: fixed; inset: 0;
+    background: #000;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 100;
+}
+.scan-header {
+    position: absolute; top: 0; left: 0; right: 0;
+    display: flex; align-items: center; gap: 12px;
+    padding: 16px 20px;
+    background: linear-gradient(to bottom, rgba(0,0,0,.8), transparent);
+    z-index: 10;
+}
+.scan-back {
+    background: none; border: none; color: #fff;
+    font-size: 1.2rem; cursor: pointer; padding: 8px;
+}
+.scan-title { color: #fff; font-size: 1rem; font-weight: 700; }
+.scan-video {
+    width: 100%; height: 100%;
+    object-fit: cover;
+}
+.scan-overlay {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    pointer-events: none;
+}
+.scan-frame {
+    width: 260px; height: 260px;
+    border: 3px solid #FFD700;
+    border-radius: 20px;
+    box-shadow: 0 0 0 9999px rgba(0,0,0,.5);
+    position: relative;
+}
+.scan-frame::before {
+    content: '';
+    position: absolute; left: 0; right: 0;
+    height: 2px; background: #FFD700;
+    top: 50%;
+    animation: scanLine 2s ease-in-out infinite;
+    box-shadow: 0 0 8px #FFD700;
+}
+@keyframes scanLine {
+    0%   { top: 10%; }
+    50%  { top: 90%; }
+    100% { top: 10%; }
+}
+.scan-hint {
+    position: absolute; bottom: 60px;
+    color: #fff; font-size: .85rem; text-align: center;
+    background: rgba(0,0,0,.6); padding: 10px 20px;
+    border-radius: 20px; backdrop-filter: blur(4px);
+}
+.scan-erro {
+    position: absolute; bottom: 60px;
+    background: rgba(231,76,60,.9); color: #fff;
+    padding: 12px 20px; border-radius: 10px;
+    font-size: .85rem; display: none;
+}
+</style>
+</head>
+<body>
+<%- include('../partials/header-aluno') %>
+
+<section class="scan-page" id="scanPage">
+    <section class="scan-header">
+        <button class="scan-back" id="scanBack" type="button">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        <span class="scan-title">Escanear equipamento</span>
+    </section>
+
+    <video id="scanVideo" class="scan-video" playsinline autoplay muted></video>
+    <canvas id="scanCanvas" style="display:none"></canvas>
+
+    <section class="scan-overlay">
+        <section class="scan-frame"></section>
+    </section>
+
+    <section class="scan-hint" id="scanHint">
+        Aponte a câmera para o QR Code do equipamento
+    </section>
+    <section class="scan-erro" id="scanErro">
+        QR Code não reconhecido. Tente novamente.
+    </section>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+<script>
+let _scanning = true;
+let _stream   = null;
+
+document.getElementById('scanBack')?.addEventListener('click', () => history.back());
+
+function scanFrame() {
+    if (!_scanning) return;
+    const video  = document.getElementById('scanVideo');
+    const canvas = document.getElementById('scanCanvas');
+    if (video.readyState !== video.HAVE_ENOUGH_DATA) {
+        requestAnimationFrame(scanFrame);
+        return;
+    }
+    canvas.width  = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const code = jsQR(imageData.data, imageData.width, imageData.height, {
+        inversionAttempts: 'dontInvert',
+    });
+
+    if (code) {
+        const url = code.data;
+        if (url.includes('/equipamento/')) {
+            _scanning = false;
+            if (_stream) _stream.getTracks().forEach(t => t.stop());
+            if (navigator.vibrate) navigator.vibrate(200);
+            window.location.href = url;
+            return;
+        } else {
+            const erroEl = document.getElementById('scanErro');
+            erroEl.style.display = 'block';
+            setTimeout(() => { erroEl.style.display = 'none'; }, 1500);
+        }
+    }
+    requestAnimationFrame(scanFrame);
+}
+
+async function iniciarNativo(video) {
+    if (!('BarcodeDetector' in window)) return false;
+    try {
+        const suporte = await BarcodeDetector.getSupportedFormats();
+        if (!suporte.includes('qr_code')) return false;
+        const detector = new BarcodeDetector({ formats: ['qr_code'] });
+        async function detectLoop() {
+            if (!_scanning) return;
+            try {
+                const codes = await detector.detect(video);
+                if (codes.length > 0) {
+                    const url = codes[0].rawValue;
+                    if (url.includes('/equipamento/')) {
+                        _scanning = false;
+                        if (_stream) _stream.getTracks().forEach(t => t.stop());
+                        if (navigator.vibrate) navigator.vibrate(200);
+                        window.location.href = url;
+                        return;
+                    }
+                }
+            } catch (_) {}
+            requestAnimationFrame(detectLoop);
+        }
+        video.addEventListener('loadedmetadata', () => requestAnimationFrame(detectLoop));
+        return true;
+    } catch { return false; }
+}
+
+async function init() {
+    _stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment', width: { ideal: 1280 } }
+    }).catch(() => null);
+
+    if (!_stream) {
+        const erroEl = document.getElementById('scanErro');
+        document.getElementById('scanHint').style.display = 'none';
+        erroEl.textContent = 'Sem acesso à câmera. Verifique as permissões do navegador.';
+        erroEl.style.display = 'block';
+        return;
+    }
+
+    const video = document.getElementById('scanVideo');
+    video.srcObject = _stream;
+    video.play();
+
+    const nativo = await iniciarNativo(video);
+    if (!nativo) {
+        video.addEventListener('loadedmetadata', () => requestAnimationFrame(scanFrame));
+    }
+}
+
+init();
+
+window.addEventListener('beforeunload', () => {
+    if (_stream) _stream.getTracks().forEach(t => t.stop());
+});
+</script>
+</body>
+</html>

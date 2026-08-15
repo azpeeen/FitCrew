@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<%- include('../partials/seo') %>
+<link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+<link rel="stylesheet" href="/css/header.css">
+<link rel="stylesheet" href="/css/footer.css">
+<link rel="stylesheet" href="/css/area-aluno.css">
+<link rel="stylesheet" href="/css/chat.css">
+</head>
+<body>
+
+<%- include('../partials/header-aluno') %>
+
+<section class="chat-app" id="chatApp">
+
+    <!-- LISTA DE CONVERSAS -->
+    <section class="chat-sidebar" id="chatSidebar">
+        <section class="chat-sidebar-header">
+            <button type="button" class="chat-btn-voltar-home" id="chatVoltarHome" aria-label="Voltar">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <h1>Mensagens</h1>
+            <button type="button" class="chat-btn-nova" id="btnNovaConversa" title="Nova conversa">
+                <i class="fas fa-square-plus"></i>
+            </button>
+        </section>
+
+        <section class="chat-busca-wrap">
+            <i class="fas fa-search"></i>
+            <input type="text" id="chatBusca" placeholder="Buscar conversas">
+        </section>
+
+        <section class="chat-lista-conversas" id="listaConversas">
+            <section class="chat-loading"><i class="fas fa-spinner fa-spin"></i></section>
+        </section>
+    </section>
+
+    <!-- ÁREA DO CHAT -->
+    <section class="chat-area" id="chatArea">
+        <section class="chat-vazio" id="chatVazio">
+            <i class="fas fa-comments"></i>
+            <p>Selecione uma conversa para começar</p>
+        </section>
+
+        <section class="chat-ativo" id="chatAtivo" style="display:none">
+            <section class="chat-cabecalho">
+                <button type="button" class="chat-btn-voltar" id="chatVoltar" aria-label="Voltar">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <section class="chat-cabecalho-clicavel" id="chatCabecalhoClicavel">
+                    <img class="chat-cabecalho-avatar" id="chatCabecalhoAvatar" src="/images/avatar.png" alt="">
+                    <section class="chat-cabecalho-info">
+                        <section class="chat-cabecalho-nome" id="chatCabecalhoNome"></section>
+                        <section class="chat-cabecalho-status" id="chatCabecalhoStatus"></section>
+                    </section>
+                </section>
+                <button type="button" class="chat-btn-info" id="chatBtnInfo" title="Informações da conversa" aria-label="Informações da conversa">
+                    <i class="fas fa-info-circle"></i>
+                </button>
+            </section>
+
+            <section class="chat-mensagens" id="chatMensagens"></section>
+
+            <section class="chat-digitando" id="chatDigitando" style="display:none"></section>
+
+            <section class="chat-gravando" id="chatGravando" style="display:none">
+                <span class="chat-gravando-dot"></span>
+                <span>Gravando... <span id="chatGravandoTempo">0:00</span></span>
+                <button type="button" class="chat-btn-texto" id="btnCancelarGravacao">Cancelar</button>
+                <button type="button" class="chat-btn-enviar-gravacao" id="btnEnviarGravacao">
+                    <i class="fas fa-paper-plane"></i> Enviar
+                </button>
+            </section>
+
+            <section class="chat-input-row" id="chatInputRow">
+                <input type="file" id="chatFotoInput" accept="image/*" style="display:none">
+                <button type="button" class="chat-input-btn" id="btnAnexo" title="Enviar foto">
+                    <i class="fas fa-paperclip"></i>
+                </button>
+                <input type="text" id="chatInputTexto" class="chat-input-texto" placeholder="Digite uma mensagem..." maxlength="4000">
+                <button type="button" class="chat-input-btn" id="btnAudio" title="Gravar áudio">
+                    <i class="fas fa-microphone"></i>
+                </button>
+                <button type="button" class="chat-btn-enviar" id="btnEnviar" title="Enviar">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </section>
+
+            <!-- Painel de informações da conversa -->
+            <section class="chat-info-panel" id="chatInfoPanel">
+                <section class="chat-info-header">
+                    <button type="button" id="chatInfoFechar" aria-label="Fechar">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <h3>Detalhes</h3>
+                </section>
+
+                <section class="chat-info-perfil">
+                    <img id="chatInfoFoto" src="/images/avatar.png" class="chat-info-avatar" alt="">
+                    <section id="chatInfoNome" class="chat-info-nome"></section>
+                    <section id="chatInfoUsername" class="chat-info-username"></section>
+                    <a id="chatInfoVerPerfil" href="#" class="chat-info-btn-perfil">Ver perfil</a>
+                </section>
+
+                <section class="chat-info-secao">
+                    <h4 class="chat-info-secao-titulo">Mídias compartilhadas</h4>
+                    <section class="chat-info-midias" id="chatInfoMidias">
+                        <section class="chat-info-loading"><i class="fas fa-spinner fa-spin"></i></section>
+                    </section>
+                </section>
+
+                <section class="chat-info-secao">
+                    <h4 class="chat-info-secao-titulo">Pesquisar mensagens</h4>
+                    <section class="chat-info-busca-wrap">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="chatInfoBusca" class="chat-info-busca-input" placeholder="Pesquisar na conversa...">
+                    </section>
+                    <section id="chatInfoBuscaResultados"></section>
+                </section>
+
+                <section class="chat-info-secao chat-info-acoes" id="chatInfoAcoes">
+                    <button type="button" class="chat-info-acao" id="chatBtnDenunciar">
+                        <i class="fas fa-flag"></i> Denunciar
+                    </button>
+                    <button type="button" class="chat-info-acao chat-info-acao--danger" id="chatBtnBloquear">
+                        <i class="fas fa-ban"></i> Bloquear
+                    </button>
+                </section>
+            </section>
+        </section>
+    </section>
+</section>
+
+<!-- MODAL: NOVA CONVERSA / CRIAR GRUPO -->
+<section class="modal-overlay" id="modalNovaConversa">
+    <section class="modal-box">
+        <section class="modal-header">
+            <h2><i class="fas fa-comment-dots"></i> Nova conversa</h2>
+            <button type="button" class="modal-close" id="fecharModalNovaConversa"><i class="fas fa-times"></i></button>
+        </section>
+
+        <section class="chat-modal-abas">
+            <button type="button" class="chat-modal-aba active" data-aba="individual">Conversa</button>
+            <button type="button" class="chat-modal-aba" data-aba="grupo">Grupo</button>
+        </section>
+
+        <section class="chat-modal-conteudo" data-conteudo="individual">
+            <input type="text" id="buscaAmigoIndividual" class="modal-convidar-input" placeholder="Buscar amigo...">
+            <section id="listaAmigosIndividual" class="modal-convidar-lista"></section>
+        </section>
+
+        <section class="chat-modal-conteudo" data-conteudo="grupo" style="display:none">
+            <input type="text" id="nomeGrupo" class="modal-convidar-input" placeholder="Nome do grupo" maxlength="100">
+            <input type="text" id="buscaAmigoGrupo" class="modal-convidar-input" placeholder="Buscar amigos...">
+            <section id="listaAmigosGrupo" class="modal-convidar-lista"></section>
+            <button type="button" class="btn-gold-full" id="btnCriarGrupo">Criar grupo</button>
+        </section>
+    </section>
+</section>
+
+<!-- VISUALIZADOR DE FOTO EM TELA CHEIA -->
+<section class="chat-foto-fullscreen" id="chatFotoFullscreen">
+    <button type="button" class="chat-foto-fechar" id="fecharFotoFullscreen" aria-label="Fechar">
+        <i class="fas fa-times"></i>
+    </button>
+    <img id="chatFotoFullscreenImg" src="" alt="">
+</section>
+
+<script>
+window.GYMBROS_USER_ID = <%= user.id %>;
+window.CHAT_CONVERSA_INICIAL = <%= conversaAtualId ? conversaAtualId : 'null' %>;
+</script>
+<script src="/js/chat.js" defer></script>
+</body>
+</html>

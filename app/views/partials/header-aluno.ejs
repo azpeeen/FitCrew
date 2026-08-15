@@ -1,0 +1,792 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<header class="gymbros-header">
+        <section class="header-container">
+            <section class="menu-icon" id="menuToggle" aria-label="Abrir menu" aria-expanded="false">
+                <i class="fas fa-bars" aria-hidden="true"></i>
+            </section>
+
+            <section class="logo">
+                <a href="/" aria-label="FitCrew — Feed">
+                    <img src="/images/logo.png" alt="Logo FitCrew" width="32" height="32" loading="eager">
+                    <span>FitCrew</span>
+                </a>
+            </section>
+
+            <section class="header-right">
+                <nav class="lang-selector" id="langSelector" aria-label="Selecionar idioma">
+                    <button class="lang-btn" data-lang="pt" title="Português (BR)" aria-label="Mudar para Português">🇧🇷</button>
+                    <button class="lang-btn" data-lang="en" title="English (US)"   aria-label="Switch to English">🇺🇸</button>
+                    <button class="lang-btn" data-lang="es" title="Español (ES)"   aria-label="Cambiar a Español">🇪🇸</button>
+                </nav>
+
+                <a href="/buscar" class="topbar-icon" title="Buscar pessoas" aria-label="Buscar pessoas">
+                    <i class="fas fa-search" aria-hidden="true"></i>
+                </a>
+
+                <section class="topbar-notif-wrap" style="position:relative">
+                    <button class="topbar-notif-btn" id="notifToggle" title="Notificações" aria-label="Notificações" type="button">
+                        <i class="fas fa-bell" aria-hidden="true"></i>
+                        <span class="notif-badge" id="topbarNotifBadge" style="display:none">0</span>
+                    </button>
+                    <section class="notif-dropdown" id="notifDropdown" style="display:none">
+                        <section class="notif-dropdown-header">
+                            <span>Notificações</span>
+                            <button class="notif-ler-todas" id="notifLerTodas" type="button">Marcar todas como lidas</button>
+                        </section>
+                        <section class="notif-dropdown-lista" id="notifLista">
+                            <section class="notif-loading"><i class="fas fa-spinner fa-spin"></i></section>
+                        </section>
+                    </section>
+                </section>
+
+                <a href="/u/<%= locals.user && user.username %>" class="topbar-avatar" aria-label="Meu perfil">
+                    <img src="<%= locals.user && user.profile_photo || '/images/avatar.png' %>" alt="Avatar" width="32" height="32">
+                </a>
+
+                <button id="themeToggle" class="theme-toggle" title="Alternar tema claro/escuro" aria-label="Alternar tema">
+                    <i class="fas fa-moon" id="themeIcon" aria-hidden="true"></i>
+                </button>
+            </section>
+        </section>
+    </header>
+    <script>
+    (function () {
+        if (localStorage.getItem('gymbros_theme') === 'light') {
+            document.body.classList.add('light-mode');
+        }
+
+        var header = document.querySelector('.gymbros-header');
+        if (header) {
+            window.addEventListener('scroll', function () {
+                header.classList.toggle('scrolled', window.scrollY > 0);
+            }, { passive: true });
+        }
+
+        function setThemeIcon(isLight) {
+            var icon = document.getElementById('themeIcon');
+            if (!icon) return;
+            if (isLight) {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            } else {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            }
+        }
+
+        function initThemeToggle() {
+            var toggle = document.getElementById('themeToggle');
+            if (!toggle) return;
+            setThemeIcon(document.body.classList.contains('light-mode'));
+            toggle.addEventListener('click', function () {
+                var isLight = document.body.classList.toggle('light-mode');
+                localStorage.setItem('gymbros_theme', isLight ? 'light' : 'dark');
+                var icon = document.getElementById('themeIcon');
+                if (icon) {
+                    icon.classList.add('theme-icon-spin');
+                    setTimeout(function () { setThemeIcon(isLight); }, 180);
+                    icon.addEventListener('animationend', function onEnd() {
+                        icon.classList.remove('theme-icon-spin');
+                        icon.removeEventListener('animationend', onEnd);
+                    });
+                }
+            });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initThemeToggle);
+        } else {
+            initThemeToggle();
+        }
+    })();
+    </script>
+<script>
+(function () {
+    document.addEventListener('DOMContentLoaded', function () {
+        var btn     = document.getElementById('menuToggle');
+        var sidebar = document.querySelector('.aluno-sidebar');
+        var overlay = document.getElementById('sidebarOverlay');
+        if (!sidebar || !overlay) return;
+
+        var closeBtn = document.createElement('button');
+        closeBtn.className = 'aluno-sidebar-close';
+        closeBtn.setAttribute('aria-label', 'Fechar menu');
+        closeBtn.innerHTML = '<i class="fas fa-times"></i>';
+        sidebar.insertBefore(closeBtn, sidebar.firstChild);
+
+        function openMenu()  { sidebar.classList.add('open'); overlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
+        function closeMenu() { sidebar.classList.remove('open'); overlay.classList.remove('open'); document.body.style.overflow = ''; }
+
+        if (btn) btn.addEventListener('click', openMenu);
+        overlay.addEventListener('click', closeMenu);
+        closeBtn.addEventListener('click', closeMenu);
+        sidebar.querySelectorAll('a').forEach(function (a) { a.addEventListener('click', closeMenu); });
+    });
+
+    function syncLembretesComSW() {
+        if (!navigator.serviceWorker || !navigator.serviceWorker.controller) return;
+        try {
+            var agua = JSON.parse(localStorage.getItem('gymbros_lembrete_agua') || 'null');
+            var sono = JSON.parse(localStorage.getItem('gymbros_lembrete_sono') || 'null');
+            if (agua) navigator.serviceWorker.controller.postMessage({ type: 'SCHEDULE_AGUA', payload: agua });
+            if (sono) navigator.serviceWorker.controller.postMessage({ type: 'SCHEDULE_SONO', payload: sono });
+        } catch (e) {}
+    }
+    if (navigator.serviceWorker) {
+        navigator.serviceWorker.ready.then(syncLembretesComSW);
+    }
+})();
+</script>
+<style>
+@keyframes toastIn { from { opacity:0; transform:translateY(12px) scale(.96); } to { opacity:1; transform:none; } }
+@keyframes toastOut { to { opacity:0; transform:translateY(12px) scale(.96); } }
+.gymbros-toast {
+    position:fixed;bottom:24px;right:24px;
+    background:var(--card-bg,#1f1f1f);border:1px solid #C98B1D;
+    color:var(--text-color,#fff);padding:14px 18px;border-radius:12px;
+    z-index:99999;max-width:320px;min-width:240px;
+    animation:toastIn .28s ease;box-shadow:0 6px 24px rgba(0,0,0,.5);
+    font-family:inherit;cursor:pointer;
+}
+.gymbros-toast-title { font-weight:700;color:#C98B1D;margin-bottom:4px;font-size:.875rem; }
+.gymbros-toast-body  { font-size:.82rem;opacity:.85;line-height:1.4; }
+</style>
+<script>
+(function(){
+    const sse = new EventSource('/api/suporte/notificacoes/stream');
+    window.addEventListener('beforeunload', function() { sse.close(); }, { once: true });
+    sse.addEventListener('admin_notification', function(e) {
+        const d = JSON.parse(e.data);
+        const icons = { alerta:'⚠️', promocao:'🎁', informativo:'📢' };
+        const t = document.createElement('section');
+        t.className = 'gymbros-toast';
+        t.innerHTML = `<section class="gymbros-toast-title">${icons[d.tipo]||'🔔'} ${escHtmlToast(d.titulo)}</section><section class="gymbros-toast-body">${escHtmlToast(d.mensagem)}</section>`;
+        t.addEventListener('click', () => t.remove());
+        document.body.appendChild(t);
+        setTimeout(() => { if(t.parentNode) { t.style.animation='toastOut .25s ease forwards'; setTimeout(()=>t.remove(),260); } }, 7000);
+    });
+    function escHtmlToast(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+})();
+</script>
+<script src="/js/landscape-report.js" defer></script>
+<script src="/js/conquistas.js"></script>
+<% if (locals.user) { %>
+<script>
+(function () {
+    const badge      = document.getElementById('topbarNotifBadge');
+    const toggle     = document.getElementById('notifToggle');
+    const dropdown   = document.getElementById('notifDropdown');
+    const lista      = document.getElementById('notifLista');
+    const lerTodas   = document.getElementById('notifLerTodas');
+    if (!toggle || !dropdown) return;
+
+    function escHtml(s) {
+        return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    function formatarTempo(iso) {
+        const d = new Date(iso);
+        const diff = (Date.now() - d) / 1000;
+        if (diff < 60) return 'agora';
+        if (diff < 3600) return Math.floor(diff / 60) + 'm';
+        if (diff < 86400) return Math.floor(diff / 3600) + 'h';
+        return Math.floor(diff / 86400) + 'd';
+    }
+
+    function atualizarBadge(total) {
+        if (total > 0) {
+            badge.textContent = total > 99 ? '99+' : total;
+            badge.style.display = 'inline-flex';
+        } else {
+            badge.style.display = 'none';
+        }
+    }
+
+    // Substitui os botões de um convite de evento pela mensagem de resposta —
+    // idempotente: se o bloco já foi trocado (ou nunca existiu), não faz nada.
+    // Usada tanto pelo clique local quanto pelo evento 'agenda:atualizar'
+    // disparado pela aba Agenda (amizades.ejs), mantendo os dois em sincronia.
+    function aplicarRespostaEventoNotif(eventoId, status) {
+        const acoes = lista.querySelector(`.notif-convite-acoes[data-evento-id="${eventoId}"]`);
+        if (!acoes) return;
+        const msg = status === 'confirmado' ? '✓ Presença confirmada' : 'Você recusou o convite';
+        acoes.outerHTML = `<section class="notif-convite-resposta">${msg}</section>`;
+    }
+
+    window.addEventListener('agenda:atualizar', e => {
+        const detalhe = e.detail;
+        if (detalhe?.eventoId) aplicarRespostaEventoNotif(detalhe.eventoId, detalhe.status);
+    });
+
+    async function carregarCount() {
+        try {
+            const d = await fetch('/api/notificacoes/sociais/count').then(r => r.json());
+            atualizarBadge(d.total || 0);
+        } catch (_) {}
+    }
+
+    async function carregarNotificacoes() {
+        lista.innerHTML = '<section class="notif-loading"><i class="fas fa-spinner fa-spin"></i></section>';
+        try {
+            const d = await fetch('/api/notificacoes/sociais').then(r => r.json());
+            if (!d.notificacoes?.length) {
+                lista.innerHTML = '<section class="notif-vazio">Nenhuma notificação</section>';
+                return;
+            }
+            lista.innerHTML = d.notificacoes.map(n => {
+                const icone = n.tipo === 'solicitacao_amizade' ? 'fa-user-plus'
+                    : n.tipo === 'amizade_aceita' ? 'fa-user-check'
+                    : n.tipo === 'convite_treino' ? 'fa-dumbbell'
+                    : (n.tipo === 'convite_aceito' || n.tipo === 'convite_recusado') ? 'fa-users'
+                    : n.tipo === 'removido_treino' ? 'fa-user-slash'
+                    : n.tipo === 'convite_evento' ? 'fa-calendar-plus'
+                    : (n.tipo === 'evento_resposta' || n.tipo === 'evento_cancelado') ? 'fa-calendar-check'
+                    : n.tipo === 'convite_gymsquad' ? 'fa-trophy'
+                    : n.tipo === 'gymsquad_encerrado' ? 'fa-trophy'
+                    : 'fa-bell';
+                let extras = n.dados_extras;
+                if (typeof extras === 'string') { try { extras = JSON.parse(extras); } catch (_) { extras = null; } }
+                const planId = extras && extras.plan_id;
+                const eventoId = extras && extras.evento_id;
+                const gymsquadId = extras && extras.gymsquad_id;
+                const acoes = (n.tipo === 'convite_treino' && planId) ? `
+                    <section class="notif-convite-acoes">
+                        <button type="button" class="notif-btn-aceitar" data-plan-id="${planId}">Aceitar</button>
+                        <button type="button" class="notif-btn-recusar" data-plan-id="${planId}">Recusar</button>
+                    </section>`
+                    : (n.tipo === 'convite_evento' && eventoId) ? `
+                    <section class="notif-convite-acoes" data-evento-id="${eventoId}">
+                        <button type="button" class="notif-btn-aceitar" data-evento-id="${eventoId}" data-status="confirmado">Vou ✓</button>
+                        <button type="button" class="notif-btn-recusar" data-evento-id="${eventoId}" data-status="recusado">Não vou</button>
+                    </section>`
+                    : (n.tipo === 'convite_gymsquad' && gymsquadId) ? `
+                    <section class="notif-convite-acoes" data-gymsquad-id="${gymsquadId}">
+                        <button type="button" class="notif-btn-aceitar" data-gymsquad-id="${gymsquadId}">Aceitar</button>
+                        <button type="button" class="notif-btn-recusar" data-gymsquad-id="${gymsquadId}">Recusar</button>
+                    </section>` : '';
+                return `
+                <section class="notif-item${n.lida ? '' : ' notif-item--nova'}" data-id="${n.id}">
+                    <section class="notif-item-icon notif-icon--${escHtml(n.tipo)}">
+                        <i class="fas ${icone}"></i>
+                    </section>
+                    <section class="notif-item-body">
+                        <section class="notif-item-titulo">${escHtml(n.titulo)}</section>
+                        ${n.mensagem ? `<section class="notif-item-msg">${escHtml(n.mensagem)}</section>` : ''}
+                        <section class="notif-item-tempo">${formatarTempo(n.criado_em)}</section>
+                        ${acoes}
+                    </section>
+                    ${!n.lida ? '<span class="notif-dot"></span>' : ''}
+                </section>`;
+            }).join('');
+        } catch (_) {
+            lista.innerHTML = '<section class="notif-vazio">Erro ao carregar</section>';
+        }
+    }
+
+    toggle.addEventListener('click', e => {
+        e.stopPropagation();
+        const aberto = dropdown.style.display !== 'none';
+        dropdown.style.display = aberto ? 'none' : 'block';
+        if (!aberto) carregarNotificacoes();
+    });
+
+    document.addEventListener('click', e => {
+        if (!dropdown.contains(e.target) && e.target !== toggle) {
+            dropdown.style.display = 'none';
+        }
+    });
+
+    lista.addEventListener('click', async e => {
+        // F12/F13 — responder convite de treino ou de evento inline
+        const btnAceitar = e.target.closest('.notif-btn-aceitar');
+        const btnRecusar = e.target.closest('.notif-btn-recusar');
+        if (btnAceitar || btnRecusar) {
+            e.stopPropagation();
+            const btn = btnAceitar || btnRecusar;
+            const acoes = btn.closest('.notif-convite-acoes');
+            if (acoes) acoes.querySelectorAll('button').forEach(b => b.disabled = true);
+            try {
+                if (btn.dataset.eventoId) {
+                    const eventoId = btn.dataset.eventoId;
+                    const status = btn.dataset.status;
+                    const r = await fetch(`/api/agenda/evento/${eventoId}/responder`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ status }),
+                    }).then(x => x.json());
+                    if (r.ok) {
+                        aplicarRespostaEventoNotif(eventoId, status);
+                        // Sincroniza a aba Agenda (amizades.ejs), se estiver na mesma página
+                        window.dispatchEvent(new CustomEvent('agenda:atualizar', { detail: { eventoId, status } }));
+                    } else if (acoes) {
+                        acoes.querySelectorAll('button').forEach(b => b.disabled = false);
+                    }
+                } else if (btn.dataset.gymsquadId) {
+                    const gymsquadId = btn.dataset.gymsquadId;
+                    const aceitar = !!btnAceitar;
+                    const r = await fetch(`/api/gymsquads/${gymsquadId}/responder`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ aceitar }),
+                    }).then(x => x.json());
+                    if (r.ok && acoes) {
+                        const sucessoMsg = aceitar ? '✓ Convite aceito' : 'Convite recusado';
+                        acoes.outerHTML = `<section class="notif-convite-resposta">${sucessoMsg}</section>`;
+                    } else if (acoes) {
+                        acoes.querySelectorAll('button').forEach(b => b.disabled = false);
+                    }
+                } else {
+                    const planId = btn.dataset.planId;
+                    const aceitar = !!btnAceitar;
+                    const r = await fetch(`/api/treinos/${planId}/responder-convite`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ aceitar }),
+                    }).then(x => x.json());
+                    if (r.ok && acoes) {
+                        const sucessoMsg = aceitar ? '✓ Convite aceito' : 'Convite recusado';
+                        acoes.outerHTML = `<section class="notif-convite-resposta">${sucessoMsg}</section>`;
+                    } else if (acoes) {
+                        acoes.querySelectorAll('button').forEach(b => b.disabled = false);
+                    }
+                }
+            } catch (_) {
+                if (acoes) acoes.querySelectorAll('button').forEach(b => b.disabled = false);
+            }
+            return;
+        }
+
+        const item = e.target.closest('.notif-item--nova');
+        if (!item) return;
+        const id = item.dataset.id;
+        item.classList.remove('notif-item--nova');
+        item.querySelector('.notif-dot')?.remove();
+        await fetch(`/api/notificacoes/sociais/ler/${id}`, { method: 'POST' }).catch(() => {});
+        carregarCount();
+    });
+
+    lerTodas.addEventListener('click', async () => {
+        await fetch('/api/notificacoes/sociais/ler-todas', { method: 'POST' }).catch(() => {});
+        lista.querySelectorAll('.notif-item--nova').forEach(el => {
+            el.classList.remove('notif-item--nova');
+            el.querySelector('.notif-dot')?.remove();
+        });
+        atualizarBadge(0);
+    });
+
+    // SSE para notificações em tempo real
+    const sseSocial = new EventSource('/api/notificacoes/sociais/stream');
+    sseSocial.addEventListener('message', e => {
+        try {
+            const d = JSON.parse(e.data);
+            if (d.event === 'notificacao_social') {
+                const atual = parseInt(badge.textContent || '0', 10);
+                atualizarBadge(isNaN(atual) ? 1 : atual + 1);
+                if (dropdown.style.display !== 'none') carregarNotificacoes();
+            } else if (d.event) {
+                // Outros eventos (ex.: gymsquad_placar) — repassa pra quem estiver ouvindo na página atual
+                window.dispatchEvent(new CustomEvent('sse:' + d.event, { detail: d }));
+            }
+        } catch (_) {}
+    });
+    window.addEventListener('beforeunload', () => sseSocial.close(), { once: true });
+
+    carregarCount();
+})();
+</script>
+
+<!-- Chat: mini widget flutuante + FAB + conexão WebSocket compartilhada (também usada por /chat) -->
+<section id="chat-widget" class="chat-widget" style="display:none">
+    <section class="chat-widget-header">
+        <section class="chat-widget-titulo" id="chat-widget-titulo">Mensagens</section>
+        <section class="chat-widget-acoes">
+            <button type="button" id="chat-widget-expandir" title="Abrir chat completo">
+                <i class="fas fa-expand-alt"></i>
+            </button>
+            <button type="button" id="chat-widget-fechar" title="Fechar">
+                <i class="fas fa-times"></i>
+            </button>
+        </section>
+    </section>
+
+    <section class="chat-widget-lista" id="chat-widget-lista">
+        <section class="chat-widget-busca-wrap">
+            <i class="fas fa-search chat-widget-busca-icon"></i>
+            <input type="text" id="chat-widget-busca" class="chat-widget-busca-input" placeholder="Buscar ou iniciar conversa...">
+        </section>
+        <section id="chat-widget-busca-resultados" style="display:none"></section>
+        <section id="chat-widget-conversas">
+            <section class="chat-widget-loading"><i class="fas fa-spinner fa-spin"></i></section>
+        </section>
+    </section>
+
+    <section class="chat-widget-conversa" id="chat-widget-conversa" style="display:none">
+        <section class="chat-widget-conversa-header">
+            <button type="button" id="chat-widget-voltar" aria-label="Voltar">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <img id="chat-widget-conversa-foto" src="/images/avatar.png" alt="" class="chat-widget-conversa-avatar">
+            <section class="chat-widget-conversa-info">
+                <section id="chat-widget-conversa-nome" class="chat-widget-conversa-nome"></section>
+                <section id="chat-widget-conversa-status" class="chat-widget-conversa-status"></section>
+            </section>
+        </section>
+
+        <section class="chat-widget-msgs" id="chat-widget-msgs"></section>
+
+        <section class="chat-widget-input-wrap">
+            <input type="text" id="chat-widget-input" class="chat-widget-input" placeholder="Digite uma mensagem...">
+            <button type="button" class="chat-widget-btn-enviar" id="chat-widget-btn-enviar" title="Enviar">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </section>
+    </section>
+</section>
+
+<section id="chat-fab" class="chat-fab" title="Chat" aria-label="Abrir chat">
+    <i class="fas fa-comment" aria-hidden="true"></i>
+    <span class="chat-fab-badge" id="chat-fab-badge" style="display:none">0</span>
+</section>
+<script>
+window.__meuUserId = <%= locals.user ? user.id : 'null' %>;
+function escHtmlChat(s) {
+    return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+(function () {
+    let widgetAberto = false;
+    let conversaWidget = null; // { id, nome, foto }
+    const chatWidget = document.getElementById('chat-widget');
+    const chatFab = document.getElementById('chat-fab');
+
+    // FAB e widget flutuante não fazem sentido dentro da própria página de chat
+    if (window.location.pathname.startsWith('/chat')) {
+        if (chatFab) chatFab.style.display = 'none';
+        if (chatWidget) chatWidget.style.display = 'none';
+    }
+
+    document.getElementById('chat-fab')?.addEventListener('click', () => {
+        widgetAberto = !widgetAberto;
+        chatWidget.style.display = widgetAberto ? 'flex' : 'none';
+        if (widgetAberto) carregarConversasWidget();
+    });
+
+    document.getElementById('chat-widget-fechar')?.addEventListener('click', () => {
+        widgetAberto = false;
+        chatWidget.style.display = 'none';
+    });
+
+    document.getElementById('chat-widget-expandir')?.addEventListener('click', () => {
+        window.location.href = conversaWidget ? `/chat/${conversaWidget.id}` : '/chat';
+    });
+
+    document.getElementById('chat-widget-voltar')?.addEventListener('click', () => {
+        conversaWidget = null;
+        document.getElementById('chat-widget-lista').style.display = 'flex';
+        document.getElementById('chat-widget-conversa').style.display = 'none';
+        document.getElementById('chat-widget-titulo').textContent = 'Mensagens';
+    });
+
+    let buscaWidgetTimer;
+    document.getElementById('chat-widget-busca')?.addEventListener('input', (e) => {
+        const q = e.target.value.trim();
+        clearTimeout(buscaWidgetTimer);
+        const resultados = document.getElementById('chat-widget-busca-resultados');
+        const conversasEl = document.getElementById('chat-widget-conversas');
+
+        if (!q) {
+            resultados.style.display = 'none';
+            conversasEl.style.display = 'block';
+            return;
+        }
+
+        buscaWidgetTimer = setTimeout(async () => {
+            resultados.style.display = 'block';
+            conversasEl.style.display = 'none';
+            resultados.innerHTML = '<section class="chat-widget-loading"><i class="fas fa-spinner fa-spin"></i></section>';
+
+            try {
+                const r = await fetch(`/api/usuarios/buscar?q=${encodeURIComponent(q)}&limit=5`).then(x => x.json());
+                if (!r.usuarios?.length) {
+                    resultados.innerHTML = '<section class="chat-widget-loading">Nenhum usuário encontrado</section>';
+                    return;
+                }
+                resultados.innerHTML = r.usuarios.map(u => `
+                    <section class="chat-widget-busca-item" data-user-id="${u.id}"
+                        data-nome="${escHtmlChat(u.nome)}"
+                        data-foto="${escHtmlChat(u.foto_perfil || '/images/avatar.png')}">
+                        <img src="${escHtmlChat(u.foto_perfil || '/images/avatar.png')}" class="chat-widget-busca-avatar" alt="${escHtmlChat(u.nome)}">
+                        <section>
+                            <section style="font-size:0.85rem;font-weight:600">${escHtmlChat(u.nome)}</section>
+                            ${u.username ? `<section style="font-size:0.72rem;color:#666">@${escHtmlChat(u.username)}</section>` : ''}
+                        </section>
+                    </section>
+                `).join('');
+            } catch (_) {
+                resultados.innerHTML = '<section class="chat-widget-loading">Erro ao buscar</section>';
+            }
+        }, 300);
+    });
+
+    document.getElementById('chat-widget-busca-resultados')?.addEventListener('click', async (e) => {
+        const item = e.target.closest('.chat-widget-busca-item');
+        if (!item) return;
+        const userId = item.dataset.userId;
+        const nome = item.dataset.nome;
+        const foto = item.dataset.foto;
+
+        try {
+            const r = await fetch('/api/chat/conversas', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: parseInt(userId, 10) }),
+            }).then(x => x.json());
+
+            if (r.ok) {
+                abrirConversaWidget({ id: r.conversaId, nome, foto });
+                document.getElementById('chat-widget-busca').value = '';
+                document.getElementById('chat-widget-busca-resultados').style.display = 'none';
+                document.getElementById('chat-widget-conversas').style.display = 'block';
+            } else {
+                alert(r.erro || 'Não foi possível iniciar a conversa.');
+            }
+        } catch (_) {
+            alert('Erro ao iniciar conversa.');
+        }
+    });
+
+    document.getElementById('chat-widget-conversas')?.addEventListener('click', (e) => {
+        const item = e.target.closest('.chat-widget-item');
+        if (!item) return;
+        abrirConversaWidget({
+            id: parseInt(item.dataset.conversaId, 10),
+            nome: item.dataset.nome,
+            foto: item.dataset.foto,
+        });
+    });
+
+    async function carregarConversasWidget() {
+        const el = document.getElementById('chat-widget-conversas');
+        el.innerHTML = '<section class="chat-widget-loading"><i class="fas fa-spinner fa-spin"></i></section>';
+        try {
+            const r = await fetch('/api/chat/conversas').then(x => x.json());
+            if (!r.conversas?.length) {
+                el.innerHTML = `
+                    <section class="chat-widget-loading" style="flex-direction:column;gap:6px">
+                        <i class="fas fa-comments" style="font-size:1.5rem;opacity:.15"></i>
+                        <span>Nenhuma conversa ainda</span>
+                        <small style="color:#444">Pesquise um amigo acima</small>
+                    </section>`;
+                return;
+            }
+            el.innerHTML = r.conversas.map(c => {
+                const nome = c.tipo === 'individual' ? (c.outro_nome || 'Conversa') : (c.nome || 'Grupo');
+                const foto = c.tipo === 'individual' ? (c.outro_foto || '/images/avatar.png') : (c.foto || '/images/avatar.png');
+                const ultimaMsg = c.ultima_msg_tipo === 'foto' ? '📷 Foto'
+                    : c.ultima_msg_tipo === 'audio' ? '🎤 Áudio'
+                    : (c.ultima_msg || '').slice(0, 35) || 'Sem mensagens';
+                return `
+                    <section class="chat-widget-item" data-conversa-id="${c.id}" data-nome="${escHtmlChat(nome)}" data-foto="${escHtmlChat(foto)}">
+                        <img src="${escHtmlChat(foto)}" class="chat-widget-item-avatar" alt="${escHtmlChat(nome)}">
+                        <section class="chat-widget-item-info">
+                            <section class="chat-widget-item-nome">${escHtmlChat(nome)}</section>
+                            <section class="chat-widget-item-ultima">${escHtmlChat(ultimaMsg)}</section>
+                        </section>
+                        ${c.nao_lidas > 0 ? `<span class="chat-widget-item-badge">${c.nao_lidas > 99 ? '99+' : c.nao_lidas}</span>` : ''}
+                    </section>`;
+            }).join('');
+        } catch (_) {
+            el.innerHTML = '<section class="chat-widget-loading">Erro ao carregar</section>';
+        }
+    }
+
+    async function abrirConversaWidget(conversa) {
+        conversaWidget = conversa;
+        document.getElementById('chat-widget-lista').style.display = 'none';
+        document.getElementById('chat-widget-conversa').style.display = 'flex';
+        document.getElementById('chat-widget-titulo').textContent = conversa.nome;
+        document.getElementById('chat-widget-conversa-nome').textContent = conversa.nome;
+        document.getElementById('chat-widget-conversa-foto').src = conversa.foto;
+
+        const msgs = document.getElementById('chat-widget-msgs');
+        msgs.innerHTML = '<section class="chat-widget-loading"><i class="fas fa-spinner fa-spin"></i></section>';
+
+        try {
+            const r = await fetch(`/api/chat/conversas/${conversa.id}/mensagens`).then(x => x.json());
+            renderMensagensWidget(r.mensagens || [], msgs);
+            msgs.scrollTop = msgs.scrollHeight;
+        } catch (_) {
+            msgs.innerHTML = '<section class="chat-widget-loading">Erro ao carregar</section>';
+        }
+
+        window.__chatSocket?.send(JSON.stringify({ type: 'lido', conversa_id: conversa.id }));
+        document.getElementById('chat-widget-input').focus();
+    }
+
+    function conteudoMsgWidget(m) {
+        if (m.tipo === 'foto') return `<section class="chat-msg-foto"><img src="${escHtmlChat(m.conteudo)}" alt="Foto" style="max-width:100%;border-radius:8px"></section>`;
+        if (m.tipo === 'audio') return `<section class="chat-msg-audio"><audio controls src="${escHtmlChat(m.conteudo)}"></audio></section>`;
+        return escHtmlChat(m.conteudo);
+    }
+
+    function renderMensagensWidget(mensagens, container) {
+        if (!mensagens.length) {
+            container.innerHTML = '<section class="chat-widget-loading" style="font-size:0.78rem">Seja o primeiro a enviar uma mensagem!</section>';
+            return;
+        }
+        container.innerHTML = mensagens.map(m => {
+            const cls = m.user_id === window.__meuUserId ? 'chat-msg--meu' : 'chat-msg--deles';
+            return `<section class="chat-msg ${cls}">${conteudoMsgWidget(m)}</section>`;
+        }).join('');
+    }
+
+    // Um único listener pro widget inteiro — evita empilhar handlers duplicados
+    // a cada vez que uma conversa é aberta (o que geraria mensagens repetidas).
+    window.addEventListener('chat:socket-ready', e => e.detail.socket.addEventListener('message', onWsMsgWidget));
+    if (window.__chatSocket) window.__chatSocket.addEventListener('message', onWsMsgWidget);
+
+    function onWsMsgWidget(e) {
+        let data;
+        try { data = JSON.parse(e.data); } catch (_) { return; }
+        if (data.type !== 'mensagem' || !conversaWidget || data.conversa_id !== conversaWidget.id) return;
+
+        const msgs = document.getElementById('chat-widget-msgs');
+        const vazio = msgs.querySelector('.chat-widget-loading');
+        if (vazio) vazio.remove();
+        const cls = data.user_id === window.__meuUserId ? 'chat-msg--meu' : 'chat-msg--deles';
+        const el = document.createElement('section');
+        el.className = `chat-msg ${cls}`;
+        el.innerHTML = conteudoMsgWidget(data);
+        msgs.appendChild(el);
+        msgs.scrollTop = msgs.scrollHeight;
+
+        if (data.user_id !== window.__meuUserId) {
+            window.__chatSocket?.send(JSON.stringify({ type: 'lido', conversa_id: conversaWidget.id }));
+        }
+    }
+
+    document.getElementById('chat-widget-btn-enviar')?.addEventListener('click', enviarMsgWidget);
+    document.getElementById('chat-widget-input')?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); enviarMsgWidget(); }
+    });
+
+    function enviarMsgWidget() {
+        const input = document.getElementById('chat-widget-input');
+        const texto = input.value.trim();
+        if (!texto || !conversaWidget) return;
+        input.value = '';
+        window.__chatSocket?.send(JSON.stringify({
+            type: 'mensagem',
+            conversa_id: conversaWidget.id,
+            tipo: 'texto',
+            conteudo: texto,
+        }));
+    }
+})();
+
+(function () {
+    function atualizarChatBadge(total) {
+        const badge = document.getElementById('chat-fab-badge');
+        if (!badge) return;
+        if (total > 0) {
+            badge.textContent = total > 99 ? '99+' : total;
+            badge.style.display = 'flex';
+        } else {
+            badge.style.display = 'none';
+        }
+    }
+    window.__atualizarChatBadge = atualizarChatBadge;
+
+    function mostrarPopupMensagem(msg) {
+        const popup = document.createElement('section');
+        popup.className = 'chat-popup';
+        const preview = msg.tipo === 'foto' ? '📷 Foto' : msg.tipo === 'audio' ? '🎤 Áudio' : escHtmlChat((msg.conteudo || '').slice(0, 50));
+        popup.innerHTML = `
+            <img src="${escHtmlChat(msg.autor_foto || '/images/avatar.png')}" class="chat-popup-avatar" alt="${escHtmlChat(msg.autor_nome)}">
+            <section class="chat-popup-body">
+                <section class="chat-popup-nome">${escHtmlChat(msg.autor_nome)}</section>
+                <section class="chat-popup-texto">${preview}</section>
+            </section>`;
+        popup.addEventListener('click', () => { window.location.href = `/chat/${msg.conversa_id}`; });
+        document.body.appendChild(popup);
+        setTimeout(() => popup.classList.add('chat-popup--visivel'), 10);
+        setTimeout(() => {
+            popup.classList.remove('chat-popup--visivel');
+            setTimeout(() => popup.remove(), 300);
+        }, 4000);
+    }
+
+    // Conexão única, reaproveitada por qualquer página (inclusive /chat, que
+    // escuta via window.__chatSocket em vez de abrir uma segunda conexão).
+    function conectarChatWs() {
+        const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+        const ws = new WebSocket(`${proto}://${location.host}/ws/chat`);
+        window.__chatSocket = ws;
+        // Avisa quem depende da conexão (ex: /chat) que há um socket novo —
+        // necessário porque, após reconectar, o objeto WebSocket muda e um
+        // listener preso ao antigo pararia de receber mensagens.
+        ws.addEventListener('open', () => {
+            window.dispatchEvent(new CustomEvent('chat:socket-ready', { detail: { socket: ws } }));
+        });
+
+        ws.addEventListener('message', e => {
+            let data;
+            try { data = JSON.parse(e.data); } catch (_) { return; }
+
+            if (data.type === 'nao_lidas') {
+                atualizarChatBadge(data.total);
+            }
+
+            if (data.type === 'mensagem' && data.user_id !== <%= locals.user ? user.id : 'null' %>) {
+                const naChatDessaConversa = window.location.pathname === `/chat/${data.conversa_id}`;
+                if (!naChatDessaConversa) {
+                    const badge = document.getElementById('chat-fab-badge');
+                    const atual = badge && badge.style.display !== 'none' ? (parseInt(badge.textContent, 10) || 0) : 0;
+                    atualizarChatBadge(atual + 1);
+                    if (!window.location.pathname.startsWith('/chat')) mostrarPopupMensagem(data);
+                }
+            }
+        });
+
+        ws.addEventListener('close', () => {
+            if (window.__chatSocket === ws) window.__chatSocket = null;
+            setTimeout(conectarChatWs, 3000);
+        });
+        ws.addEventListener('error', () => ws.close());
+    }
+    conectarChatWs();
+})();
+</script>
+<% } %>
+<%- include('./logout-modal') %>
+<% if (locals.user && user.status === 'pendente_exclusao') { %>
+<section class="banner-exclusao-pendente">
+    <i class="fas fa-triangle-exclamation"></i>
+    Sua conta está agendada para exclusão em <strong><%= user.diasRestantesExclusao ?? 30 %> dia(s)</strong>.
+    <strong>Cancele antes que o prazo expire.</strong>
+    <button id="btn-banner-cancelar" type="button" class="btn-cancelar-exclusao">
+        Cancelar exclusão
+    </button>
+</section>
+<script>
+async function cancelarExclusaoBanner() {
+    const btn = document.getElementById('btn-banner-cancelar');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Aguarde...'; }
+    try {
+        const res  = await fetch('/api/conta/cancelar-exclusao', { method: 'POST' });
+        const data = await res.json();
+        if (data.ok) {
+            const t = document.createElement('section');
+            t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1f1f1f;border:1px solid #22c55e;color:#fff;padding:14px 22px;border-radius:10px;font-size:.88rem;font-weight:600;z-index:999999;box-shadow:0 8px 32px rgba(0,0,0,.5);max-width:340px;text-align:center;';
+            t.textContent = 'Que bom ter você de volta, <%= user.nome.split(" ")[0] %>! 🎉 Sua conta está ativa.';
+            document.body.appendChild(t);
+            setTimeout(() => location.reload(), 2800);
+        } else {
+            if (btn) { btn.disabled = false; btn.innerHTML = 'Cancelar exclusão'; }
+        }
+    } catch (_) {
+        if (btn) { btn.disabled = false; btn.innerHTML = 'Cancelar exclusão'; }
+    }
+}
+document.getElementById('btn-banner-cancelar')?.addEventListener('click', cancelarExclusaoBanner);
+</script>
+<% } %>

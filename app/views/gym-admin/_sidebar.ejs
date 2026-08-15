@@ -1,0 +1,44 @@
+<aside class="admin-sidebar" id="ga-sidebar">
+    <section class="admin-sidebar-brand">
+        <img src="/images/logo.png" alt="FitCrew">
+        <section>
+            <span>FitCrew</span>
+            <small>Portal da Academia</small>
+        </section>
+    </section>
+
+    <nav class="admin-nav">
+        <section class="admin-nav-section">Principal</section>
+        <a href="/gym-admin/dashboard" class="admin-nav-item <%= page==='dashboard' ? 'active' : '' %>">
+            <i class="fas fa-chart-line"></i> Dashboard
+        </a>
+
+        <section class="admin-nav-section">Gestão</section>
+        <a href="/gym-admin/alunos" class="admin-nav-item <%= page==='alunos' ? 'active' : '' %>">
+            <i class="fas fa-users"></i> Alunos
+        </a>
+        <a href="/gym-admin/checkins" class="admin-nav-item <%= page==='checkins' ? 'active' : '' %>">
+            <i class="fas fa-calendar-check"></i> Check-ins
+        </a>
+        <a href="/gym-admin/relatorios" class="admin-nav-item <%= page==='relatorios' ? 'active' : '' %>">
+            <i class="fas fa-chart-bar"></i> Relatórios
+        </a>
+
+        <section class="admin-nav-section">Comunicação</section>
+        <a href="/gym-admin/notificacao" class="admin-nav-item <%= page==='notificacao' ? 'active' : '' %>">
+            <i class="fas fa-bell"></i> Notificações
+        </a>
+
+        <section class="admin-nav-section">Conta</section>
+        <a href="/gym-admin/logout" class="admin-nav-item">
+            <i class="fas fa-sign-out-alt"></i> Sair
+        </a>
+    </nav>
+
+    <section class="admin-sidebar-footer">
+        <span class="badge badge-muted" style="margin-bottom:6px;display:inline-block">
+            <i class="fas fa-building" style="margin-right:4px"></i><%= gymAdmin.gym_nome %>
+        </span>
+        <section style="font-size:0.72rem"><%= gymAdmin.nome %> · <span style="text-transform:capitalize"><%= gymAdmin.role %></span></section>
+    </section>
+</aside>

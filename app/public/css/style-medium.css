@@ -1,0 +1,257 @@
+/* ==============================
+   ESTILO PADRÃO PARA DESKTOP
+   ============================== */
+
+html {
+  font-size: 58%; /* escala geral */
+}
+
+.banner2 {
+  display: flex;
+  flex-wrap: wrap; /* permite quebrar se necessário */
+  align-items: center;
+  justify-content: center; /* centraliza horizontalmente */
+  gap: 2rem;
+  padding: 2rem 4rem;
+}
+
+.banner2 img {
+  flex: 1 1 45%; /* cresce proporcionalmente */
+  max-width: 480px;
+  min-width: 250px; /* evita ficar minúsculo em telas menores */
+  height: auto;
+}
+
+.text-banner {
+  flex: 1 1 50%; /* cresce proporcionalmente */
+  min-width: 250px; /* evita quebrar */
+}
+
+.text-banner h1 {
+  font-size: 2.8rem;
+}
+
+.text-banner p {
+  font-size: 1.8rem;
+  color: #747474;
+}
+
+/* ===== Modalidades ===== */
+.img-modalidades {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2rem;
+}
+
+.modalidade {
+  flex: 1 1 30%; /* largura base 30%, cresce se tiver espaço */
+  max-width: 350px;
+  aspect-ratio: 16/10;
+}
+
+.modalidade img {
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+}
+
+/* ===== Planos ===== */
+.planos {
+  max-width: 1200px;
+  padding: 5rem 2rem;
+}
+
+.planos p {
+  font-size: 1.8rem;
+  width: 90%;
+}
+
+/* ===== Cantos decorativos ===== */
+.corner-left, .corner-right {
+  width: 300px;
+  transform: translate(0, -50%);
+  opacity: 0.7;
+}
+
+.corner-left {
+  left: -5%;
+}
+
+.corner-right {
+  right: -5%;
+}
+
+/* ===== Parceiros ===== */
+.carrossel img {
+  width: 10rem;
+}
+
+/* ==============================
+   AJUSTES MEDIUM (769px–1440px)
+   ============================== */
+@media (min-width: 769px) and (max-width: 1440px) {
+
+  html {
+    font-size: 58%;
+  }
+
+  .banner2 img,
+  .text-banner {
+    flex: 1 1 auto; /* mantém proporcionalidade */
+  }
+
+  .text-banner h1 {
+    font-size: 2.6rem;
+  }
+
+  .text-banner p {
+    font-size: 1.6rem;
+  }
+
+  .modalidade {
+    flex: 1 1 28%;
+    max-width: 320px;
+  }
+
+  .planos p {
+    font-size: 1.6rem;
+  }
+    
+@media (min-width: 769px) and (max-width: 1440px) {
+    
+    .corner-left, .corner-right {
+        display: block !important;
+        width: 20vw !important; 
+        min-width: 150px; 
+        max-width: 250px; 
+        opacity: 0.6;
+        transform: translate(-50%, -50%); 
+    }
+    
+    .corner-right {
+        transform: translate(50%, -50%);
+    }
+
+}
+
+  .carrossel img {
+    width: 9rem;
+  }
+}
+
+/* ==============================
+   AJUSTES SMALL (576px–768px)
+   ============================== */
+@media (max-width: 768px) and (min-width: 576px) {
+
+  html {
+    font-size: 55%;
+  }
+
+  .banner2 {
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1.5rem 2rem;
+    justify-content: center; /* mantém centralizado */
+  }
+
+  .banner2 img {
+    width: 80%;
+    max-width: 400px;
+  }
+
+  .text-banner {
+    width: 90%;
+  }
+
+  .text-banner h1 {
+    font-size: 2.4rem;
+  }
+
+  .text-banner p {
+    font-size: 1.6rem;
+  }
+
+  .modalidade {
+    width: 48%;
+    min-width: unset;
+    aspect-ratio: 16/10;
+  }
+
+  .planos {
+    padding: 4rem 1.5rem;
+  }
+
+  .planos p {
+    font-size: 1.6rem;
+    width: 95%;
+  }
+
+  .corner-left, .corner-right {
+    width: 220px;
+  }
+
+  .carrossel img {
+    width: 8rem;
+  }
+}
+
+/* ==============================
+   AJUSTES MOBILE (até 575px)
+   ============================== */
+@media (max-width: 575px) {
+
+  html {
+    font-size: 50%;
+  }
+
+  .banner2 {
+    gap: 1rem;
+    padding: 1rem;
+    justify-content: center; /* centralizado no mobile também */
+  }
+
+  .banner2 img {
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .text-banner {
+    width: 100%;
+  }
+
+  .text-banner h1 {
+    font-size: 2rem;
+  }
+
+  .text-banner p {
+    font-size: 1.4rem;
+  }
+
+  .modalidade {
+    width: 90%;
+    margin: 0 auto;
+  }
+
+  .planos {
+    padding: 3rem 1rem;
+  }
+
+  .planos p {
+    font-size: 1.4rem;
+    width: 100%;
+  }
+
+  .corner-left, .corner-right {
+    width: 180px;
+  }
+
+  .carrossel img {
+    width: 6rem;
+  }
+
+  p {
+    font-size: 1.4rem;
+  }
+}

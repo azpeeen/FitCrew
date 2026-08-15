@@ -1,0 +1,29 @@
+<%
+const EVENTO_ICONE = { checkin: '📍', treino: '💪', conquista: '🏆' };
+const eventoPayload = item.evento_payload
+    ? (typeof item.evento_payload === 'string' ? JSON.parse(item.evento_payload) : item.evento_payload)
+    : {};
+const eventoDescricoes = {
+    checkin:   `Fez check-in${eventoPayload.gym_nome ? ' em ' + eventoPayload.gym_nome : ''}`,
+    treino:    `Concluiu um treino${eventoPayload.treino_nome ? ' · ' + eventoPayload.treino_nome : ''}${eventoPayload.total_exercicios ? ' · ' + eventoPayload.total_exercicios + ' exercícios' : ''}`,
+    conquista: `Desbloqueou ${eventoPayload.conquista_icone || '🏆'} ${eventoPayload.conquista_nome || 'uma conquista'}`,
+};
+%>
+<section class="post-card evento-card" data-id="<%= item.id %>" data-tipo="evento">
+    <section class="post-header">
+        <a href="/u/<%= item.autor_username || item.autor_id %>">
+            <img class="post-avatar" src="<%= item.autor_foto || '/images/avatar.png' %>" alt="<%= item.autor_nome %>">
+        </a>
+        <section class="post-header-info">
+            <a href="/u/<%= item.autor_username || item.autor_id %>" class="post-author-name"><%= item.autor_nome %></a>
+            <section class="post-header-sub">
+                <% if (item.autor_username) { %><span class="post-author-username">@<%= item.autor_username %></span><span class="post-dot-sep">·</span><% } %>
+                <span class="post-time" data-time="<%= new Date(item.created_at).toISOString() %>">agora</span>
+            </section>
+        </section>
+    </section>
+    <section class="evento-body">
+        <span class="evento-icone"><%= EVENTO_ICONE[item.evento_tipo] || '📌' %></span>
+        <span class="evento-descricao"><%= eventoDescricoes[item.evento_tipo] || 'Teve uma atividade' %></span>
+    </section>
+</section>

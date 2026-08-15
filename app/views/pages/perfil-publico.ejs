@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<%- include('../partials/seo') %>
+<link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin><link rel="stylesheet" href="/css/area-aluno.css">
+<link rel="stylesheet" href="/css/footer.css">
+</head>
+<body>
+
+<% if (visitante) { %>
+<%- include('../partials/header-aluno') %>
+<section class="aluno-dashboard">
+    <section class="sidebar-overlay" id="sidebarOverlay"></section>
+    <%- include('../partials/sidebar-aluno') %>
+    <section class="aluno-main">
+<% } else { %>
+<header class="perfil-publico-header">
+    <section class="perfil-publico-header-inner">
+        <a href="/" class="perfil-publico-logo">
+            <img src="/images/logo.png" alt="FitCrew" width="32" height="32">
+            <span>FitCrew</span>
+        </a>
+        <section class="perfil-publico-header-actions">
+            <a href="/login" class="btn-outline-sm">Entrar</a>
+            <a href="/register" class="btn-gold-sm">Cadastrar</a>
+        </section>
+    </section>
+</header>
+<main class="pp-main">
+<% } %>
+
+<% if (isDono) { %>
+<section class="pp-own-header">
+    <h1 class="pp-own-title"><i class="fas fa-user-circle"></i> Meu Perfil</h1>
+    <a href="/perfil/editar" class="btn-pedir-ia" style="text-decoration:none">
+        <i class="fas fa-edit"></i> Editar perfil
+    </a>
+</section>
+<% } %>
+
+<!-- HERO -->
+<section class="pp-hero">
+    <section class="pp-avatar-wrap">
+        <img class="pp-avatar"
+             src="<%= perfil.profile_photo || '/images/avatar.png' %>"
+             alt="<%= perfil.nome %>">
+        <% if (perfil.instagram_username) { %>
+        <a class="pp-insta-link"
+           href="https://instagram.com/<%= perfil.instagram_username %>"
+           target="_blank" rel="noopener noreferrer">
+            <i class="fab fa-instagram"></i> @<%= perfil.instagram_username %>
+        </a>
+        <% } %>
+    </section>
+    <section class="pp-hero-info">
+        <h1 class="pp-nome"><%= perfil.nome %></h1>
+        <% if (perfil.username) { %><p class="pp-username">@<%= perfil.username %></p><% } %>
+        <% if (perfil.bio) { %>
+        <p class="pp-bio"><%= perfil.bio %></p>
+        <% } %>
+        <p class="pp-since">
+            <i class="fas fa-calendar-alt"></i>
+            Membro desde <%= new Date(perfil.created_at).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }) %>
+        </p>
+        <section class="pp-hero-badges">
+            <% if (streak > 0) { %>
+            <span class="pp-badge pp-badge--streak">🔥 <%= streak %> dia<%= streak !== 1 ? 's' : '' %></span>
+            <% } %>
+            <% conquistasHero.forEach(c => { %>
+            <span class="pp-badge pp-badge--conquista pp-badge--<%= c.tier %>">
+                <span class="pp-badge-icone"><%= c.icone %></span>
+                <span><%= c.nome %></span>
+            </span>
+            <% }) %>
+        </section>
+        <% if (visitante && !isDono) { %>
+        <section class="pp-amizade-wrap" id="pp-amizade-wrap" data-uid="<%= perfilId %>" data-fid="<%= fsId || '' %>">
+            <% if (statusAmizade === 'none') { %>
+            <button class="btn-amizade-adicionar" id="pp-btn-adicionar">
+                <i class="fas fa-user-plus"></i> Adicionar amigo
+            </button>
+            <% } else if (statusAmizade === 'pending_sent') { %>
+            <button class="btn-amizade-pendente" disabled>
+                <i class="fas fa-clock"></i> Solicitação enviada
+            </button>
+            <button class="btn-amizade-remover" id="pp-btn-cancelar">Cancelar</button>
+            <% } else if (statusAmizade === 'pending_received') { %>
+            <button class="btn-amizade-adicionar" id="pp-btn-aceitar">
+                <i class="fas fa-check"></i> Aceitar solicitação
+            </button>
+            <button class="btn-amizade-remover" id="pp-btn-recusar">
+                <i class="fas fa-times"></i> Recusar
+            </button>
+            <% } else if (statusAmizade === 'friends') { %>
+            <button class="btn-amizade-aceito" disabled>
+                <i class="fas fa-user-check"></i> Amigos
+            </button>
+            <button type="button" class="btn-enviar-msg" id="pp-btn-mensagem">
+                <i class="fas fa-comment"></i> Mensagem
+            </button>
+            <button class="btn-amizade-remover" id="pp-btn-remover">Remover</button>
+            <% } %>
+        </section>
+        <% } %>
+    </section>
+</section>
+
+<!-- STATS -->
+<section class="pp-stats">
+    <section class="pp-stat">
+        <section class="pp-stat-icon"><i class="fas fa-dumbbell"></i></section>
+        <span class="pp-stat-num"><%= totalSessoes %></span>
+        <span class="pp-stat-label">Sessões</span>
+    </section>
+    <section class="pp-stat">
+        <section class="pp-stat-icon"><i class="fas fa-trophy"></i></section>
+        <span class="pp-stat-num"><%= conquistas.length %></span>
+        <span class="pp-stat-label">Conquistas</span>
+    </section>
+    <section class="pp-stat">
+        <section class="pp-stat-icon"><i class="fas fa-fire"></i></section>
+        <span class="pp-stat-num"><%= streak %></span>
+        <span class="pp-stat-label">Streak 🔥</span>
+    </section>
+</section>
+
+<!-- CONQUISTAS -->
+<% if (conquistas.length > 0) { %>
+<p class="pp-section-title">
+    <i class="fas fa-trophy"></i>
+    Conquistas desbloqueadas
+    <span class="pp-count-badge"><%= conquistas.length %></span>
+</p>
+<section class="pp-conquistas">
+    <% conquistas.forEach(c => { %>
+    <section class="pp-conquista pp-conquista--<%= c.tier %>">
+        <span class="pp-conquista-icon"><%= c.icone %></span>
+        <section class="pp-conquista-info">
+            <span class="pp-conquista-nome"><%= c.nome %></span>
+            <span class="pp-conquista-tier"><%= c.tier %></span>
+        </section>
+    </section>
+    <% }) %>
+</section>
+<% } else { %>
+<section class="pp-vazio">
+    <i class="fas fa-trophy" style="font-size:2rem;color:#333;display:block;margin-bottom:12px"></i>
+    Nenhuma conquista desbloqueada ainda.
+</section>
+<% } %>
+
+<% if (visitante) { %>
+    </section>
+</section>
+<% } else { %>
+</main>
+<%- include('../partials/footer') %>
+<% } %>
+
+<% if (visitante && !isDono) { %>
+<script>
+(function () {
+    var wrap = document.getElementById('pp-amizade-wrap');
+    if (!wrap) return;
+    var uid = wrap.dataset.uid;
+    var fid = wrap.dataset.fid;
+
+    async function solicitar() {
+        var btn = document.getElementById('pp-btn-adicionar');
+        if (!btn) return;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+        var r = await fetch('/api/amizades/solicitar/' + uid, { method: 'POST' }).then(function(x){ return x.json(); }).catch(function(){ return { ok: false }; });
+        if (r.ok) {
+            btn.innerHTML = '<i class="fas fa-clock"></i> Solicitação enviada';
+            btn.className = 'btn-amizade-pendente';
+            btn.disabled = true;
+        } else {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-user-plus"></i> Adicionar amigo';
+        }
+    }
+
+    async function aceitar() {
+        var btn = document.getElementById('pp-btn-aceitar');
+        if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; }
+        var r = await fetch('/api/amizades/' + fid + '/aceitar', { method: 'POST' }).then(function(x){ return x.json(); }).catch(function(){ return { ok: false }; });
+        if (r.ok) location.reload();
+        else if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check"></i> Aceitar solicitação'; }
+    }
+
+    async function recusar() {
+        var r = await fetch('/api/amizades/' + fid + '/recusar', { method: 'POST' }).then(function(x){ return x.json(); }).catch(function(){ return { ok: false }; });
+        if (r.ok) location.reload();
+    }
+
+    async function remover() {
+        if (!confirm('Remover amigo?')) return;
+        var r = await fetch('/api/amizades/' + uid, { method: 'DELETE' }).then(function(x){ return x.json(); }).catch(function(){ return { ok: false }; });
+        if (r.ok) location.reload();
+    }
+
+    async function enviarMensagem() {
+        var btn = document.getElementById('pp-btn-mensagem');
+        if (btn) { btn.disabled = true; }
+        var r = await fetch('/api/chat/conversas', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: parseInt(uid, 10) }),
+        }).then(function(x){ return x.json(); }).catch(function(){ return { ok: false }; });
+        if (r.ok) {
+            window.location.href = '/chat/' + r.conversaId;
+        } else {
+            if (btn) { btn.disabled = false; }
+            alert(r.erro || 'Não foi possível iniciar a conversa.');
+        }
+    }
+
+    wrap.addEventListener('click', function (e) {
+        if (e.target.closest('#pp-btn-adicionar')) { solicitar();      return; }
+        if (e.target.closest('#pp-btn-aceitar'))   { aceitar();        return; }
+        if (e.target.closest('#pp-btn-recusar'))   { recusar();        return; }
+        if (e.target.closest('#pp-btn-cancelar'))  { remover();        return; }
+        if (e.target.closest('#pp-btn-mensagem'))  { enviarMensagem(); return; }
+        if (e.target.closest('#pp-btn-remover'))   { remover();        }
+    });
+})();
+</script>
+<% } %>
+
+<% if (visitante) { %>
+<script>
+(function () {
+    document.addEventListener('DOMContentLoaded', function () {
+        var btn     = document.getElementById('menuToggle');
+        var sidebar = document.querySelector('.aluno-sidebar');
+        var overlay = document.getElementById('sidebarOverlay');
+        if (!sidebar || !overlay) return;
+        var closeBtn = document.createElement('button');
+        closeBtn.className = 'aluno-sidebar-close';
+        closeBtn.setAttribute('aria-label', 'Fechar menu');
+        closeBtn.innerHTML = '<i class="fas fa-times"></i>';
+        sidebar.insertBefore(closeBtn, sidebar.firstChild);
+        function openMenu()  { sidebar.classList.add('open'); overlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
+        function closeMenu() { sidebar.classList.remove('open'); overlay.classList.remove('open'); document.body.style.overflow = ''; }
+        if (btn) btn.addEventListener('click', openMenu);
+        overlay.addEventListener('click', closeMenu);
+        closeBtn.addEventListener('click', closeMenu);
+        sidebar.querySelectorAll('a').forEach(function (a) { a.addEventListener('click', closeMenu); });
+    });
+})();
+</script>
+<% } %>
+
+</body>
+</html>

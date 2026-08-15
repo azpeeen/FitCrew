@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro Enviado — FitCrew</title>
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin.css">
+    <style>
+    .conf-page { min-height:100vh; background:#0a0a0a; display:flex; align-items:center; justify-content:center; padding:24px; }
+    .conf-box  { max-width:480px; text-align:center; }
+    .conf-icon { width:80px; height:80px; border-radius:50%; background:rgba(34,197,94,0.12); border:2px solid rgba(34,197,94,0.3); display:flex; align-items:center; justify-content:center; margin:0 auto 24px; font-size:2rem; color:#22c55e; animation:confPulse 2.5s ease-in-out infinite; }
+    @keyframes confPulse { 0%,100%{box-shadow:0 0 12px rgba(34,197,94,0.2)} 50%{box-shadow:0 0 30px rgba(34,197,94,0.4)} }
+    .conf-box h1 { font-size:1.8rem; font-weight:800; margin-bottom:8px; }
+    .conf-box p  { color:#888; font-size:0.9rem; line-height:1.6; margin-bottom:12px; }
+    .steps { background:#141414; border:1px solid #222; border-radius:12px; padding:20px; margin:24px 0; text-align:left; }
+    .step  { display:flex; align-items:center; gap:12px; font-size:0.85rem; color:#ccc; margin-bottom:14px; }
+    .step:last-child { margin-bottom:0; }
+    .step-num { width:28px; height:28px; border-radius:50%; background:rgba(201,139,29,0.15); border:1px solid rgba(201,139,29,0.3); color:#C98B1D; font-size:0.75rem; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    </style>
+</head>
+<body>
+<section class="conf-page">
+    <section class="conf-box">
+        <section class="conf-icon"><i class="fas fa-check"></i></section>
+        <h1>Cadastro enviado!</h1>
+        <p>Recebemos o cadastro de <strong style="color:#f0f0f0"><%= gym_nome %></strong>.<br>Enviamos uma confirmação para <strong style="color:#f0f0f0"><%= gestor_email %></strong>.</p>
+
+        <section class="steps">
+            <section class="step">
+                <section class="step-num">1</section>
+                <span>Nossa equipe analisa os dados da academia</span>
+            </section>
+            <section class="step">
+                <section class="step-num">2</section>
+                <span>Você recebe um e-mail com as credenciais de acesso</span>
+            </section>
+            <section class="step">
+                <section class="step-num">3</section>
+                <span>Acesse o Portal da Academia e comece a gerenciar seus alunos</span>
+            </section>
+        </section>
+
+        <p style="font-size:0.8rem">Prazo estimado: <strong style="color:#f0f0f0">até 24 horas</strong></p>
+
+        <section style="display:flex;gap:10px;justify-content:center;margin-top:24px">
+            <a href="/" class="btn btn-outline"><i class="fas fa-home"></i> Voltar ao site</a>
+            <a href="/gym-admin/login" class="btn btn-gold"><i class="fas fa-sign-in-alt"></i> Portal da Academia</a>
+        </section>
+    </section>
+</section>
+</body>
+</html>

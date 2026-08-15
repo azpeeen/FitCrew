@@ -1,0 +1,102 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financeiro — FitCrew Admin</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body class="admin-body">
+<section class="admin-wrapper">
+    <%- include('../partials/admin-sidebar') %>
+    <section class="admin-content">
+        <%- include('../partials/admin-topbar') %>
+        <main class="admin-main">
+            <h1 class="admin-page-title">Financeiro</h1>
+            <p class="admin-page-subtitle">Visão financeira consolidada</p>
+
+            <!-- Sub-navegação -->
+            <section class="flex gap-10 mb-16" style="margin-bottom:20px">
+                <a href="/admin/financeiro" class="btn btn-gold btn-sm">Visão Geral</a>
+                <a href="/admin/financeiro/receitas" class="btn btn-outline btn-sm">Receitas</a>
+                <a href="/admin/financeiro/inadimplentes" class="btn btn-outline btn-sm">Inadimplentes <span class="badge badge-error" style="font-size:.7rem;padding:1px 6px"><%= inadimplentes %></span></a>
+            </section>
+
+            <!-- KPIs -->
+            <section class="admin-kpi-grid">
+                <section class="admin-kpi">
+                    <section class="admin-kpi-icon"><i class="fas fa-dollar-sign"></i></section>
+                    <section>
+                        <section class="admin-kpi-label">Receita Mês Atual</section>
+                        <section class="admin-kpi-value">R$ <%= receitaMes %></section>
+                        <section class="admin-kpi-sub <%= parseFloat(variacao) >= 0 ? 'text-success' : 'text-error' %>">
+                            <%= parseFloat(variacao) >= 0 ? '▲' : '▼' %> <%= Math.abs(variacao) %>% vs mês anterior
+                        </section>
+                    </section>
+                </section>
+                <section class="admin-kpi">
+                    <section class="admin-kpi-icon info"><i class="fas fa-history"></i></section>
+                    <section>
+                        <section class="admin-kpi-label">Mês Anterior</section>
+                        <section class="admin-kpi-value">R$ <%= receitaAnterior %></section>
+                    </section>
+                </section>
+                <section class="admin-kpi">
+                    <section class="admin-kpi-icon error"><i class="fas fa-exclamation-triangle"></i></section>
+                    <section>
+                        <section class="admin-kpi-label">Inadimplentes</section>
+                        <section class="admin-kpi-value"><%= inadimplentes %></section>
+                        <section class="admin-kpi-sub">pagamentos pendentes</section>
+                    </section>
+                </section>
+            </section>
+
+            <!-- Gráfico receita mensal -->
+            <section class="admin-card" style="margin-bottom:20px">
+                <section class="admin-card-header">
+                    <span class="admin-card-title"><i class="fas fa-chart-area text-gold"></i> Receita Mensal — Últimos 12 Meses</span>
+                </section>
+                <section class="admin-card-body">
+                    <section class="chart-wrap"><canvas id="chartReceita"></canvas></section>
+                </section>
+            </section>
+
+            <!-- Receita por plano -->
+            <section class="admin-card">
+                <section class="admin-card-header"><span class="admin-card-title">Receita por Plano</span></section>
+                <section class="admin-card-body no-pad">
+                    <table class="admin-table">
+                        <thead><tr><th>Plano</th><th>Assinantes</th><th>Receita Total</th></tr></thead>
+                        <tbody>
+                        <% receitaPorPlano.forEach(p => { %>
+                        <tr>
+                            <td class="fw-600"><%= p.nome %></td>
+                            <td><span class="badge badge-muted"><%= p.count %></span></td>
+                            <td class="fw-600 text-gold">R$ <%= Number(p.valor).toFixed(2) %></td>
+                        </tr>
+                        <% }) %>
+                        </tbody>
+                    </table>
+                </section>
+            </section>
+        </main>
+    </section>
+</section>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="/js/admin.js"></script>
+<script>
+Chart.getChart(document.getElementById('chartReceita'))?.destroy();
+new Chart(document.getElementById('chartReceita'), {
+    type: 'line',
+    data: {
+        labels: <%- meses %>,
+        datasets: [{ label: 'Receita R$', data: <%- receitaMensal %>, borderColor: '#C98B1D', backgroundColor: 'rgba(201,139,29,0.1)', tension: 0.4, fill: true }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { color: '#2A2A2A' }, ticks: { color: '#9A9A9A' } }, y: { grid: { color: '#2A2A2A' }, ticks: { color: '#9A9A9A', callback: v => 'R$ ' + v }, beginAtZero: true } } }
+});
+</script>
+</body>
+</html>

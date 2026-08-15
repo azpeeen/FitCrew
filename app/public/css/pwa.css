@@ -1,0 +1,282 @@
+.pwa-banner {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 32px);
+  max-width: 520px;
+  background: #232323;
+  border: 1px solid #333;
+  border-radius: 16px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  z-index: 9999;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,215,0,0.15);
+  animation: slideUp 0.4s cubic-bezier(0.34, 1.2, 0.64, 1);
+}
+@keyframes slideUp {
+  from { transform: translateX(-50%) translateY(calc(100% + 24px)); opacity: 0; }
+  to   { transform: translateX(-50%) translateY(0);                  opacity: 1; }
+}
+
+.pwa-banner-icon img {
+  border-radius: 10px;
+  flex-shrink: 0;
+  display: block;
+}
+
+.pwa-banner-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+.pwa-banner-text strong {
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pwa-banner-text span {
+  color: #ccc;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.pwa-btn-install {
+  background: #FFD700;
+  color: #000;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-weight: 800;
+  font-size: 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+.pwa-btn-install:hover {
+  background: #FFC200;
+  transform: scale(1.04);
+}
+
+.pwa-btn-close {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  background: none;
+  border: none;
+  color: #777;
+  font-size: 13px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 2px 4px;
+  transition: color 0.15s ease;
+}
+.pwa-btn-close:hover { color: #ccc; }
+
+/* ── Push notification opt-in banner (área do aluno) ── */
+.push-notif-banner {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9999;
+  max-width: 320px;
+  width: calc(100% - 32px);
+  background: #1a1a1a;
+  border: 1px solid #2e2e2e;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.72), 0 2px 8px rgba(0,0,0,.4);
+  padding: 14px 14px 14px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: slideInRight 0.35s cubic-bezier(.22,.68,0,1.2);
+}
+.push-notif-icon {
+  font-size: 1.45rem;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.push-notif-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.push-notif-text strong {
+  color: #fff;
+  font-size: 0.84rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.push-notif-text {
+  color: #bbb;
+  font-size: 0.76rem;
+  line-height: 1.35;
+}
+.push-notif-action {
+  background: #FFD700;
+  color: #1a1a1a;
+  border: none;
+  border-radius: 10px;
+  padding: 7px 13px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.15s, transform 0.1s;
+}
+.push-notif-action:hover  { background: #e6c200; }
+.push-notif-action:active { transform: scale(0.95); }
+.push-notif-close {
+  position: absolute;
+  top: 7px;
+  right: 9px;
+  background: none;
+  border: none;
+  color: #555;
+  font-size: 0.78rem;
+  cursor: pointer;
+  padding: 2px 4px;
+  line-height: 1;
+  transition: color 0.15s;
+}
+.push-notif-close:hover { color: #aaa; }
+
+/* ── Cookie consent banner ── */
+.cookie-banner {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 340px;
+  background: #ffffff;
+  border-radius: 12px;
+  border-top: 4px solid #FFD700;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  padding: 24px;
+  z-index: 9998;
+  animation: slideInRight 0.4s ease;
+}
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(40px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes slideUpMobileCookie {
+  from { opacity: 0; transform: translateY(100%); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.cookie-content {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: stretch;
+}
+.cookie-content p {
+  color: #333;
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0;
+}
+.cookie-link {
+  color: #B8960C;
+  font-weight: bold;
+  font-size: 14px;
+  text-decoration: underline;
+}
+.cookie-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.cookie-btn-accept {
+  background: #FFD700;
+  color: #000;
+  border: none;
+  padding: 10px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+  width: 100%;
+}
+.cookie-btn-accept:hover { background: #FFC200; }
+.cookie-btn-decline {
+  background: none;
+  border: 1.5px solid #aaa;
+  color: #444;
+  padding: 8px;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  width: 100%;
+  text-align: center;
+}
+.cookie-btn-decline:hover { border-color: #666; color: #111; }
+
+@media (max-width: 480px) {
+  .cookie-banner {
+    bottom: 0;
+    right: 0;
+    left: 0;
+    width: 100%;
+    border-radius: 16px 16px 0 0;
+    border-top: 4px solid #FFD700;
+    border-left: none;
+    border-right: none;
+    padding: 20px 16px;
+    z-index: 10000;
+    animation: slideUpMobileCookie 0.4s ease;
+  }
+
+  .cookie-actions {
+    flex-direction: row;
+    gap: 8px;
+  }
+
+  .cookie-btn-accept {
+    flex: 2;
+  }
+
+  .cookie-btn-decline {
+    flex: 1;
+    padding: 10px 8px;
+    font-size: 12px;
+  }
+}
+
+
+@media (max-width: 540px) {
+  .pwa-banner {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-width: 100%;
+    border-radius: 14px 14px 0 0;
+    transform: none;
+    flex-wrap: wrap;
+    padding: 14px 16px 18px;
+    animation: slideUpMobile 0.4s cubic-bezier(0.34, 1.2, 0.64, 1);
+  }
+  @keyframes slideUpMobile {
+    from { transform: translateY(100%); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+  .pwa-btn-install {
+    width: 100%;
+    text-align: center;
+    padding: 12px;
+    font-size: 14px;
+  }
+}
