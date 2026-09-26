@@ -17,7 +17,7 @@ async function main() {
         port    : Number(process.env.DB_PORT) || 3306,
     });
 
-    const email = process.env.ADMIN_EMAIL    || 'admin@fitcrew.net';
+    const email = process.env.ADMIN_EMAIL    || 'admin@gymbros.app.br';
     const senha = process.env.ADMIN_PASSWORD || 'admin123';
     const nome  = 'Admin';
     const role  = 'owner';

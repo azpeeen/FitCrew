@@ -48,8 +48,8 @@ async function send({ to, subject, html }) {
         return { ok: false, skipped: true };
     }
     const response = await resend.emails.send({
-        from: 'FitCrew <noreply@fitcrew.net>',
-        reply_to: 'contato@fitcrew.net',
+        from: 'FitCrew <noreply@gymbros.app.br>',
+        reply_to: 'contato@gymbros.app.br',
         to: [to],
         subject,
         html,
@@ -107,7 +107,7 @@ async function sendAlertaAdminNovaAcademia({ gym, gestor, adminAcademiaId }) {
 <section class="btn-wrap"><a href="${BASE_URL}/admin/academias/${adminAcademiaId}" class="btn">Aprovar no Painel</a></section>`;
 
     return send({
-        to: 'admin@fitcrew.net',
+        to: 'admin@gymbros.app.br',
         subject: `Nova academia aguardando aprovação: ${esc(gym.nome)}`,
         html: wrapEmail(corpo),
     });

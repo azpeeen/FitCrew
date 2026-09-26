@@ -103,8 +103,8 @@ Equipe FitCrew
 
   try {
     const response = await resend.emails.send({
-      from: 'FitCrew <noreply@fitcrew.net>',
-      reply_to: 'contato@fitcrew.net',
+      from: 'FitCrew <noreply@gymbros.app.br>',
+      reply_to: 'contato@gymbros.app.br',
       to: [to],
       subject: `FitCrew | Detalhes da sua assinatura — ${planoNome}`,
       html,

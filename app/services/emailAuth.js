@@ -98,7 +98,7 @@ async function enviarRecuperacaoSenha({ to, nome, link }) {
             <td style="background:#111;padding:24px 40px;border-top:1px solid #222;">
               <p style="margin:0;font-size:0.78rem;color:#555;line-height:1.8;text-align:center;">
                 <strong style="color:#888;">FitCrew</strong><br>
-                contato@fitcrew.net &bull; fitcrew.net
+                contato@gymbros.app.br &bull; fitcrew.net
               </p>
               <p style="margin:16px 0 0;font-size:0.72rem;color:#444;text-align:center;">
                 Você está recebendo este email porque solicitou a redefinição de senha.
@@ -126,8 +126,8 @@ Se você não solicitou a redefinição de senha, ignore este email — sua senh
 Equipe FitCrew`;
 
   const response = await resend.emails.send({
-    from: 'FitCrew <noreply@fitcrew.net>',
-    reply_to: 'contato@fitcrew.net',
+    from: 'FitCrew <noreply@gymbros.app.br>',
+    reply_to: 'contato@gymbros.app.br',
     to: [to],
     subject: 'Redefinição de senha — FitCrew',
     html,
