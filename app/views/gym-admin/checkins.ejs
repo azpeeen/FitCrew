@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check-ins — Portal da Academia · FitCrew</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin.css">
+    <style>
+    .freq-chart { display:flex;align-items:flex-end;gap:2px;height:80px;margin-bottom:6px; }
+    .freq-bar { flex:1;background:rgba(201,139,29,0.3);border-radius:2px 2px 0 0;min-width:3px;transition:background 0.2s; }
+    .freq-bar:hover { background:var(--gold); }
+    </style>
+</head>
+<body class="admin-body">
+<section class="admin-wrapper">
+    <%- include('./_sidebar') %>
+    <section class="admin-content">
+        <header class="admin-topbar">
+            <span class="admin-topbar-title">Check-ins</span>
+            <section class="admin-topbar-right">
+                <span class="admin-topbar-admin">Olá, <strong><%= gymAdmin.nome.split(' ')[0] %></strong></span>
+                <a href="/gym-admin/logout" class="btn admin-btn-logout"><i class="fas fa-sign-out-alt"></i> Sair</a>
+            </section>
+        </header>
+
+        <main class="admin-main">
+            <h1 class="admin-page-title">Check-ins</h1>
+            <p class="admin-page-subtitle">Frequência dos alunos de <%= gymAdmin.gym_nome %></p>
+
+            <section class="admin-toolbar">
+                <a href="?filtro=hoje"   class="btn <%= filtro==='hoje'   ? 'btn-gold' : 'btn-outline' %>">Hoje</a>
+                <a href="?filtro=semana" class="btn <%= filtro==='semana' ? 'btn-gold' : 'btn-outline' %>">Esta semana</a>
+                <a href="?filtro=mes"    class="btn <%= filtro==='mes'    ? 'btn-gold' : 'btn-outline' %>">Este mês</a>
+            </section>
+
+            <% if (frequencia.length > 0) { %>
+            <section class="admin-card" style="margin-bottom:20px">
+                <section class="admin-card-header">
+                    <span class="admin-card-title">Frequência — Últimos 30 dias</span>
+                    <span class="badge badge-gold"><%= frequencia.reduce((s,f) => s + f.total, 0) %> check-ins</span>
+                </section>
+                <section class="admin-card-body">
+                    <% const maxBar = Math.max(...frequencia.map(f => f.total), 1); %>
+                    <section class="freq-chart">
+                        <% frequencia.forEach(f => { %>
+                        <section class="freq-bar" style="height:<%= Math.round((f.total/maxBar)*80) %>px"
+                            title="<%= new Date(f.dia).toLocaleDateString('pt-BR') %>: <%= f.total %>"></section>
+                        <% }) %>
+                    </section>
+                    <section style="display:flex;justify-content:space-between;font-size:0.65rem;color:var(--text-muted)">
+                        <span><%= frequencia.length>0 ? new Date(frequencia[0].dia).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}) : '' %></span>
+                        <span><%= frequencia.length>0 ? new Date(frequencia[frequencia.length-1].dia).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}) : '' %></span>
+                    </section>
+                </section>
+            </section>
+            <% } %>
+
+            <section class="admin-card">
+                <section class="admin-card-header">
+                    <span class="admin-card-title">
+                        <% if (filtro==='hoje') { %>Entradas de Hoje<% } else if (filtro==='semana') { %>Entradas da Semana<% } else { %>Entradas do Mês<% } %>
+                    </span>
+                    <span class="badge badge-muted"><%= checkins.length %> registros</span>
+                </section>
+                <section class="admin-card-body no-pad">
+                    <section class="admin-table-wrap">
+                        <% if (checkins.length === 0) { %>
+                        <section style="text-align:center;padding:40px;color:var(--text-muted)">
+                            <i class="fas fa-calendar-times" style="font-size:2rem;opacity:.2;display:block;margin-bottom:10px"></i>
+                            Nenhum check-in neste período.
+                        </section>
+                        <% } else { %>
+                        <table class="admin-table">
+                            <thead><tr><th>Aluno</th><th>E-mail</th><th>Data</th><th>Hora</th></tr></thead>
+                            <tbody>
+                            <% checkins.forEach(c => { %>
+                            <tr>
+                                <td class="fw-600"><a href="/gym-admin/alunos/<%= c.user_id %>"><%= c.nome %></a></td>
+                                <td class="text-muted"><%= c.email %></td>
+                                <td><%= new Date(c.data).toLocaleDateString('pt-BR') %></td>
+                                <td class="text-muted"><%= c.hora ? String(c.hora).slice(0,5) : '—' %></td>
+                            </tr>
+                            <% }) %>
+                            </tbody>
+                        </table>
+                        <% } %>
+                    </section>
+                </section>
+            </section>
+        </main>
+    </section>
+</section>
+</body>
+</html>

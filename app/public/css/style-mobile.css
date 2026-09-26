@@ -1,0 +1,385 @@
+/* ===================== MOBILE HARDCORE ===================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 56.25%;
+    overflow-x: hidden;
+    max-width: 100%;
+    touch-action: pan-y;
+}
+
+body {
+    font-size: 56.25%;
+    overflow-x: hidden !important;
+    width: 100% !important;
+    max-width: 100%;
+    position: relative;
+    font-family: 'Arial', sans-serif;
+    color: #FFFFFF;
+    touch-action: pan-y;
+}
+
+/* Títulos e textos */
+h1 {
+    font-size: 2.4rem;
+}
+
+h2 {
+    font-size: 2.4rem;
+    color: #000;
+    text-align: center;
+    margin: 4rem 0 2rem 0;
+}
+
+p, a {
+    font-size: 1.6rem;
+    line-height: 1.5;
+}
+
+/* Banner principal */
+.banner-home img {
+    width: 100% !important;
+    height: auto !important;
+    display: block;
+}
+
+/* Troca de banner em celular */
+@media (max-width: 768px) {
+    .banner-home img {
+        content: url("/images/banner-mobile.png") !important;
+    }
+}
+
+/* Banner 2 */
+.banner2 {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    padding: 2rem !important;
+    gap: 2rem !important;
+    margin-bottom: 4rem !important;
+    overflow: hidden !important; /* força não empilhar fora da tela */
+    width: 100% !important;
+}
+
+.banner2 img {
+    max-width: 90% !important;
+    height: auto !important;
+}
+
+.text-banner {
+    width: 100% !important;
+}
+
+.text-banner h1 {
+    font-size: 2.4rem !important;
+    margin-bottom: 1rem !important;
+    color: #C5A349 !important;
+    line-height: 1.2 !important; /* evita quebra feia */
+    word-break: keep-all !important;
+}
+
+.text-banner p {
+    font-size: 1.6rem !important;
+    color: #000000 !important;
+    line-height: 1.4 !important;
+    word-break: keep-all !important;
+}
+
+/* Planos */
+.planos {
+    padding: 4rem 2rem !important;
+    text-align: center !important;
+}
+
+.planos p {
+    font-size: 1.6rem !important;
+    color: #000000 !important;
+    margin-bottom: 2rem !important;
+    padding-bottom: 1.5rem !important;
+    position: relative !important;
+}
+
+.planos p::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    height: 2px;
+    background: linear-gradient(90deg, #B8860B, #FFD700, #B8860B);
+}
+
+/* Cantos decorativos */
+.corner-left,
+.corner-right {
+    display: none !important;
+}
+
+/* Botão Veja Mais */
+.btn-veja-mais {
+    display: inline-block;
+    padding: 12px 24px;
+    margin-top: 20px;
+    font-size: 16px;
+    font-weight: bold;
+    text-decoration: none;
+    background: linear-gradient(90deg, #B8860B, #FFD700, #B8860B);
+    background-size: 200%;
+    color: transparent;
+    -webkit-background-clip: text;
+    border: 2px solid #B8860B;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-veja-mais::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, #B8860B, #FFD700, #B8860B);
+    background-size: 200%;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+}
+
+.btn-veja-mais:hover {
+    transform: scale(1.05);
+    color: white !important;
+    -webkit-background-clip: initial;
+    background: transparent;
+    border-color: #FFD700;
+}
+
+.btn-veja-mais:hover::before {
+    opacity: 1;
+    animation: gradient 3s ease infinite;
+}
+
+@keyframes gradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Modalidades */
+.img-modalidades {
+    display: flex;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 2rem !important;
+    padding: 2rem !important;
+}
+
+.modalidade {
+    position: relative !important;
+    overflow: hidden !important;
+    border-radius: 1.5rem !important;
+    width: 90% !important;
+    max-width: 400px !important;
+    height: 200px !important;
+}
+
+.modalidade img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.modalidade span {
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    color: white !important;
+    font-size: 1.8rem !important;
+    font-weight: bold !important;
+    opacity: 0 !important;
+    transition: opacity 0.3s ease;
+    text-shadow: 0 0 10px rgba(0,0,0,0.8) !important;
+}
+
+.modalidade:hover img {
+    transform: scale(1.05);
+    filter: brightness(0.4);
+}
+
+.modalidade:hover span {
+    opacity: 1;
+}
+
+/* Categorias de Treino */
+.categorias-treino {
+    margin-top: 4rem !important;
+    margin-bottom: 4rem !important;
+    padding: 2.5rem 0 2rem !important;
+}
+
+.categorias-treino h2 {
+    font-size: 2.2rem !important;
+    margin-bottom: 0.4rem !important;
+}
+
+.categorias-subtitle {
+    font-size: 1.4rem !important;
+    margin-bottom: 1.6rem !important;
+}
+
+.categories-outer {
+    overflow: hidden !important;
+    max-width: 100% !important;
+}
+
+.category-item {
+    padding: 12px 18px !important;
+    min-width: 90px !important;
+    border-radius: 12px !important;
+}
+
+.category-item svg {
+    width: 24px !important;
+    height: 24px !important;
+}
+
+.category-item span {
+    font-size: 1.2rem !important;
+}
+
+/* Parceiros */
+.parceiros {
+    background-color: #DDB872 !important;
+    margin-top: 4rem !important;
+    padding: 2rem 0 !important;
+    text-align: center !important;
+}
+
+.parceiros h2 {
+    font-size: 2.4rem !important;
+    color: #000 !important;
+    margin-bottom: 2rem !important;
+}
+
+.carrossel-wrapper {
+    width: 100% !important;
+    margin: 0 auto !important;
+    overflow: hidden !important;
+    position: relative !important;
+}
+
+.carrossel {
+    display: flex !important;
+    gap: 1.5rem !important;
+    overflow-x: auto !important;
+    scroll-behavior: smooth !important;
+    padding: 1rem !important;
+    scrollbar-width: none !important;
+}
+
+.carrossel::-webkit-scrollbar {
+    display: none !important;
+}
+
+.carrossel img {
+    flex: 0 0 auto !important;
+    width: 10rem !important;
+    border-radius: 1rem !important;
+    object-fit: cover !important;
+    user-select: none !important;
+    pointer-events: none !important;
+}
+
+/* ── Novas seções mobile ────────────────────────────────── */
+
+/* Impact Numbers */
+.impact-numbers {
+    padding: 48px 5% !important;
+}
+
+.impact-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 1.6rem !important;
+}
+
+.impact-number {
+    font-size: 4rem !important;
+}
+
+.impact-label {
+    font-size: 1.3rem !important;
+}
+
+/* Split Sections */
+.split-section {
+    flex-direction: column !important;
+    gap: 3.2rem !important;
+}
+
+.ai-section,
+.execution-section {
+    padding: 48px 5% !important;
+}
+
+.split-text h2 {
+    font-size: 2.8rem !important;
+}
+
+.split-text p {
+    font-size: 1.6rem !important;
+}
+
+.split-image {
+    width: 100% !important;
+}
+
+/* IA: imagem preenche toda a largura disponível */
+.ai-section .photo-placeholder {
+    width: 100% !important;
+}
+
+.ai-section .photo-placeholder img {
+    width: 100% !important;
+    height: auto !important;
+}
+
+/* Execução: mantém proporção de phone */
+.execution-section .photo-placeholder img {
+    width: 200px !important;
+    height: auto !important;
+}
+
+/* How It Works */
+.how-it-works {
+    padding: 48px 5% !important;
+}
+
+.how-it-works > h2 {
+    font-size: 2.8rem !important;
+    margin-bottom: 3.2rem !important;
+}
+
+.steps-grid {
+    flex-direction: column !important;
+    gap: 2rem !important;
+}
+
+.step-card {
+    max-width: 100% !important;
+    width: 100% !important;
+}
+
+.step-connector {
+    display: none !important;
+}

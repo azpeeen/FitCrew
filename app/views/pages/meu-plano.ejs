@@ -1,0 +1,139 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<%- include('../partials/seo') %>
+<link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+<link rel="stylesheet" href="/css/header.css">
+<link rel="stylesheet" href="/css/footer.css">
+<link rel="stylesheet" href="/css/area-aluno.css"></head>
+<body>
+
+<%- include('../partials/header-aluno') %>
+
+<section class="aluno-dashboard">
+    <section class="sidebar-overlay" id="sidebarOverlay"></section>
+
+    <!-- SIDEBAR -->
+    <%- include('../partials/sidebar-aluno') %>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <section class="aluno-main">
+        <section class="dashboard-top">
+            <h1 data-i18n="myplan.title">Meu Plano</h1>
+            <p data-i18n="myplan.subtitle">Gerencie sua assinatura, veja benefícios e compare com outros planos.</p>
+        </section>
+
+        <!-- PLANO ATUAL -->
+        <section class="plano-atual-card">
+
+            <section class="plano-atual-top">
+                <section>
+                    <section class="plano-atual-nome">
+                        <i class="fas fa-crown"></i> <%= planoAtual.nome %>
+                    </section>
+                    <section class="plano-atual-desc"><%= planoAtual.descricao %></section>
+                </section>
+                <section>
+                    <section class="plano-atual-preco">
+                        <%= planoAtual.preco %>
+                        <small>/<%= planoAtual.periodo %></small>
+                    </section>
+                    <span class="plano-atual-badge">
+                        <i class="fas fa-check-circle"></i> <span data-i18n="myplan.active">Plano ativo</span>
+                    </span>
+                </section>
+            </section>
+
+            <!-- Benefícios -->
+            <section class="plano-beneficios">
+                <% (planoAtual.beneficios || []).forEach(b => { %>
+                <section class="plano-beneficio-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span><%= b %></span>
+                </section>
+                <% }) %>
+            </section>
+
+            <!-- Barra de renovação -->
+            <section class="plano-renew">
+                <section class="plano-renew-labels">
+                    <span><i class="fas fa-calendar-alt"></i> Renovação em <%= planoAtual.renovacao %></span>
+                    <span><%= planoAtual.tempoRestanteDias %> dias restantes</span>
+                </section>
+                <section class="plano-renew-bar">
+                    <section class="plano-renew-fill" id="renew-fill"></section>
+                </section>
+                <section class="plano-renew-note" data-i18n="myplan.renew">Seu plano renova automaticamente na data acima.</section>
+            </section>
+
+            <!-- Ações -->
+            <section class="plano-acoes">
+                <a href="/planos" class="plano-btn plano-btn-cancelar">
+                    <i class="fas fa-times-circle"></i> Cancelar Plano
+                </a>
+                <a href="/planos" class="plano-btn plano-btn-upgrade">
+                    <i class="fas fa-rocket"></i> Fazer Upgrade
+                </a>
+            </section>
+
+        </section>
+
+        <!-- OUTROS PLANOS -->
+        <section class="outros-planos-titulo">
+            <i class="fas fa-exchange-alt"></i> <span data-i18n="myplan.others">Outros Planos Disponíveis</span>
+        </section>
+
+        <section class="outros-planos-grid">
+            <% outrosPlanos.forEach(plano => { %>
+            <section class="plano-card <%= plano.destaque ? 'plano-card-destaque' : '' %>">
+
+                <% if (plano.destaque) { %>
+                <span class="plano-card-ribbon"><i class="fas fa-fire"></i> Mais completo</span>
+                <% } %>
+
+                <section class="plano-card-nome"><%= plano.nome %></section>
+                <section class="plano-card-desc"><%= plano.descricao %></section>
+
+                <section class="plano-card-preco">
+                    <%= plano.preco %>
+                    <small>/<%= plano.periodo %></small>
+                </section>
+
+                <ul class="plano-card-lista">
+                    <% (plano.beneficios || []).forEach(b => { %>
+                    <li>
+                        <i class="fas fa-check-circle"></i>
+                        <span><%= b %></span>
+                    </li>
+                    <% }) %>
+                </ul>
+
+                <a href="/planos" class="plano-card-btn">
+                    <i class="fas fa-arrow-right"></i> Assinar <%= plano.nome %>
+                </a>
+
+            </section>
+            <% }) %>
+        </section>
+
+    </section>
+</section>
+
+<%- include('../partials/footer') %>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var fill = document.getElementById('renew-fill');
+    if (fill) {
+        requestAnimationFrame(function () {
+            fill.style.width = '<%= planoAtual.progresso %>%';
+        });
+    }
+});
+
+</script>
+</body>
+</html>

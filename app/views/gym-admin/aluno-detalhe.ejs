@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= aluno.nome %> — Portal da Academia · FitCrew</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body class="admin-body">
+<section class="admin-wrapper">
+    <%- include('./_sidebar') %>
+    <section class="admin-content">
+        <header class="admin-topbar">
+            <section style="display:flex;align-items:center;gap:12px">
+                <a href="/gym-admin/alunos" class="btn btn-outline btn-sm"><i class="fas fa-arrow-left"></i></a>
+                <span class="admin-topbar-title"><%= aluno.nome %></span>
+            </section>
+            <section class="admin-topbar-right">
+                <span class="admin-topbar-admin">Olá, <strong><%= gymAdmin.nome.split(' ')[0] %></strong></span>
+                <a href="/gym-admin/logout" class="btn admin-btn-logout"><i class="fas fa-sign-out-alt"></i> Sair</a>
+            </section>
+        </header>
+
+        <main class="admin-main">
+            <section class="admin-2col" style="margin-bottom:20px;align-items:start">
+                <!-- Card do aluno -->
+                <section class="admin-card">
+                    <section class="admin-card-header">
+                        <span class="admin-card-title">Dados do Aluno</span>
+                        <span class="badge <%= aluno.status==='ativo' ? 'badge-success' : 'badge-muted' %>"><%= aluno.status %></span>
+                    </section>
+                    <section class="admin-card-body">
+                        <section style="display:flex;flex-direction:column;gap:12px">
+                            <section>
+                                <section style="font-size:0.72rem;color:var(--text-muted);margin-bottom:2px">Nome</section>
+                                <section style="font-weight:600"><%= aluno.nome %></section>
+                            </section>
+                            <section>
+                                <section style="font-size:0.72rem;color:var(--text-muted);margin-bottom:2px">E-mail</section>
+                                <section><%= aluno.email %></section>
+                            </section>
+                            <section>
+                                <section style="font-size:0.72rem;color:var(--text-muted);margin-bottom:2px">Cadastro</section>
+                                <section><%= new Date(aluno.created_at).toLocaleDateString('pt-BR') %></section>
+                            </section>
+                            <% if (medicao) { %>
+                            <section style="border-top:1px solid var(--border);padding-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                                <section>
+                                    <section style="font-size:0.72rem;color:var(--text-muted);margin-bottom:2px">Peso</section>
+                                    <section style="font-weight:600"><%= medicao.peso ? medicao.peso + ' kg' : '—' %></section>
+                                </section>
+                                <section>
+                                    <section style="font-size:0.72rem;color:var(--text-muted);margin-bottom:2px">Altura</section>
+                                    <section style="font-weight:600"><%= medicao.altura ? medicao.altura + ' cm' : '—' %></section>
+                                </section>
+                            </section>
+                            <% } %>
+                        </section>
+                    </section>
+                </section>
+
+                <!-- Treinos e métricas -->
+                <section style="display:flex;flex-direction:column;gap:16px">
+                    <section class="admin-kpi-grid" style="grid-template-columns:1fr 1fr">
+                        <section class="admin-kpi">
+                            <section class="admin-kpi-icon success"><i class="fas fa-calendar-check"></i></section>
+                            <section>
+                                <section class="admin-kpi-label">Check-ins Total</section>
+                                <section class="admin-kpi-value"><%= totalCheckins %></section>
+                            </section>
+                        </section>
+                        <section class="admin-kpi">
+                            <section class="admin-kpi-icon"><i class="fas fa-dumbbell"></i></section>
+                            <section>
+                                <section class="admin-kpi-label">Planos de Treino</section>
+                                <section class="admin-kpi-value"><%= totalTreinos %></section>
+                            </section>
+                        </section>
+                    </section>
+
+                    <!-- Últimos check-ins -->
+                    <section class="admin-card">
+                        <section class="admin-card-header">
+                            <span class="admin-card-title">Últimos Check-ins</span>
+                        </section>
+                        <section class="admin-card-body no-pad">
+                            <% if (checkins.length === 0) { %>
+                            <section style="text-align:center;padding:20px;color:var(--text-muted);font-size:0.85rem">Sem check-ins ainda.</section>
+                            <% } else { %>
+                            <table class="admin-table">
+                                <thead><tr><th>Data</th><th>Hora</th></tr></thead>
+                                <tbody>
+                                <% checkins.forEach(c => { %>
+                                <tr>
+                                    <td><%= new Date(c.data).toLocaleDateString('pt-BR') %></td>
+                                    <td class="text-muted"><%= c.hora ? String(c.hora).slice(0,5) : '—' %></td>
+                                </tr>
+                                <% }) %>
+                                </tbody>
+                            </table>
+                            <% } %>
+                        </section>
+                    </section>
+                </section>
+            </section>
+        </main>
+    </section>
+</section>
+</body>
+</html>

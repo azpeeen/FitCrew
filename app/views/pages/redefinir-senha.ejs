@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <%- include('../partials/seo') %>
+
+  <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+  <link rel="stylesheet" href="/css/forms.css">
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+</head>
+
+<body class="auth-page auth-login">
+  <section class="wrapper">
+    <% if (!valido) { %>
+      <section class="auth-form">
+        <section class="auth-header">
+          <p class="auth-kicker">Link expirado</p>
+          <h1>Link inválido</h1>
+          <p class="auth-subtitle">Este link de recuperação não é mais válido ou já foi utilizado. Solicite um novo link abaixo.</p>
+        </section>
+
+        <a href="/esqueci-senha" class="btn">Solicitar novo link</a>
+
+        <section class="register-link">
+          <p><a href="/login">← Voltar ao login</a></p>
+        </section>
+      </section>
+    <% } else { %>
+      <form id="redefinirSenhaForm" class="auth-form" data-token="<%= token %>">
+        <section class="auth-header">
+          <p class="auth-kicker">Olá, <%= nome %></p>
+          <h1>Nova senha</h1>
+          <p class="auth-subtitle">Crie uma nova senha para acessar sua conta.</p>
+        </section>
+
+        <span class="success-message"></span>
+
+        <section class="input-box">
+          <input type="password" id="novaSenha" name="novaSenha" placeholder="Nova senha" autocomplete="new-password">
+          <button type="button" class="toggle-password" data-target="novaSenha" title="Mostrar/ocultar senha">
+            <i class='bx bx-hide'></i>
+          </button>
+          <span class="error-message" id="novaSenha-error"></span>
+        </section>
+
+        <section class="input-box">
+          <input type="password" id="confirmarSenha" name="confirmarSenha" placeholder="Confirmar nova senha" autocomplete="new-password">
+          <button type="button" class="toggle-password" data-target="confirmarSenha" title="Mostrar/ocultar senha">
+            <i class='bx bx-hide'></i>
+          </button>
+          <span class="error-message" id="confirmarSenha-error"></span>
+        </section>
+
+        <button type="submit" class="btn">Salvar nova senha</button>
+      </form>
+    <% } %>
+
+    <aside class="auth-brand-panel">
+      <a href="/" class="brand-link" aria-label="Voltar para a página inicial">
+        <img src="/images/logo-form.png" class="logo" alt="Logo FitCrew">
+      </a>
+
+      <section class="brand-copy">
+        <span>GYMBROS</span>
+        <h2>Quase lá.</h2>
+        <p>Defina uma senha forte e continue treinando.</p>
+      </section>
+    </aside>
+  </section>
+
+  <script src="/js/forms.js" type="module"></script>
+</body>
+</html>

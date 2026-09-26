@@ -1,0 +1,244 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket #<%= ticket.id %> — FitCrew Admin</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body class="admin-body">
+<section class="admin-wrapper">
+    <%- include('../partials/admin-sidebar') %>
+    <section class="admin-content">
+        <%- include('../partials/admin-topbar') %>
+        <main class="admin-main">
+            <section class="flex gap-10 mb-16">
+                <a href="/admin/suporte" class="btn btn-outline btn-sm"><i class="fas fa-arrow-left"></i> Suporte</a>
+                <h1 class="admin-page-title" style="margin:0"><%= ticket.assunto %></h1>
+                <span class="ticket-status-pill <%= ticket.status %>"><%= ticket.status.replace('_',' ') %></span>
+            </section>
+
+            <section class="admin-chat-layout">
+                <!-- Chat principal -->
+                <section>
+                    <section class="admin-chat-box" id="admin-chat-box">
+                        <section class="admin-chat-header">
+                            <section class="admin-chat-header-user">
+                                <section class="chat-avatar"><%= user.nome.charAt(0).toUpperCase() %></section>
+                                <section>
+                                    <section class="fw-600" style="font-size:.9rem"><%= user.nome %></section>
+                                    <section class="text-muted" style="font-size:.72rem"><%= ticket.tipo %> · #<%= ticket.id %></section>
+                                </section>
+                            </section>
+                            <section class="admin-chat-header-actions">
+                                <% if (ticket.status !== 'resolvido') { %>
+                                <button class="btn btn-gold btn-sm" data-ticket-id="<%= ticket.id %>" data-ticket-status="resolvido">
+                                    <i class="fas fa-check"></i> Resolver
+                                </button>
+                                <button class="btn btn-outline btn-sm" data-ticket-id="<%= ticket.id %>" data-ticket-status="em_atendimento">
+                                    <i class="fas fa-headset"></i> Em Atend.
+                                </button>
+                                <% } %>
+                                <button class="btn btn-danger btn-sm" data-ticket-id="<%= ticket.id %>" data-ticket-status="aberto">
+                                    <i class="fas fa-undo"></i> Reabrir
+                                </button>
+                            </section>
+                        </section>
+
+                        <section class="admin-chat-msgs" id="chat-msgs">
+                        <% msgs.forEach(m => { %>
+                            <section class="admin-chat-bubble <%= m.remetente %>" data-id="<%= m.id %>">
+                                <section class="bubble-text"><%= m.texto %></section>
+                                <section class="admin-chat-bubble-meta">
+                                    <% if (m.remetente === 'admin') { %>
+                                        <i class="fas fa-user-shield" style="font-size:.6rem"></i> Você (Admin)
+                                    <% } else { %>
+                                        <i class="fas fa-user" style="font-size:.6rem"></i> <%= user.nome %>
+                                    <% } %>
+                                    · <%= new Date(m.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) %>
+                                    <%= new Date(m.created_at).toLocaleDateString('pt-BR') %>
+                                    <% if (m.remetente === 'admin') { %>
+                                    <span class="msg-status" data-msgid="<%= m.id %>">
+                                        <i class="fas fa-check-double" style="color:var(--gold);font-size:.6rem"></i>
+                                    </span>
+                                    <% } %>
+                                </section>
+                            </section>
+                        <% }) %>
+                            <!-- Typing indicator (hidden by default) -->
+                            <section class="typing-indicator" id="typing-indicator" style="display:none">
+                                <section class="typing-dot"></section>
+                                <section class="typing-dot"></section>
+                                <section class="typing-dot"></section>
+                            </section>
+                        </section>
+
+                        <% if (ticket.status !== 'resolvido') { %>
+                        <form class="admin-chat-input" id="admin-chat-form" data-ticket-id="<%= ticket.id %>">
+                            <textarea id="chat-textarea" placeholder="Digite sua resposta... (Enter para enviar)" rows="1"></textarea>
+                            <button type="submit" class="chat-send-btn" id="chat-send-btn">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </form>
+                        <% } else { %>
+                        <section class="chat-resolved-bar">
+                            <i class="fas fa-check-circle text-success"></i> Ticket resolvido — chat encerrado
+                        </section>
+                        <% } %>
+                    </section>
+                </section>
+
+                <!-- Painel lateral -->
+                <section>
+                    <section class="admin-card">
+                        <section class="admin-card-header"><span class="admin-card-title"><i class="fas fa-user text-gold"></i> Usuário</span></section>
+                        <section class="admin-card-body" style="text-align:center">
+                            <section class="chat-avatar" style="width:56px;height:56px;font-size:1.5rem;margin:0 auto 10px"><%= user.nome.charAt(0).toUpperCase() %></section>
+                            <section class="fw-600"><%= user.nome %></section>
+                            <section class="text-muted" style="font-size:.78rem;margin-top:2px"><%= user.email %></section>
+                            <span class="badge badge-gold" style="margin-top:8px;display:inline-block"><%= '—' %></span>
+                        </section>
+                        <section class="admin-card-body" style="padding-top:0">
+                            <ul class="admin-detail-list">
+                                <li><span>Ticket</span><span class="text-muted">#<%= ticket.id %></span></li>
+                                <li><span>Tipo</span><span><%= ticket.tipo %></span></li>
+                                <li><span>Prioridade</span><span class="badge <%= ticket.prioridade==='alta'?'badge-error':'badge-muted' %>"><%= ticket.prioridade %></span></li>
+                                <li><span>Abertura</span><span class="text-muted"><%= new Date(ticket.created_at).toLocaleDateString('pt-BR') %></span></li>
+                                <li><span>Atualiz.</span><span class="text-muted"><%= new Date(ticket.updated_at).toLocaleDateString('pt-BR') %></span></li>
+                            </ul>
+                            <% if (user) { %>
+                            <a href="/admin/usuarios/<%= user.id %>" class="btn btn-outline btn-sm w-100" style="justify-content:center;margin-top:12px">
+                                <i class="fas fa-user"></i> Ver Perfil
+                            </a>
+                            <% } %>
+                        </section>
+                    </section>
+
+                    <!-- Status em tempo real -->
+                    <section class="admin-card" style="margin-top:16px">
+                        <section class="admin-card-header"><span class="admin-card-title"><i class="fas fa-wifi text-gold"></i> Tempo Real</span></section>
+                        <section class="admin-card-body">
+                            <section class="flex gap-10" style="font-size:.8rem">
+                                <span class="online-dot"></span>
+                                <span id="realtime-status">Conectado ao chat</span>
+                            </section>
+                            <section class="text-muted" style="font-size:.72rem;margin-top:6px">Mensagens chegam automaticamente</section>
+                        </section>
+                    </section>
+                </section>
+            </section>
+        </main>
+    </section>
+</section>
+<script src="/js/admin.js"></script>
+<script>
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+const TICKET_ID = '<%= ticket.id %>';
+const chatMsgs  = document.getElementById('chat-msgs');
+const chatForm  = document.getElementById('admin-chat-form');
+const textarea  = document.getElementById('chat-textarea');
+
+// ── Auto-resize textarea ──────────────────────────────────────────────────────
+if (textarea) {
+    textarea.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+    });
+    textarea.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); chatForm.requestSubmit(); }
+    });
+}
+
+// ── Enviar mensagem ───────────────────────────────────────────────────────────
+if (chatForm) {
+    chatForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const texto = textarea.value.trim();
+        if (!texto) return;
+        const btn = document.getElementById('chat-send-btn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        try {
+            const res = await fetch(`/api/admin/suporte/tickets/${TICKET_ID}/mensagem`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ texto }),
+            });
+            const msg = await res.json();
+            if (!res.ok) throw new Error(msg.erro);
+            appendBubble(msg, 'admin', true);
+            textarea.value = '';
+            textarea.style.height = 'auto';
+            scrollChat();
+        } catch (err) { toast(err.message, 'error'); }
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i>';
+    });
+}
+
+// ── SSE: mensagens em tempo real via stream do admin ─────────────────────────
+// Reutiliza a conexão SSE já aberta pelo admin.js (window._adminSSE)
+// em vez de criar uma nova conexão para o endpoint do aluno (que retornaria 401)
+if (window._adminSSE) {
+    window._adminSSE.addEventListener('ticket_update', function(e) {
+        const d = JSON.parse(e.data);
+        if (String(d.ticketId) !== String(TICKET_ID)) return;
+        const pill = document.querySelector('.ticket-status-pill');
+        if (pill) { pill.textContent = d.status.replace('_',' '); pill.className = 'ticket-status-pill ' + d.status; }
+    });
+
+    document.getElementById('realtime-status').textContent = 'Conectado ao chat';
+    window._adminSSE.addEventListener('error', function() {
+        document.getElementById('realtime-status').textContent = 'Reconectando...';
+    });
+    window._adminSSE.addEventListener('open', function() {
+        document.getElementById('realtime-status').textContent = 'Conectado ao chat';
+    });
+}
+
+// SSE ticket-específico: admin recebe mensagens do aluno via broadcastTicket
+const _ticketId  = TICKET_ID;
+const _ticketSSE = new EventSource(`/api/admin/suporte/tickets/${_ticketId}/stream`);
+_ticketSSE.addEventListener('ticket_message', (e) => {
+    const msg = JSON.parse(e.data);
+    if (msg.remetente === 'admin') return; // já renderizado otimisticamente
+    appendBubble({ texto: msg.texto, criadaEm: msg.created_at }, 'usuario', true);
+    scrollChat();
+    toast('Nova mensagem de ' + msg.nome, 'info', 2500);
+});
+
+function showTyping() {
+    const t = document.getElementById('typing-indicator');
+    if (t) { t.style.display = 'flex'; scrollChat(); }
+}
+function hideTyping() {
+    const t = document.getElementById('typing-indicator');
+    if (t) t.style.display = 'none';
+}
+
+function appendBubble(msg, side, animate) {
+    const time = new Date(msg.criadaEm).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    const date = new Date(msg.criadaEm).toLocaleDateString('pt-BR');
+    const senderLabel = side === 'admin' ? '<i class="fas fa-user-shield" style="font-size:.6rem"></i> Você (Admin)' : `<i class="fas fa-user" style="font-size:.6rem"></i> <%= user.nome %>`;
+    const checkmark = side === 'admin' ? '<span class="msg-status"><i class="fas fa-check" style="color:#666;font-size:.6rem"></i></span>' : '';
+    // bubble: self-contained chat message block (sender + text + timestamp)
+    const bubble = document.createElement('section');
+    bubble.className = `admin-chat-bubble ${side}${animate ? ' bubble-animate' : ''}`;
+    bubble.innerHTML = `<section class="bubble-text">${escHtml(msg.texto)}</section><section class="admin-chat-bubble-meta">${senderLabel} · ${time} ${date} ${checkmark}</section>`;
+    const typing = document.getElementById('typing-indicator');
+    chatMsgs.insertBefore(bubble, typing);
+    if (animate) requestAnimationFrame(() => bubble.classList.add('bubble-visible'));
+}
+
+function scrollChat() {
+    if (chatMsgs) chatMsgs.scrollTop = chatMsgs.scrollHeight;
+}
+
+// Scroll inicial
+scrollChat();
+</script>
+</body>
+</html>

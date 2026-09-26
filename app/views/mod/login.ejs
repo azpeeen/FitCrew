@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login — FitCrew Moderação</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin.css">
+    <style>
+    .login-bg { position: fixed; inset: 0; background: #0a0a0a; overflow: hidden; z-index: 0; }
+    .login-bg-glow1 {
+        position: absolute; width: 700px; height: 700px; border-radius: 50%;
+        background: radial-gradient(circle, rgba(201,139,29,0.13) 0%, transparent 65%);
+        top: -200px; right: -150px;
+    }
+    .admin-login-wrap { position: relative; z-index: 1; }
+    .admin-login-box {
+        background: rgba(20,20,20,0.95);
+        border: 1px solid rgba(201,139,29,0.25);
+        border-radius: 20px;
+        padding: 48px 44px;
+        width: 100%;
+        max-width: 420px;
+        box-shadow: 0 32px 80px rgba(0,0,0,0.7);
+        backdrop-filter: blur(16px);
+    }
+    .admin-login-logo img { width: 64px; height: 64px; border-radius: 16px; border: 2px solid rgba(201,139,29,0.4); }
+    .admin-login-logo h1 { font-size: 1.6rem; font-weight: 800; letter-spacing: -0.5px; margin-top: 12px; }
+    .admin-login-logo p {
+        font-size: 0.72rem; letter-spacing: 2px; text-transform: uppercase;
+        background: rgba(201,139,29,0.12); border: 1px solid rgba(201,139,29,0.25);
+        color: rgba(201,139,29,0.9); padding: 3px 14px; border-radius: 20px; display: inline-block; margin-top: 6px;
+    }
+    .mod-login-field { margin-bottom: 16px; }
+    .mod-login-field label { display: block; font-size: 0.78rem; font-weight: 500; color: #888; margin-bottom: 5px; }
+    .mod-login-field input {
+        width: 100%; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 10px; padding: 11px 14px; font-size: 0.9rem; color: var(--text); outline: none;
+        box-sizing: border-box;
+    }
+    .mod-login-field input:focus { border-color: rgba(201,139,29,0.6); box-shadow: 0 0 0 3px rgba(201,139,29,0.1); }
+    .mod-login-erro {
+        display: flex; align-items: center; gap: 8px;
+        background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3);
+        color: var(--error); font-size: 0.82rem; padding: 10px 14px;
+        border-radius: 8px; margin-bottom: 20px;
+    }
+    .admin-login-footer { text-align: center; margin-top: 24px; }
+    .admin-login-footer a { font-size: 0.78rem; color: #555; }
+    .admin-login-footer a:hover { color: #C98B1D; }
+    </style>
+</head>
+<body class="admin-body" style="display:block">
+
+<section class="login-bg"><section class="login-bg-glow1"></section></section>
+
+<section class="admin-login-wrap" style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px">
+    <section class="admin-login-box">
+        <section class="admin-login-logo" style="text-align:center;margin-bottom:32px">
+            <img src="/images/logo.png" alt="FitCrew">
+            <h1 class="text-gold">FitCrew</h1>
+            <p>Moderação</p>
+        </section>
+
+        <% if (erro) { %>
+        <section class="mod-login-erro">
+            <i class="fas fa-exclamation-circle"></i> <%= erro %>
+        </section>
+        <% } %>
+
+        <form method="POST" action="/mod/login">
+            <section class="mod-login-field">
+                <label for="username">E-mail ou usuário</label>
+                <input type="text" id="username" name="username" placeholder="Seu login" required autofocus>
+            </section>
+
+            <section class="mod-login-field">
+                <label for="password">Senha</label>
+                <input type="password" id="password" name="password" placeholder="••••••••" required>
+            </section>
+
+            <button type="submit" class="btn btn-gold w-100" style="justify-content:center;width:100%">Entrar</button>
+        </form>
+
+        <section class="admin-login-footer">
+            <a href="/"><i class="fas fa-arrow-left" style="font-size:0.7rem;margin-right:4px"></i>Voltar ao site</a>
+        </section>
+    </section>
+</section>
+
+</body>
+</html>

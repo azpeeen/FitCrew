@@ -1,0 +1,118 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suporte — FitCrew Admin</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body class="admin-body">
+<section class="admin-wrapper">
+    <%- include('../partials/admin-sidebar') %>
+    <section class="admin-content">
+        <%- include('../partials/admin-topbar') %>
+        <main class="admin-main">
+            <section class="flex-between mb-16">
+                <section>
+                    <h1 class="admin-page-title">Central de Suporte</h1>
+                    <p class="admin-page-subtitle">Gerencie e responda os chamados dos alunos</p>
+                </section>
+            </section>
+
+            <!-- Filtros rápidos -->
+            <section class="suporte-filter-bar">
+                <a href="/admin/suporte" class="suporte-filter-btn <%= !status?'active':'' %>">
+                    <i class="fas fa-inbox"></i> Todos
+                    <span class="filter-count"><%= counts.todos %></span>
+                </a>
+                <a href="/admin/suporte?status=aberto" class="suporte-filter-btn <%= status==='aberto'?'active':'' %> warn">
+                    <i class="fas fa-circle-exclamation"></i> Abertos
+                    <span class="filter-count"><%= counts.aberto %></span>
+                </a>
+                <a href="/admin/suporte?status=em_atendimento" class="suporte-filter-btn <%= status==='em_atendimento'?'active':'' %> info">
+                    <i class="fas fa-headset"></i> Em Atendimento
+                    <span class="filter-count"><%= counts.em_atendimento %></span>
+                </a>
+                <a href="/admin/suporte?status=resolvido" class="suporte-filter-btn <%= status==='resolvido'?'active':'' %> ok">
+                    <i class="fas fa-circle-check"></i> Resolvidos
+                    <span class="filter-count"><%= counts.resolvido %></span>
+                </a>
+            </section>
+
+            <!-- Lista de tickets -->
+            <% if (lista.length === 0) { %>
+            <section class="admin-card">
+                <section class="admin-empty"><i class="fas fa-check-circle" style="color:var(--success);opacity:1"></i>Nenhum ticket encontrado</section>
+            </section>
+            <% } else { %>
+            <section class="ticket-cards" id="ticket-cards">
+            <% lista.forEach(t => { %>
+            <% const horas = Math.floor((Date.now() - new Date(t.created_at)) / 3600000); %>
+            <a href="/admin/suporte/<%= t.id %>" class="ticket-card <%= t.prioridade==='alta' ? 'priority-high' : '' %>">
+                <section class="ticket-card-left">
+                    <section class="ticket-card-avatar">
+                        <%= t.userName.charAt(0).toUpperCase() %>
+                    </section>
+                </section>
+                <section class="ticket-card-body">
+                    <section class="ticket-card-top">
+                        <span class="ticket-card-name"><%= t.userName %></span>
+                        <span class="ticket-card-time text-muted"><%= new Date(t.created_at).toLocaleDateString('pt-BR') %></span>
+                    </section>
+                    <section class="ticket-card-subject"><%= t.assunto %></section>
+                    <section class="ticket-card-meta">
+                        <span class="badge badge-muted" style="font-size:.65rem"><%= t.tipo %></span>
+                        <% if (t.prioridade === 'alta') { %><span class="badge badge-error" style="font-size:.65rem"><i class="fas fa-fire"></i> Alta prioridade</span><% } %>
+                        <% if (t.status !== 'resolvido' && horas > 24) { %><span class="badge badge-warning" style="font-size:.65rem"><i class="fas fa-clock"></i> <%= horas %>h sem resposta</span><% } %>
+                    </section>
+                </section>
+                <section class="ticket-card-right">
+                    <span class="ticket-status-pill <%= t.status %>"><%= t.status.replace('_',' ') %></span>
+                    <i class="fas fa-chevron-right ticket-card-arrow"></i>
+                </section>
+            </a>
+            <% }) %>
+            </section>
+            <% } %>
+        </main>
+    </section>
+</section>
+<script src="/js/admin.js"></script>
+<script>
+// SSE: detecta novos tickets em tempo real e adiciona no topo
+if (window._adminSSE) {
+    window._adminSSE.addEventListener('new_ticket', function(e) {
+        const t = JSON.parse(e.data);
+        const cards = document.getElementById('ticket-cards');
+        if (!cards) return;
+        const card = document.createElement('a');
+        card.href = '/admin/suporte/' + t.ticketId;
+        card.className = 'ticket-card ticket-card-new';
+        card.innerHTML = `
+            <section class="ticket-card-left">
+                <section class="ticket-card-avatar">${t.userName.charAt(0).toUpperCase()}</section>
+            </section>
+            <section class="ticket-card-body">
+                <section class="ticket-card-top">
+                    <span class="ticket-card-name">${escHtml(t.userName)}</span>
+                    <span class="ticket-card-time text-muted">agora</span>
+                </section>
+                <section class="ticket-card-subject">${escHtml(t.assunto)}</section>
+                <section class="ticket-card-meta"><span class="badge badge-muted" style="font-size:.65rem">${escHtml(t.tipo)}</span></section>
+            </section>
+            <section class="ticket-card-right">
+                <span class="ticket-status-pill aberto">aberto</span>
+                <i class="fas fa-chevron-right ticket-card-arrow"></i>
+            </section>`;
+        cards.prepend(card);
+        // Remove animação após fim
+        setTimeout(() => card.classList.remove('ticket-card-new'), 800);
+    });
+}
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+</script>
+</body>
+</html>

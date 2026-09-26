@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatórios — Portal da Academia · FitCrew</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin.css">
+    <style>
+    .prog-bar-wrap { background:var(--border);border-radius:20px;height:8px;overflow:hidden;margin-top:8px; }
+    .prog-bar      { height:100%;background:var(--gold);border-radius:20px;transition:width 1s; }
+    .cresc-chart   { display:flex;align-items:flex-end;gap:4px;height:90px; }
+    .cresc-bar     { flex:1;background:rgba(201,139,29,0.3);border-radius:2px 2px 0 0;min-width:20px;transition:background 0.2s;position:relative; }
+    .cresc-bar:hover { background:var(--gold); }
+    .cresc-label   { font-size:0.65rem;color:var(--text-muted);text-align:center;margin-top:4px; }
+    </style>
+</head>
+<body class="admin-body">
+<section class="admin-wrapper">
+    <%- include('./_sidebar') %>
+    <section class="admin-content">
+        <header class="admin-topbar">
+            <span class="admin-topbar-title">Relatórios</span>
+            <section class="admin-topbar-right">
+                <span class="admin-topbar-admin">Olá, <strong><%= gymAdmin.nome.split(' ')[0] %></strong></span>
+                <a href="/gym-admin/logout" class="btn admin-btn-logout"><i class="fas fa-sign-out-alt"></i> Sair</a>
+            </section>
+        </header>
+
+        <main class="admin-main">
+            <h1 class="admin-page-title">Relatórios</h1>
+            <p class="admin-page-subtitle">Frequência e retenção de alunos de <%= gymAdmin.gym_nome %></p>
+
+            <section class="admin-kpi-grid">
+                <section class="admin-kpi">
+                    <section class="admin-kpi-icon"><i class="fas fa-users"></i></section>
+                    <section>
+                        <section class="admin-kpi-label">Alunos Ativos</section>
+                        <section class="admin-kpi-value"><%= totalAlunos %></section>
+                    </section>
+                </section>
+                <section class="admin-kpi">
+                    <section class="admin-kpi-icon error"><i class="fas fa-user-slash"></i></section>
+                    <section>
+                        <section class="admin-kpi-label">Inativos</section>
+                        <section class="admin-kpi-value"><%= inativos %></section>
+                    </section>
+                </section>
+                <section class="admin-kpi">
+                    <section class="admin-kpi-icon success"><i class="fas fa-chart-line"></i></section>
+                    <section>
+                        <section class="admin-kpi-label">Média Check-ins/Mês</section>
+                        <section class="admin-kpi-value"><%= mediaCheckins || 0 %></section>
+                        <section class="admin-kpi-sub">por aluno ativo</section>
+                    </section>
+                </section>
+                <section class="admin-kpi">
+                    <section class="admin-kpi-icon error"><i class="fas fa-exclamation-triangle"></i></section>
+                    <section>
+                        <section class="admin-kpi-label">Nunca fizeram check-in</section>
+                        <section class="admin-kpi-value"><%= semCheckin %></section>
+                    </section>
+                </section>
+            </section>
+
+            <section class="admin-2col">
+                <section class="admin-card">
+                    <section class="admin-card-header"><span class="admin-card-title">Taxa de Retenção</span></section>
+                    <section class="admin-card-body">
+                        <% const retencao = totalAlunos > 0 ? Math.round(((totalAlunos - semCheckin) / totalAlunos) * 100) : 0; %>
+                        <section style="text-align:center;padding:16px 0">
+                            <section style="font-size:3rem;font-weight:800;color:var(--gold)"><%= retencao %>%</section>
+                            <section style="color:var(--text-muted);font-size:0.82rem;margin-top:4px">dos alunos fizeram ao menos 1 check-in</section>
+                        </section>
+                        <section class="prog-bar-wrap"><section class="prog-bar" style="width:<%= retencao %>%"></section></section>
+                        <section style="display:flex;justify-content:space-between;margin-top:6px;font-size:0.72rem;color:var(--text-muted)">
+                            <span>0%</span><span>100%</span>
+                        </section>
+                    </section>
+                </section>
+
+                <section class="admin-card">
+                    <section class="admin-card-header">
+                        <span class="admin-card-title">Novos Alunos — Últimos 6 Meses</span>
+                    </section>
+                    <section class="admin-card-body">
+                        <% if (crescimento.length === 0) { %>
+                        <section style="text-align:center;color:var(--text-muted);padding:20px">Sem dados ainda.</section>
+                        <% } else { %>
+                        <% const maxC = Math.max(...crescimento.map(c => c.novos), 1); %>
+                        <section class="cresc-chart">
+                            <% crescimento.forEach(c => { %>
+                            <section style="display:flex;flex-direction:column;align-items:center;flex:1">
+                                <section style="font-size:0.7rem;font-weight:700;color:var(--gold);margin-bottom:2px"><%= c.novos %></section>
+                                <section class="cresc-bar" style="height:<%= Math.round((c.novos/maxC)*80) %>px;width:100%"
+                                    title="<%= c.mes %>: <%= c.novos %> novos"></section>
+                                <section class="cresc-label"><%= c.mes.slice(5) %>/<%= c.mes.slice(2,4) %></section>
+                            </section>
+                            <% }) %>
+                        </section>
+                        <% } %>
+                    </section>
+                </section>
+            </section>
+
+            <section class="admin-card" style="margin-top:20px">
+                <section class="admin-card-header"><span class="admin-card-title">Resumo por Status</span></section>
+                <section class="admin-card-body no-pad">
+                    <table class="admin-table">
+                        <thead><tr><th>Status</th><th>Quantidade</th><th>%</th></tr></thead>
+                        <tbody>
+                        <% const tot = (totalAlunos + inativos) || 1; %>
+                        <tr><td><span class="badge badge-success">Ativo</span></td><td><%= totalAlunos %></td><td class="text-muted"><%= Math.round((totalAlunos/tot)*100) %>%</td></tr>
+                        <tr><td><span class="badge badge-muted">Inativo</span></td><td><%= inativos %></td><td class="text-muted"><%= Math.round((inativos/tot)*100) %>%</td></tr>
+                        </tbody>
+                    </table>
+                </section>
+            </section>
+        </main>
+    </section>
+</section>
+</body>
+</html>

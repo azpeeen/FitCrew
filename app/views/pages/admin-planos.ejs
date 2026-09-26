@@ -1,0 +1,123 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planos — FitCrew Admin</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body class="admin-body">
+<section class="admin-wrapper">
+    <%- include('../partials/admin-sidebar') %>
+    <section class="admin-content">
+        <%- include('../partials/admin-topbar') %>
+        <main class="admin-main">
+            <section class="flex-between mb-16">
+                <section>
+                    <h1 class="admin-page-title">Planos</h1>
+                    <p class="admin-page-subtitle">Gerencie os planos disponíveis na plataforma</p>
+                </section>
+                <button class="btn btn-gold" data-modal-open="modal-plano">
+                    <i class="fas fa-plus"></i> Novo Plano
+                </button>
+            </section>
+
+            <section class="admin-2col">
+            <% planos.forEach(p => { %>
+            <section class="admin-card">
+                <section class="admin-card-header">
+                    <span class="admin-card-title"><%= p.nome %></span>
+                    <span class="badge <%= p.status==='ativo'?'badge-success':'badge-muted' %>"><%= p.status %></span>
+                </section>
+                <section class="admin-card-body">
+                    <section style="font-size:1.8rem;font-weight:700;color:var(--gold);margin-bottom:4px">
+                        <%= p.preco.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) %><span style="font-size:0.85rem;color:var(--text-muted)">/<%= p.duracao %></span>
+                    </section>
+                    <section class="text-muted" style="font-size:.8rem;margin-bottom:12px"><%= p.descricao %></section>
+                    <ul style="list-style:none;margin-bottom:16px">
+                    <% (p.beneficios||[]).forEach(b => { %>
+                        <li style="font-size:.8rem;padding:3px 0;color:var(--text-muted)"><i class="fas fa-check text-success" style="width:14px;margin-right:6px"></i><%= b %></li>
+                    <% }) %>
+                    </ul>
+                    <section class="flex-between" style="font-size:.82rem">
+                        <span class="text-muted">Assinantes</span>
+                        <span class="badge badge-gold"><%= p.totalAssinantes %></span>
+                    </section>
+                </section>
+            </section>
+            <% }) %>
+            </section>
+
+            <!-- Tabela completa -->
+            <section class="admin-card mt-16" style="margin-top:20px">
+                <section class="admin-card-header"><span class="admin-card-title">Resumo dos Planos</span></section>
+                <section class="admin-card-body no-pad">
+                    <table class="admin-table">
+                        <thead><tr><th>Plano</th><th>Preço</th><th>Duração</th><th>Assinantes</th><th>Receita Mensal</th><th>Status</th></tr></thead>
+                        <tbody>
+                        <% planos.forEach(p => { %>
+                        <tr>
+                            <td class="fw-600"><%= p.nome %></td>
+                            <td><%= p.preco.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) %></td>
+                            <td class="text-muted"><%= p.duracao %></td>
+                            <td><span class="badge badge-muted"><%= p.totalAssinantes %></span></td>
+                            <td class="fw-600 text-gold"><%= (p.preco * p.totalAssinantes).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) %></td>
+                            <td><span class="badge <%= p.status==='ativo'?'badge-success':'badge-muted' %>"><%= p.status %></span></td>
+                        </tr>
+                        <% }) %>
+                        </tbody>
+                    </table>
+                </section>
+            </section>
+        </main>
+    </section>
+</section>
+
+<!-- Modal Novo Plano -->
+<section class="admin-modal-backdrop" id="modal-plano">
+    <section class="admin-modal">
+        <section class="admin-modal-header">
+            <span class="admin-modal-title"><i class="fas fa-tags text-gold"></i> Novo Plano</span>
+            <button class="admin-modal-close" data-modal-close="modal-plano"><i class="fas fa-times"></i></button>
+        </section>
+        <form id="form-plano">
+            <section class="admin-2col">
+                <section class="admin-form-group">
+                    <label>Nome *</label>
+                    <input type="text" name="nome" class="admin-input" required placeholder="Black Premium">
+                </section>
+                <section class="admin-form-group">
+                    <label>Preço (R$) *</label>
+                    <input type="number" name="preco" class="admin-input" required step="0.01" placeholder="0.00">
+                </section>
+            </section>
+            <section class="admin-form-group">
+                <label>Descrição</label>
+                <input type="text" name="descricao" class="admin-input" placeholder="Breve descrição do plano">
+            </section>
+            <section class="admin-form-group">
+                <label>Duração</label>
+                <select name="duracao" class="admin-input">
+                    <option value="mensal">Mensal</option>
+                    <option value="trimestral">Trimestral</option>
+                    <option value="anual">Anual</option>
+                </select>
+            </section>
+            <section class="admin-form-group">
+                <label>Benefícios (um por linha)</label>
+                <textarea name="beneficios" class="admin-textarea" placeholder="Treinos manuais ilimitados&#10;IA treinadora personalizada&#10;Suporte prioritário"></textarea>
+            </section>
+            <section class="admin-modal-footer">
+                <button type="button" class="btn btn-outline" data-modal-close="modal-plano">Cancelar</button>
+                <button type="submit" class="btn btn-gold"><i class="fas fa-save"></i> Criar Plano</button>
+            </section>
+        </form>
+    </section>
+</section>
+
+<script src="/js/admin.js"></script>
+</body>
+</html>

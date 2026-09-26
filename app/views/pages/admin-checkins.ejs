@@ -1,0 +1,77 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check-ins — FitCrew Admin</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body class="admin-body">
+<section class="admin-wrapper">
+    <%- include('../partials/admin-sidebar') %>
+    <section class="admin-content">
+        <%- include('../partials/admin-topbar') %>
+        <main class="admin-main">
+            <h1 class="admin-page-title">Check-ins</h1>
+            <p class="admin-page-subtitle"><%= total %> registros | <strong class="text-gold"><%= checkinsHoje %></strong> check-ins hoje</p>
+
+            <!-- Chart -->
+            <section class="admin-charts-grid" style="margin-bottom:20px">
+                <section class="admin-card">
+                    <section class="admin-card-header">
+                        <span class="admin-card-title"><i class="fas fa-chart-bar text-gold"></i> Check-ins por Dia da Semana</span>
+                    </section>
+                    <section class="admin-card-body">
+                        <section class="chart-wrap"><canvas id="chartCheckins"></canvas></section>
+                    </section>
+                </section>
+            </section>
+
+            <!-- Tabela -->
+            <section class="admin-card">
+                <section class="admin-card-body no-pad">
+                    <section class="admin-table-wrap">
+                        <table class="admin-table">
+                            <thead><tr><th>Usuário</th><th>Data</th><th>Hora</th></tr></thead>
+                            <tbody>
+                            <% items.forEach(c => { %>
+                            <tr>
+                                <td class="fw-600"><%= c.userName %></td>
+                                <td class="text-muted"><%= c.dataStr %></td>
+                                <td><span class="badge badge-muted"><%= c.hora %></span></td>
+                            </tr>
+                            <% }) %>
+                            </tbody>
+                        </table>
+                    </section>
+                </section>
+            </section>
+
+            <% if (pages > 1) { %>
+            <section class="admin-pagination">
+                <% for (let i = 1; i <= pages; i++) { %>
+                <a href="/admin/checkins?page=<%= i %>" class="<%= i===currentPage?'active':'' %>"><%= i %></a>
+                <% } %>
+            </section>
+            <% } %>
+        </main>
+    </section>
+</section>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="/js/admin.js"></script>
+<script>
+Chart.getChart(document.getElementById('chartCheckins'))?.destroy();
+new Chart(document.getElementById('chartCheckins'), {
+    type: 'bar',
+    data: {
+        labels: <%- diasSemana %>,
+        datasets: [{ data: <%- heatmap %>, backgroundColor: 'rgba(201,139,29,0.7)', borderRadius: 6 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { color: '#2A2A2A' }, ticks: { color: '#9A9A9A' } }, y: { grid: { color: '#2A2A2A' }, ticks: { color: '#9A9A9A' }, beginAtZero: true } } }
+});
+</script>
+</body>
+</html>

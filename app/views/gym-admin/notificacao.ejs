@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notificações — Portal da Academia · FitCrew</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body class="admin-body">
+<section class="admin-wrapper">
+    <%- include('./_sidebar') %>
+    <section class="admin-content">
+        <header class="admin-topbar">
+            <span class="admin-topbar-title">Notificações</span>
+            <section class="admin-topbar-right">
+                <span class="admin-topbar-admin">Olá, <strong><%= gymAdmin.nome.split(' ')[0] %></strong></span>
+                <a href="/gym-admin/logout" class="btn admin-btn-logout"><i class="fas fa-sign-out-alt"></i> Sair</a>
+            </section>
+        </header>
+
+        <main class="admin-main">
+            <h1 class="admin-page-title">Enviar Notificação</h1>
+            <p class="admin-page-subtitle">A mensagem será vinculada apenas aos alunos de <%= gymAdmin.gym_nome %></p>
+
+            <% if (sucesso) { %>
+            <section class="admin-toast" style="position:static;margin-bottom:20px;border-left-color:var(--success)">
+                <i class="fas fa-check-circle" style="color:var(--success)"></i> Notificação enviada com sucesso!
+            </section>
+            <% } %>
+            <% if (erro) { %>
+            <section class="admin-toast" style="position:static;margin-bottom:20px;border-left-color:var(--error)">
+                <i class="fas fa-exclamation-circle" style="color:var(--error)"></i> <%= erro %>
+            </section>
+            <% } %>
+
+            <section class="admin-2col">
+                <section class="admin-card">
+                    <section class="admin-card-header"><span class="admin-card-title">Compor Mensagem</span></section>
+                    <section class="admin-card-body">
+                        <form method="POST" action="/gym-admin/notificacao">
+                            <section class="admin-form-group">
+                                <label>Título *</label>
+                                <input type="text" name="titulo" class="admin-input"
+                                    placeholder="Ex: Aula especial neste sábado!" maxlength="120" required>
+                            </section>
+                            <section class="admin-form-group">
+                                <label>Mensagem *</label>
+                                <textarea name="mensagem" class="admin-textarea"
+                                    placeholder="Escreva a mensagem para seus alunos..." maxlength="500" required></textarea>
+                            </section>
+                            <section style="background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:12px;margin-bottom:16px;font-size:0.8rem;color:var(--text-muted)">
+                                <i class="fas fa-info-circle" style="color:var(--gold);margin-right:6px"></i>
+                                Vinculada à academia <strong style="color:var(--text)"><%= gymAdmin.gym_nome %></strong> — visível só para alunos dela.
+                            </section>
+                            <button type="submit" class="btn btn-gold w-100" style="justify-content:center">
+                                <i class="fas fa-paper-plane"></i> Enviar Notificação
+                            </button>
+                        </form>
+                    </section>
+                </section>
+
+                <section class="admin-card">
+                    <section class="admin-card-header"><span class="admin-card-title">Preview</span></section>
+                    <section class="admin-card-body">
+                        <section style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px">
+                            <section style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+                                <img src="/images/logo.png" alt="" style="width:34px;height:34px;border-radius:8px">
+                                <section>
+                                    <section style="font-size:0.78rem;font-weight:600">FitCrew</section>
+                                    <section style="font-size:0.68rem;color:var(--text-muted)">agora</section>
+                                </section>
+                            </section>
+                            <section id="preview-titulo" style="font-weight:700;font-size:0.9rem;margin-bottom:6px;color:var(--text-muted)">Título da notificação</section>
+                            <section id="preview-msg" style="font-size:0.82rem;color:var(--text-muted);line-height:1.5">Sua mensagem aparecerá aqui...</section>
+                        </section>
+                        <section style="margin-top:16px;padding:12px;background:var(--gold-dim);border:1px solid rgba(201,139,29,0.2);border-radius:7px;font-size:0.78rem;color:var(--gold)">
+                            <i class="fas fa-users" style="margin-right:6px"></i>
+                            Alunos de <strong><%= gymAdmin.gym_nome %></strong>
+                        </section>
+                    </section>
+                </section>
+            </section>
+        </main>
+    </section>
+</section>
+
+<script>
+document.querySelector('[name="titulo"]')?.addEventListener('input', updatePreview);
+document.querySelector('[name="mensagem"]')?.addEventListener('input', updatePreview);
+function updatePreview() {
+    const t = document.querySelector('[name="titulo"]').value;
+    const m = document.querySelector('[name="mensagem"]').value;
+    const pt = document.getElementById('preview-titulo');
+    const pm = document.getElementById('preview-msg');
+    pt.textContent = t || 'Título da notificação';
+    pt.style.color = t ? 'var(--text)' : 'var(--text-muted)';
+    pm.textContent = m || 'Sua mensagem aparecerá aqui...';
+    pm.style.color = m ? 'var(--text)' : 'var(--text-muted)';
+}
+</script>
+</body>
+</html>

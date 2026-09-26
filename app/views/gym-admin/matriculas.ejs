@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrículas — Portal da Academia · FitCrew</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body class="admin-body">
+<section class="admin-wrapper">
+    <%- include('./_sidebar') %>
+    <section class="admin-content">
+        <header class="admin-topbar">
+            <span class="admin-topbar-title">Matrículas</span>
+            <section class="admin-topbar-right">
+                <span class="admin-topbar-admin">Olá, <strong><%= gymAdmin.nome.split(' ')[0] %></strong></span>
+                <a href="/gym-admin/logout" class="btn admin-btn-logout"><i class="fas fa-sign-out-alt"></i> Sair</a>
+            </section>
+        </header>
+
+        <main class="admin-main">
+            <section class="admin-toolbar">
+                <section>
+                    <h1 class="admin-page-title">Matrículas</h1>
+                    <p class="admin-page-subtitle"><%= total %> matrícula<%= total !== 1 ? 's' : '' %> · <%= gymAdmin.gym_nome %></p>
+                </section>
+                <a href="/gym-admin/matriculas/nova" class="btn btn-gold" style="margin-left:auto">
+                    <i class="fas fa-plus"></i> Nova Matrícula
+                </a>
+            </section>
+
+            <section class="admin-toolbar">
+                <a href="?"                  class="btn <%= !statusFiltro                ? 'btn-gold' : 'btn-outline' %>">Todas</a>
+                <a href="?status=ativa"      class="btn <%= statusFiltro==='ativa'      ? 'btn-gold' : 'btn-outline' %>">Ativas</a>
+                <a href="?status=vencida"    class="btn <%= statusFiltro==='vencida'    ? 'btn-gold' : 'btn-outline' %>">Vencidas</a>
+                <a href="?status=cancelada"  class="btn <%= statusFiltro==='cancelada'  ? 'btn-gold' : 'btn-outline' %>">Canceladas</a>
+            </section>
+
+            <section class="admin-card">
+                <section class="admin-card-body no-pad">
+                    <section class="admin-table-wrap">
+                        <% if (matriculas.length === 0) { %>
+                        <section style="text-align:center;padding:40px;color:var(--text-muted)">
+                            <i class="fas fa-id-card" style="font-size:2rem;opacity:.2;display:block;margin-bottom:10px"></i>
+                            Nenhuma matrícula encontrada.
+                        </section>
+                        <% } else { %>
+                        <table class="admin-table">
+                            <thead>
+                                <tr><th>Aluno</th><th>Plano</th><th>Início</th><th>Vencimento</th><th>Status</th><th></th></tr>
+                            </thead>
+                            <tbody>
+                            <% matriculas.forEach(m => { %>
+                            <tr>
+                                <td class="fw-600"><%= m.aluno_nome %><br><small class="text-muted"><%= m.aluno_email %></small></td>
+                                <td class="text-muted"><%= m.plano_nome %></td>
+                                <td class="text-muted"><%= new Date(m.data_inicio).toLocaleDateString('pt-BR') %></td>
+                                <td class="text-muted"><%= new Date(m.data_vencimento).toLocaleDateString('pt-BR') %></td>
+                                <td>
+                                    <span class="badge <%= m.status==='ativa' ? 'badge-success' : (m.status==='vencida' ? 'badge-warning' : 'badge-muted') %>"><%= m.status %></span>
+                                </td>
+                                <td><a href="/gym-admin/matriculas/<%= m.id %>/editar" class="btn btn-outline btn-sm">Editar status</a></td>
+                            </tr>
+                            <% }) %>
+                            </tbody>
+                        </table>
+                        <% } %>
+                    </section>
+                </section>
+            </section>
+
+            <% if (totalPaginas > 1) { %>
+            <section class="admin-pagination">
+                <% if (paginaAtual > 1) { %>
+                <a href="?page=<%= paginaAtual-1 %><%= statusFiltro ? '&status='+statusFiltro : '' %>"><i class="fas fa-chevron-left"></i></a>
+                <% } %>
+                <% for (let i = Math.max(1,paginaAtual-2); i <= Math.min(totalPaginas,paginaAtual+2); i++) { %>
+                    <% if (i===paginaAtual) { %><span class="active"><%= i %></span>
+                    <% } else { %><a href="?page=<%= i %><%= statusFiltro ? '&status='+statusFiltro : '' %>"><%= i %></a><% } %>
+                <% } %>
+                <% if (paginaAtual < totalPaginas) { %>
+                <a href="?page=<%= paginaAtual+1 %><%= statusFiltro ? '&status='+statusFiltro : '' %>"><i class="fas fa-chevron-right"></i></a>
+                <% } %>
+            </section>
+            <% } %>
+        </main>
+    </section>
+</section>
+</body>
+</html>

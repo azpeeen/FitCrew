@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alunos — Portal da Academia · FitCrew</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body class="admin-body">
+<section class="admin-wrapper">
+    <%- include('./_sidebar') %>
+    <section class="admin-content">
+        <header class="admin-topbar">
+            <span class="admin-topbar-title">Alunos</span>
+            <section class="admin-topbar-right">
+                <span class="admin-topbar-admin">Olá, <strong><%= gymAdmin.nome.split(' ')[0] %></strong></span>
+                <a href="/gym-admin/logout" class="btn admin-btn-logout"><i class="fas fa-sign-out-alt"></i> Sair</a>
+            </section>
+        </header>
+
+        <main class="admin-main">
+            <h1 class="admin-page-title">Alunos</h1>
+            <p class="admin-page-subtitle"><%= total %> aluno<%= total !== 1 ? 's' : '' %> encontrado<%= total !== 1 ? 's' : '' %></p>
+
+            <section class="admin-toolbar">
+                <section class="admin-search">
+                    <i class="fas fa-search"></i>
+                    <form method="GET" action="/gym-admin/alunos" style="display:contents">
+                        <input type="text" name="busca" placeholder="Buscar por nome ou e-mail..." value="<%= busca %>">
+                    </form>
+                </section>
+                <% if (busca) { %>
+                <a href="/gym-admin/alunos" class="btn btn-outline btn-sm">Limpar</a>
+                <% } %>
+            </section>
+
+            <section class="admin-card">
+                <section class="admin-card-body no-pad">
+                    <section class="admin-table-wrap">
+                        <% if (alunos.length === 0) { %>
+                        <section style="text-align:center;padding:40px;color:var(--text-muted)">
+                            <i class="fas fa-user-slash" style="font-size:2rem;opacity:.2;display:block;margin-bottom:10px"></i>
+                            Nenhum aluno encontrado.
+                        </section>
+                        <% } else { %>
+                        <table class="admin-table">
+                            <thead>
+                                <tr><th>Nome</th><th>E-mail</th><th>Status</th><th>Último Check-in</th><th>Cadastro</th><th></th></tr>
+                            </thead>
+                            <tbody>
+                            <% alunos.forEach(a => { %>
+                            <tr>
+                                <td class="fw-600"><%= a.nome %></td>
+                                <td class="text-muted"><%= a.email %></td>
+                                <td>
+                                    <span class="badge <%= a.status==='ativo' ? 'badge-success' : 'badge-muted' %>"><%= a.status %></span>
+                                </td>
+                                <td class="text-muted">
+                                    <% if (a.ultimo_checkin) { %>
+                                        <%= new Date(a.ultimo_checkin).toLocaleDateString('pt-BR') %>
+                                    <% } else { %>
+                                        <span style="color:var(--error)">Nunca</span>
+                                    <% } %>
+                                </td>
+                                <td class="text-muted"><%= new Date(a.created_at).toLocaleDateString('pt-BR') %></td>
+                                <td><a href="/gym-admin/alunos/<%= a.id %>" class="btn btn-outline btn-sm">Ver</a></td>
+                            </tr>
+                            <% }) %>
+                            </tbody>
+                        </table>
+                        <% } %>
+                    </section>
+                </section>
+            </section>
+
+            <% if (totalPaginas > 1) { %>
+            <section class="admin-pagination">
+                <% if (paginaAtual > 1) { %>
+                <a href="?page=<%= paginaAtual-1 %>&busca=<%= encodeURIComponent(busca) %>"><i class="fas fa-chevron-left"></i></a>
+                <% } %>
+                <% for (let i = Math.max(1,paginaAtual-2); i <= Math.min(totalPaginas,paginaAtual+2); i++) { %>
+                    <% if (i===paginaAtual) { %><span class="active"><%= i %></span>
+                    <% } else { %><a href="?page=<%= i %>&busca=<%= encodeURIComponent(busca) %>"><%= i %></a><% } %>
+                <% } %>
+                <% if (paginaAtual < totalPaginas) { %>
+                <a href="?page=<%= paginaAtual+1 %>&busca=<%= encodeURIComponent(busca) %>"><i class="fas fa-chevron-right"></i></a>
+                <% } %>
+            </section>
+            <% } %>
+        </main>
+    </section>
+</section>
+</body>
+</html>

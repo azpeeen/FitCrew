@@ -1,0 +1,25 @@
+<header class="admin-topbar">
+    <section class="flex gap-10">
+        <button id="mod-sidebar-toggle" class="btn btn-outline btn-icon" style="display:none" title="Menu">
+            <i class="fas fa-bars"></i>
+        </button>
+        <span class="admin-topbar-title">Moderação</span>
+    </section>
+    <section class="admin-topbar-right">
+        <span class="admin-topbar-admin">
+            <strong><%= mod.nome %></strong>
+        </span>
+        <button class="btn admin-btn-logout sidebar-logout-btn" type="button">
+            <i class="fas fa-sign-out-alt"></i> Sair
+        </button>
+    </section>
+</header>
+<%- include('./logout-modal', { logoutAction: '/mod/logout' }) %>
+<script>
+if (window.innerWidth <= 768) {
+    document.getElementById('mod-sidebar-toggle').style.display = 'flex';
+}
+document.getElementById('mod-sidebar-toggle')?.addEventListener('click', function () {
+    document.getElementById('mod-sidebar')?.classList.toggle('open');
+});
+</script>

@@ -1,0 +1,168 @@
+/* sobre-mobile.css — design editorial v2 */
+
+html {
+    font-size: 56.25% !important;
+}
+
+body {
+    overflow-x: hidden !important;
+}
+
+/* ── Hero ─────────────────────────────────────────────────── */
+.about-hero-ed {
+    flex-direction: column !important;
+    padding: 8rem 5% 6rem !important;
+    gap: 4rem !important;
+}
+
+.hero-content {
+    flex: none !important;
+    width: 100% !important;
+}
+
+.hero-visual {
+    width: 100% !important;
+    justify-content: center !important;
+}
+
+.hero-title {
+    font-size: 4rem !important;
+}
+
+.hero-sub {
+    font-size: 1.7rem !important;
+    max-width: 100% !important;
+}
+
+/* ── Manifesto ────────────────────────────────────────────── */
+.about-manifesto {
+    padding: 6.4rem 5% !important;
+}
+
+.manifesto-inner {
+    flex-direction: column !important;
+}
+
+.manifesto-left {
+    flex: none !important;
+    padding-right: 0 !important;
+    padding-bottom: 2.4rem !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--primary) !important;
+}
+
+.manifesto-right {
+    padding-left: 0 !important;
+    padding-top: 2.4rem !important;
+}
+
+.manifesto-right p {
+    font-size: 1.7rem !important;
+}
+
+/* ── Números ──────────────────────────────────────────────── */
+.about-numbers {
+    padding: 6.4rem 5% !important;
+}
+
+.numbers-row {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 4rem 0 !important;
+    max-width: 100% !important;
+}
+
+.num-sep {
+    display: none !important;
+}
+
+.num-item {
+    padding: 0 !important;
+}
+
+.numbers-row .num-item:last-child {
+    grid-column: 1 / -1 !important;
+    text-align: center !important;
+}
+
+.num-value {
+    font-size: 4rem !important;
+}
+
+.num-label {
+    font-size: 1.2rem !important;
+}
+
+/* ── Stack ────────────────────────────────────────────────── */
+.about-stack {
+    padding: 6.4rem 5% !important;
+}
+
+.stack-title {
+    font-size: 2.8rem !important;
+    margin-bottom: 3.2rem !important;
+}
+
+.stack-item {
+    flex-direction: column !important;
+    gap: 0.4rem !important;
+}
+
+.stack-name {
+    min-width: auto !important;
+}
+
+.stack-sep {
+    display: none !important;
+}
+
+.stack-desc {
+    font-size: 1.5rem !important;
+}
+
+/* ── Trainer ──────────────────────────────────────────────── */
+.about-trainer {
+    flex-direction: column !important;
+    min-height: auto !important;
+}
+
+.trainer-image {
+    flex: none !important;
+    height: 300px !important;
+}
+
+.trainer-image img {
+    height: 300px !important;
+    object-position: top !important;
+}
+
+.trainer-info {
+    flex: none !important;
+    padding: 4rem 5% !important;
+}
+
+.trainer-name {
+    font-size: 3.6rem !important;
+}
+
+.trainer-bio {
+    max-width: 100% !important;
+}
+
+/* ── CTA ──────────────────────────────────────────────────── */
+.about-cta-ed {
+    padding: 8rem 5% !important;
+}
+
+.cta-title {
+    font-size: 3.6rem !important;
+}
+
+.cta-sub {
+    font-size: 1.6rem !important;
+}
+
+.btn-cta-solid {
+    font-size: 1.5rem !important;
+    padding: 14px 32px !important;
+}

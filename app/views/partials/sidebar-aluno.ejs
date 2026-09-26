@@ -1,0 +1,164 @@
+<%
+    const temIA = user && (user.planoSlug === 'gymbro' || user.planoSlug === 'black');
+    const temAvaliacao = user && user.planoSlug === 'black';
+%>
+<nav class="sidebar-nav" id="sidebarNav">
+
+    <!-- Logo: ícone compacto por padrão, troca pra wordmark quando a sidebar expande -->
+    <a href="/feed" class="sidebar-logo" aria-label="FitCrew">
+        <img src="/images/logo.png" alt="FitCrew" class="sidebar-logo-img sidebar-logo-img--compact">
+        <img src="/images/logo-form.png" alt="FitCrew" class="sidebar-logo-img sidebar-logo-img--expandida">
+    </a>
+
+    <!-- Links principais -->
+    <section class="sidebar-links">
+
+        <a href="/feed" class="sidebar-item sidebar-item--home" data-tooltip="Feed">
+            <i class="fas fa-home sidebar-item-icon"></i>
+            <span class="sidebar-item-label">Feed</span>
+        </a>
+
+        <a href="/chat" class="sidebar-item sidebar-item--chat" data-tooltip="Mensagens">
+            <i class="fas fa-comment sidebar-item-icon"></i>
+            <span class="sidebar-item-label">Mensagens</span>
+            <span class="sidebar-badge" id="sidebar-chat-badge" style="display:none">0</span>
+        </a>
+
+        <a href="/gymsquads" class="sidebar-item sidebar-item--gymsquads" data-tooltip="GymSquads">
+            <i class="fas fa-trophy sidebar-item-icon"></i>
+            <span class="sidebar-item-label">GymSquads</span>
+        </a>
+
+        <a href="/treinos" class="sidebar-item sidebar-item--treino" data-tooltip="Treinos">
+            <i class="fas fa-dumbbell sidebar-item-icon"></i>
+            <span class="sidebar-item-label">Treinos</span>
+        </a>
+
+        <a href="/nutricao" class="sidebar-item sidebar-item--nutri" data-tooltip="Nutrição">
+            <i class="fas fa-apple-alt sidebar-item-icon"></i>
+            <span class="sidebar-item-label">Nutrição</span>
+        </a>
+
+        <a href="<%= temIA ? '/ai/chat' : '/meu-plano?upgrade=1' %>"
+            class="sidebar-item sidebar-item--ia"
+            data-tooltip="<%= temIA ? 'IA' : 'IA 🔒' %>">
+            <i class="fas fa-robot sidebar-item-icon"></i>
+            <span class="sidebar-item-label">IA<%= temIA ? '' : ' 🔒' %></span>
+            <% if (!temIA) { %><i class="fas fa-lock sidebar-lock-badge"></i><% } %>
+        </a>
+
+        <a href="<%= temAvaliacao ? '/ai/avaliacao' : '/meu-plano?upgrade=1' %>"
+            class="sidebar-item sidebar-item--avaliacao"
+            data-tooltip="<%= temAvaliacao ? 'Avaliação Corporal' : 'Avaliação Corporal 🔒' %>">
+            <i class="fas fa-camera sidebar-item-icon"></i>
+            <span class="sidebar-item-label">Avaliação Corporal<%= temAvaliacao ? '' : ' 🔒' %></span>
+            <% if (!temAvaliacao) { %><i class="fas fa-lock sidebar-lock-badge"></i><% } %>
+        </a>
+
+        <a href="/amizades#agenda" class="sidebar-item sidebar-item--agenda" data-tooltip="Agenda">
+            <i class="fas fa-calendar-alt sidebar-item-icon"></i>
+            <span class="sidebar-item-label">Agenda</span>
+        </a>
+
+    </section>
+
+    <!-- Bottom: perfil + engrenagem -->
+    <section class="sidebar-bottom">
+
+        <a href="/perfil/<%= user.username || user.id %>"
+            class="sidebar-item sidebar-item--perfil"
+            data-tooltip="<%= user.nome %>">
+            <img
+                src="<%= user.profile_photo || user.foto_perfil || '/images/avatar.png' %>"
+                alt="<%= user.nome %>"
+                class="sidebar-perfil-foto">
+            <span class="sidebar-item-label"><%= user.nome %></span>
+        </a>
+
+        <button type="button" class="sidebar-item sidebar-item--mais" id="sidebar-btn-mais" data-tooltip="Mais" aria-haspopup="true" aria-expanded="false" aria-controls="sidebar-menu-flutuante">
+            <i class="fas fa-bars sidebar-item-icon"></i>
+            <span class="sidebar-item-label">Mais</span>
+        </button>
+
+    </section>
+
+    <!-- Backdrop do menu "Mais" (bottom sheet no mobile) -->
+    <section class="sidebar-mais-backdrop" id="sidebar-mais-backdrop"></section>
+
+    <!-- Menu flutuante -->
+    <section class="sidebar-menu-flutuante" id="sidebar-menu-flutuante" style="display:none">
+        <a href="/gymsquads" class="sidebar-menu-item sidebar-menu-item--mobile-only"><i class="fas fa-trophy"></i> GymSquads</a>
+        <a href="/metricas" class="sidebar-menu-item"><i class="fas fa-tachometer-alt"></i> Minhas Métricas</a>
+        <a href="/evolucao" class="sidebar-menu-item"><i class="fas fa-chart-line"></i> Evolução</a>
+        <a href="/imc-form" class="sidebar-menu-item"><i class="fas fa-clipboard-list"></i> Medidas</a>
+        <a href="<%= temAvaliacao ? '/ai/avaliacao' : '/meu-plano?upgrade=1' %>" class="sidebar-menu-item">
+            <i class="fas fa-camera"></i> Avaliação Corporal<%= temAvaliacao ? '' : ' 🔒' %>
+        </a>
+        <a href="/conquistas" class="sidebar-menu-item"><i class="fas fa-medal"></i> Conquistas</a>
+        <a href="/amizades" class="sidebar-menu-item"><i class="fas fa-user-friends"></i> Amigos</a>
+        <a href="/amizades#agenda" class="sidebar-menu-item"><i class="fas fa-calendar-alt"></i> Agenda</a>
+        <a href="/scan" class="sidebar-menu-item"><i class="fas fa-qrcode"></i> Check-in / Scan</a>
+        <a href="/meu-plano" class="sidebar-menu-item"><i class="fas fa-file-alt"></i> Meu Plano</a>
+        <a href="/suporte" class="sidebar-menu-item"><i class="fas fa-headset"></i> Suporte</a>
+        <a href="/config" class="sidebar-menu-item"><i class="fas fa-cog"></i> Configurações</a>
+        <section class="sidebar-menu-divider"></section>
+        <button type="button" class="sidebar-menu-item sidebar-menu-item--danger sidebar-logout-btn">
+            <i class="fas fa-sign-out-alt"></i> Sair
+        </button>
+    </section>
+
+</nav>
+<script>
+(function () {
+    var sidebarBtnMais = document.getElementById('sidebar-btn-mais');
+    var sidebarMenuFlutuante = document.getElementById('sidebar-menu-flutuante');
+    var sidebarMaisBackdrop = document.getElementById('sidebar-mais-backdrop');
+    var mqMobile = window.matchMedia('(max-width: 768px)');
+
+    function abrirMenuMais() {
+        sidebarMenuFlutuante.style.display = 'block';
+        sidebarBtnMais.setAttribute('aria-expanded', 'true');
+        if (mqMobile.matches) {
+            sidebarMaisBackdrop.classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    function fecharMenuMais() {
+        sidebarMenuFlutuante.style.display = 'none';
+        sidebarBtnMais.setAttribute('aria-expanded', 'false');
+        sidebarMaisBackdrop.classList.remove('open');
+        document.body.style.overflow = '';
+    }
+
+    sidebarBtnMais?.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var aberto = sidebarMenuFlutuante.style.display !== 'none';
+        if (aberto) { fecharMenuMais(); } else { abrirMenuMais(); }
+    });
+
+    sidebarMaisBackdrop?.addEventListener('click', fecharMenuMais);
+
+    document.addEventListener('click', function (e) {
+        if (!sidebarBtnMais?.contains(e.target) && !sidebarMenuFlutuante?.contains(e.target)) {
+            fecharMenuMais();
+        }
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && sidebarMenuFlutuante.style.display !== 'none') {
+            fecharMenuMais();
+        }
+    });
+
+    // Destaca o ícone da página atual comparando com o pathname atual —
+    // não há convenção de variável "page" nas rotas, então a checagem é client-side.
+    var path = window.location.pathname;
+    document.querySelectorAll('#sidebarNav .sidebar-links .sidebar-item[href]').forEach(function (a) {
+        var base = a.getAttribute('href').split('?')[0].split('#')[0];
+        if (path === base || path.indexOf(base + '/') === 0) {
+            a.classList.add('sidebar-item--ativo');
+        }
+    });
+})();
+</script>

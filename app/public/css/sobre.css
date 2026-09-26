@@ -1,0 +1,355 @@
+/* sobre.css — design editorial v2 */
+
+:root {
+    --primary: #B8860B;
+    --primary-light: #FFD700;
+    --bg: #ffffff;
+    --card-bg: #faf7f0;
+    --text: #1a1a1a;
+    --text-secondary: #666666;
+    --border: rgba(0, 0, 0, 0.12);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+}
+
+html {
+    font-size: 62.5%;
+}
+
+body {
+    background-color: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+/* ── Animate In ─────────────────────────────────────────── */
+.animate-in {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.animate-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ── SEÇÃO 1: Hero editorial ─────────────────────────────── */
+.about-hero-ed {
+    display: flex;
+    align-items: center;
+    gap: 6.4rem;
+    padding: 12rem 10%;
+    background: var(--bg);
+}
+
+.hero-content {
+    flex: 0 0 52%;
+}
+
+.hero-visual {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hero-visual img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+.hero-accent-bar {
+    display: block;
+    width: 80px;
+    height: 4px;
+    background: var(--primary);
+    margin-bottom: 3.2rem;
+}
+
+.hero-title {
+    display: flex;
+    flex-direction: column;
+    font-size: 7.2rem;
+    font-weight: 800;
+    line-height: 1.1;
+    color: var(--text);
+    margin-bottom: 2.4rem;
+}
+
+.hero-sub {
+    font-size: 2rem;
+    font-weight: 400;
+    color: var(--text-secondary);
+    max-width: 52rem;
+    line-height: 1.6;
+}
+
+/* ── SEÇÃO 2: Manifesto ──────────────────────────────────── */
+.about-manifesto {
+    padding: 10rem 10%;
+    background: var(--card-bg);
+}
+
+.manifesto-inner {
+    display: flex;
+    gap: 0;
+    align-items: flex-start;
+}
+
+.manifesto-left {
+    flex: 0 0 30%;
+    padding-right: 4.8rem;
+    border-right: 1px solid var(--primary);
+}
+
+.section-label {
+    display: block;
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--primary);
+}
+
+.manifesto-right {
+    flex: 1;
+    padding-left: 4.8rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2.4rem;
+}
+
+.manifesto-right p {
+    font-size: 1.8rem;
+    line-height: 1.8;
+    color: var(--text);
+}
+
+/* ── SEÇÃO 3: Números ────────────────────────────────────── */
+.about-numbers {
+    padding: 8rem 10%;
+    background: var(--bg);
+}
+
+.numbers-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.num-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.2rem;
+    padding: 0 2.4rem;
+    text-align: center;
+}
+
+.num-sep {
+    display: block;
+    width: 1px;
+    height: 7.2rem;
+    background: var(--border);
+    flex-shrink: 0;
+}
+
+.num-value {
+    display: block;
+    font-size: 5.6rem;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--primary);
+}
+
+.num-label {
+    display: block;
+    font-size: 1.3rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-secondary);
+}
+
+/* ── SEÇÃO 4: Stack & Tecnologia ─────────────────────────── */
+.about-stack {
+    padding: 10rem 10%;
+    background: var(--card-bg);
+}
+
+.stack-title {
+    font-size: 3.6rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-top: 1.2rem;
+    margin-bottom: 4.8rem;
+    max-width: 680px;
+    line-height: 1.2;
+}
+
+.stack-list {
+    list-style: none;
+    max-width: 960px;
+}
+
+.stack-item {
+    display: flex;
+    align-items: baseline;
+    gap: 2rem;
+    padding: 2rem 0;
+    border-top: 1px solid var(--border);
+}
+
+.stack-item:last-child {
+    border-bottom: 1px solid var(--border);
+}
+
+.stack-name {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--text);
+    min-width: 18rem;
+    flex-shrink: 0;
+}
+
+.stack-sep {
+    font-size: 1.6rem;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+.stack-desc {
+    font-size: 1.6rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+/* ── SEÇÃO 5: Personal Trainer ───────────────────────────── */
+.about-trainer {
+    display: flex;
+    min-height: 50rem;
+}
+
+.trainer-image {
+    flex: 0 0 50%;
+    overflow: hidden;
+}
+
+.trainer-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
+    display: block;
+}
+
+.trainer-info {
+    flex: 0 0 50%;
+    background: var(--primary-light);
+    padding: 6.4rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    color: #1a1a1a;
+}
+
+.trainer-label {
+    display: block;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    opacity: 0.7;
+    margin-bottom: 1.6rem;
+    color: #1a1a1a;
+}
+
+.trainer-name {
+    font-size: 4.8rem;
+    font-weight: 800;
+    line-height: 1.1;
+    color: #1a1a1a;
+}
+
+.trainer-role {
+    font-size: 1.6rem;
+    font-weight: 500;
+    margin-top: 0.4rem;
+    color: #1a1a1a;
+}
+
+.trainer-divider {
+    display: block;
+    width: 4.8rem;
+    height: 2px;
+    background: #1a1a1a;
+    margin: 2.4rem 0;
+    opacity: 0.6;
+}
+
+.trainer-bio {
+    font-size: 1.6rem;
+    line-height: 1.7;
+    color: #1a1a1a;
+    max-width: 52rem;
+}
+
+.trainer-note {
+    display: block;
+    font-size: 1.2rem;
+    font-style: italic;
+    opacity: 0.5;
+    margin-top: 1.6rem;
+    color: #1a1a1a;
+}
+
+/* ── SEÇÃO 6: CTA Final ──────────────────────────────────── */
+.about-cta-ed {
+    padding: 12rem 10%;
+    background: var(--primary-light);
+    text-align: center;
+}
+
+.cta-title {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 6.4rem;
+    font-weight: 900;
+    line-height: 1.1;
+    color: #1a1a1a;
+    margin-bottom: 1.6rem;
+}
+
+.cta-sub {
+    font-size: 1.8rem;
+    color: rgba(0, 0, 0, 0.7);
+    margin-bottom: 4rem;
+}
+
+.btn-cta-solid {
+    display: inline-block;
+    padding: 16px 40px;
+    background: #1a1a1a;
+    color: #ffffff;
+    font-size: 1.6rem;
+    font-weight: 700;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.btn-cta-solid:hover {
+    background: #333333;
+    transform: scale(1.03);
+}

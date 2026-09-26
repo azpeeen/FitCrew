@@ -1,0 +1,183 @@
+/* ============================================================
+   mod.css — Painel de Moderação GymBros (/mod)
+   Carrega junto de admin.css — reaproveita as CSS custom
+   properties (--gold, --card, --border, --text-muted, etc.)
+   ============================================================ */
+
+.mod-avatar, .mod-avatar-sm {
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    vertical-align: middle;
+}
+.mod-avatar { width: 44px; height: 44px; }
+.mod-avatar-sm { width: 26px; height: 26px; margin-right: 8px; }
+
+/* ── Filtros (abas por link) ─────────────────────────────────── */
+.mod-filtros {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.mod-filtro-btn {
+    padding: 7px 16px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: all 0.15s;
+}
+
+.mod-filtro-btn:hover { border-color: var(--gold); color: var(--gold); }
+.mod-filtro-btn.active { background: var(--gold-dim); border-color: var(--gold); color: var(--gold); }
+
+/* ── Busca ────────────────────────────────────────────────────── */
+.mod-busca-form {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+    align-items: center;
+}
+.mod-busca-form .admin-search input { width: 320px; max-width: 100%; }
+
+/* ── Card de denúncia ─────────────────────────────────────────── */
+.mod-denuncia-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin-bottom: 14px;
+}
+
+.mod-denuncia-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+    font-size: 0.82rem;
+}
+
+.mod-denuncia-tipo {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+.mod-denuncia-tipo--post       { background: rgba(59,130,246,0.12);  color: var(--info); }
+.mod-denuncia-tipo--comentario { background: rgba(34,197,94,0.12);   color: var(--success); }
+.mod-denuncia-tipo--story      { background: rgba(201,139,29,0.12);  color: var(--gold); }
+
+.mod-denuncia-descricao {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-style: italic;
+    margin-bottom: 10px;
+}
+
+.mod-denuncia-conteudo {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+}
+
+.mod-denuncia-texto {
+    font-size: 0.88rem;
+    color: var(--text);
+    margin-bottom: 6px;
+    word-break: break-word;
+}
+
+.mod-denuncia-acoes {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.mod-suspender-opcoes {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--border);
+    flex-wrap: wrap;
+}
+
+/* ── Card de usuário / apelação ──────────────────────────────── */
+.mod-usuario-card, .mod-apelacao-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin-bottom: 14px;
+}
+
+.mod-usuario-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+
+.mod-usuario-info { flex: 1; min-width: 160px; }
+.mod-usuario-nome { font-size: 0.95rem; font-weight: 700; }
+
+.mod-usuario-acoes {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+}
+
+.mod-motivo-input {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.mod-usuario-botoes {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.mod-resposta-input {
+    width: 100%;
+    margin-bottom: 10px;
+    resize: vertical;
+}
+
+/* ── Paginação ────────────────────────────────────────────────── */
+.mod-paginacao {
+    display: flex;
+    gap: 6px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.mod-pag-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 7px;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.mod-pag-btn:hover { border-color: var(--gold); color: var(--gold); }
+.mod-pag-btn.active { background: var(--gold-dim); border-color: var(--gold); color: var(--gold); }

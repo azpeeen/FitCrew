@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<%- include('../partials/seo') %>
+<link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+<link rel="stylesheet" href="/css/header.css">
+<link rel="stylesheet" href="/css/footer.css">
+<link rel="stylesheet" href="/css/area-aluno.css">
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin></head>
+<body>
+
+<%- include('../partials/header-aluno') %>
+
+<section class="aluno-dashboard">
+    <section class="sidebar-overlay" id="sidebarOverlay"></section>
+    <%- include('../partials/sidebar-aluno') %>
+
+    <section class="aluno-main">
+        <section class="gymsquads-layout">
+
+            <section class="gymsquads-header">
+                <h1 class="gymsquads-titulo"><i class="fas fa-trophy"></i> GymSquads</h1>
+                <button type="button" class="btn-gold-full gymsquads-btn-criar" id="btn-abrir-criar-gymsquad">
+                    <i class="fas fa-plus"></i> Criar desafio
+                </button>
+            </section>
+
+            <% if (convites.length > 0) { %>
+            <section class="gymsquads-section">
+                <h2 class="gymsquads-section-title">
+                    Convites pendentes
+                    <span class="amizades-count-badge"><%= convites.length %></span>
+                </h2>
+                <section class="gymsquads-convites-lista">
+                    <% convites.forEach(c => { %>
+                    <section class="gymsquads-convite-card" id="convite-<%= c.gymsquad_id %>">
+                        <section class="gymsquads-convite-info">
+                            <section class="gymsquads-convite-nome"><%= c.nome %></section>
+                            <section class="gymsquads-convite-meta">
+                                <%= c.criador_nome %> te convidou ·
+                                <%= new Date(c.data_inicio).toLocaleDateString('pt-BR') %> a
+                                <%= new Date(c.data_fim).toLocaleDateString('pt-BR') %>
+                            </section>
+                        </section>
+                        <section class="gymsquads-convite-acoes">
+                            <button type="button" class="gymsquad-btn gymsquad-btn--gold" data-gymsquad-id="<%= c.gymsquad_id %>" data-aceitar="1">Aceitar</button>
+                            <button type="button" class="gymsquad-btn gymsquad-btn--outline" data-gymsquad-id="<%= c.gymsquad_id %>" data-aceitar="0">Recusar</button>
+                        </section>
+                    </section>
+                    <% }) %>
+                </section>
+            </section>
+            <% } %>
+
+            <% const ativos = gymsquads.filter(g => g.status === 'ativo'); %>
+            <% const encerrados = gymsquads.filter(g => g.status === 'encerrado'); %>
+
+            <section class="gymsquads-section">
+                <h2 class="gymsquads-section-title">Ativos</h2>
+                <% if (ativos.length === 0) { %>
+                <section class="amizades-vazio">
+                    <i class="fas fa-trophy" style="font-size:2.5rem;opacity:.15;display:block;margin-bottom:14px"></i>
+                    Você ainda não participa de nenhum desafio.
+                </section>
+                <% } else { %>
+                <% ativos.forEach(g => { %>
+                <% const placar = placares[g.id] || []; %>
+                <% const top = placar.slice(0, 3); %>
+                <% const maxPontos = top.length ? top[0].pontuacao : 1; %>
+                <section class="gymsquad-card">
+                    <section class="gymsquad-card-header">
+                        <section>
+                            <section class="gymsquad-card-titulo"><%= g.nome %></section>
+                            <section class="gymsquad-card-meta">
+                                <span class="gymsquad-tipo-badge"><%= g.tipo_desafio %></span>
+                                <span><%= new Date(g.data_inicio).toLocaleDateString('pt-BR') %> → <%= new Date(g.data_fim).toLocaleDateString('pt-BR') %></span>
+                                <span><%= g.total_membros %> membro<%= g.total_membros === 1 ? '' : 's' %></span>
+                            </section>
+                        </section>
+                    </section>
+
+                    <section class="gymsquad-placar" id="placar-<%= g.id %>">
+                        <% top.forEach((p, i) => { %>
+                        <section class="gymsquad-placar-item" data-user-id="<%= p.user_id %>">
+                            <span class="gymsquad-placar-pos gymsquad-placar-pos--<%= i + 1 %>"><%= i + 1 %>º</span>
+                            <img src="<%= p.foto_perfil || '/images/avatar.png' %>" class="gymsquad-placar-avatar" alt="<%= p.nome %>">
+                            <section class="gymsquad-placar-info">
+                                <section class="gymsquad-placar-nome"><%= p.nome %></section>
+                                <section class="gymsquad-placar-barra-wrap">
+                                    <section class="gymsquad-placar-barra">
+                                        <section class="gymsquad-placar-fill" style="width:<%= Math.round((p.pontuacao / maxPontos) * 100) %>%"></section>
+                                    </section>
+                                    <span class="gymsquad-placar-valor"><%= p.pontuacao %></span>
+                                </section>
+                            </section>
+                        </section>
+                        <% }) %>
+                    </section>
+
+                    <section class="gymsquad-card-acoes">
+                        <a href="/gymsquads/<%= g.id %>" class="gymsquad-btn gymsquad-btn--gold">Ver desafio</a>
+                    </section>
+                </section>
+                <% }) %>
+                <% } %>
+            </section>
+
+            <% if (encerrados.length > 0) { %>
+            <section class="gymsquads-section">
+                <h2 class="gymsquads-section-title">Encerrados</h2>
+                <% encerrados.forEach(g => { %>
+                <section class="gymsquad-card gymsquad-card--encerrado">
+                    <section class="gymsquad-card-header">
+                        <section>
+                            <section class="gymsquad-card-titulo"><%= g.nome %></section>
+                            <section class="gymsquad-card-meta">
+                                <span class="gymsquad-tipo-badge"><%= g.tipo_desafio %></span>
+                                <span><%= new Date(g.data_inicio).toLocaleDateString('pt-BR') %> → <%= new Date(g.data_fim).toLocaleDateString('pt-BR') %></span>
+                            </section>
+                        </section>
+                    </section>
+                    <section class="gymsquad-card-acoes">
+                        <a href="/gymsquads/<%= g.id %>" class="gymsquad-btn gymsquad-btn--outline">Ver resultado</a>
+                    </section>
+                </section>
+                <% }) %>
+            </section>
+            <% } %>
+
+        </section>
+    </section>
+</section>
+
+<!-- MODAL: CRIAR GYMSQUAD -->
+<section id="modal-criar-gymsquad" class="modal-overlay">
+    <section class="modal-box">
+        <section class="modal-header">
+            <h2><i class="fas fa-trophy"></i> Criar GymSquad</h2>
+            <button type="button" class="modal-close" id="modal-gymsquad-fechar"><i class="fas fa-times"></i></button>
+        </section>
+
+        <section class="form-group">
+            <label class="form-label">Nome do desafio *</label>
+            <input type="text" id="gymsquad-nome" class="form-input" placeholder="Ex: Desafio de Agosto" maxlength="200">
+        </section>
+
+        <section class="form-group">
+            <label class="form-label">Tipo de desafio *</label>
+            <select id="gymsquad-tipo" class="form-input">
+                <option value="frequencia">🏃 Frequência (check-ins)</option>
+                <option value="carga">💪 Carga total (kg levantados)</option>
+                <option value="distancia">📍 Distância (km, auto-declarado)</option>
+                <option value="tempo">⏱ Tempo total (minutos treinando)</option>
+                <option value="personalizado">✏️ Personalizado</option>
+            </select>
+        </section>
+
+        <section class="form-group" id="gymsquad-meta-wrap" style="display:none">
+            <label class="form-label">Descrição da meta *</label>
+            <input type="text" id="gymsquad-meta" class="form-input" placeholder="Ex: Quem fizer mais flexões essa semana" maxlength="300">
+        </section>
+
+        <section class="form-group">
+            <label class="form-label">Período *</label>
+            <section style="display:flex;gap:10px">
+                <input type="date" id="gymsquad-inicio" class="form-input">
+                <input type="date" id="gymsquad-fim" class="form-input">
+            </section>
+        </section>
+
+        <section class="form-group">
+            <label class="form-label">Convidar amigos</label>
+            <section id="gymsquad-amigos-lista" class="gymsquad-amigos-lista">
+                <p style="font-size:.82rem;color:#666;margin:0">Carregando...</p>
+            </section>
+        </section>
+
+        <button type="button" class="btn-gold-full" id="btn-criar-gymsquad">Criar desafio</button>
+    </section>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    document.addEventListener('click', async e => {
+        const btn = e.target.closest('.gymsquads-convite-acoes button');
+        if (!btn) return;
+        const gymsquadId = btn.dataset.gymsquadId;
+        const aceitar = btn.dataset.aceitar === '1';
+        btn.closest('.gymsquads-convite-acoes').querySelectorAll('button').forEach(b => b.disabled = true);
+        try {
+            const r = await fetch(`/api/gymsquads/${gymsquadId}/responder`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ aceitar }),
+            }).then(x => x.json());
+            if (r.ok) {
+                location.reload();
+            } else {
+                btn.closest('.gymsquads-convite-acoes').querySelectorAll('button').forEach(b => b.disabled = false);
+            }
+        } catch (_) {
+            btn.closest('.gymsquads-convite-acoes').querySelectorAll('button').forEach(b => b.disabled = false);
+        }
+    });
+
+});
+
+// ── Modal criar gymsquad ───────────────────────────────────────────────────────
+const modalCriarGymSquad = document.getElementById('modal-criar-gymsquad');
+const tipoSelect = document.getElementById('gymsquad-tipo');
+const metaWrap = document.getElementById('gymsquad-meta-wrap');
+let amigosCarregados = false;
+
+function escHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+}
+
+async function carregarAmigosConvidaveis() {
+    if (amigosCarregados) return;
+    amigosCarregados = true;
+    const lista = document.getElementById('gymsquad-amigos-lista');
+    try {
+        const data = await fetch('/api/gymsquads/amigos-convidaveis').then(r => r.json());
+        if (!data.amigos?.length) {
+            lista.innerHTML = '<p style="font-size:.82rem;color:#666;margin:0">Você ainda não tem amigos para convidar.</p>';
+            return;
+        }
+        lista.innerHTML = data.amigos.map(a => `
+            <label class="evento-amigo-item">
+                <input type="checkbox" class="gymsquad-amigo-check" value="${a.id}">
+                <img src="${escHtml(a.foto_perfil || '/images/avatar.png')}" class="evento-amigo-avatar" alt="${escHtml(a.nome)}">
+                <section>
+                    <section class="evento-amigo-nome">${escHtml(a.nome)}</section>
+                    <section class="evento-amigo-username">@${escHtml(a.username)}</section>
+                </section>
+            </label>`).join('');
+    } catch (_) {
+        lista.innerHTML = '<p style="font-size:.82rem;color:#666;margin:0">Erro ao carregar amigos.</p>';
+    }
+}
+
+document.getElementById('btn-abrir-criar-gymsquad')?.addEventListener('click', () => {
+    modalCriarGymSquad.classList.add('open');
+    carregarAmigosConvidaveis();
+});
+
+document.getElementById('modal-gymsquad-fechar')?.addEventListener('click', () => {
+    modalCriarGymSquad.classList.remove('open');
+});
+
+modalCriarGymSquad.addEventListener('click', e => {
+    if (e.target === modalCriarGymSquad) modalCriarGymSquad.classList.remove('open');
+});
+
+tipoSelect?.addEventListener('change', () => {
+    metaWrap.style.display = tipoSelect.value === 'personalizado' ? 'block' : 'none';
+});
+
+document.getElementById('btn-criar-gymsquad')?.addEventListener('click', async () => {
+    const nome = document.getElementById('gymsquad-nome').value.trim();
+    const tipo_desafio = tipoSelect.value;
+    const descricao_meta = document.getElementById('gymsquad-meta').value.trim();
+    const data_inicio = document.getElementById('gymsquad-inicio').value;
+    const data_fim = document.getElementById('gymsquad-fim').value;
+    const convidados = Array.from(document.querySelectorAll('.gymsquad-amigo-check:checked')).map(el => parseInt(el.value, 10));
+
+    if (!nome) { alert('Nome obrigatório.'); return; }
+    if (!data_inicio || !data_fim) { alert('Período obrigatório.'); return; }
+    if (tipo_desafio === 'personalizado' && !descricao_meta) { alert('Descreva a meta do desafio.'); return; }
+
+    const btn = document.getElementById('btn-criar-gymsquad');
+    btn.disabled = true;
+    btn.textContent = 'Criando...';
+
+    try {
+        const r = await fetch('/api/gymsquads', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nome, tipo_desafio, descricao_meta, data_inicio, data_fim, convidados }),
+        }).then(x => x.json());
+
+        if (r.ok) {
+            location.href = `/gymsquads/${r.gymsquadId}`;
+        } else {
+            alert(r.erro || 'Erro ao criar GymSquad.');
+        }
+    } catch (_) {
+        alert('Erro ao criar GymSquad.');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Criar desafio';
+    }
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= gym.nome %> — FitCrew Admin</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body class="admin-body">
+<section class="admin-wrapper">
+    <%- include('../partials/admin-sidebar') %>
+    <section class="admin-content">
+        <%- include('../partials/admin-topbar') %>
+        <main class="admin-main">
+            <section style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+                <a href="/admin/academias" class="btn btn-outline btn-sm"><i class="fas fa-arrow-left"></i></a>
+                <section>
+                    <h1 class="admin-page-title" style="margin-bottom:0"><%= gym.nome %></h1>
+                    <p class="admin-page-subtitle" style="margin-bottom:0"><%= [gym.cidade, gym.estado].filter(Boolean).join(' — ') || 'Sem localização' %></p>
+                </section>
+                <section style="margin-left:auto;display:flex;gap:8px;align-items:center">
+                    <span class="badge <%=
+                        gym.status==='ativa' ? 'badge-success' :
+                        gym.status==='pendente' ? 'badge-warning' : 'badge-muted'
+                    %>" style="font-size:0.8rem;padding:4px 12px"><%= gym.status %></span>
+                    <% if (gym.status === 'pendente') { %>
+                    <form method="POST" action="/admin/academias/<%= gym.id %>/aprovar" style="display:inline">
+                        <button type="submit" class="btn btn-gold"><i class="fas fa-check"></i> Aprovar Academia</button>
+                    </form>
+                    <% } %>
+                </section>
+            </section>
+
+            <% if (sucesso) { %>
+            <section class="admin-toast" style="position:static;margin-bottom:16px;border-left-color:var(--success)">
+                <i class="fas fa-check-circle" style="color:var(--success)"></i> <%= sucesso %>
+            </section>
+            <% } %>
+            <% if (erro) { %>
+            <section class="admin-toast" style="position:static;margin-bottom:16px;border-left-color:var(--error)">
+                <i class="fas fa-exclamation-circle" style="color:var(--error)"></i> <%= erro %>
+            </section>
+            <% } %>
+
+            <!-- KPIs -->
+            <section class="admin-kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px">
+                <section class="admin-kpi">
+                    <section class="admin-kpi-icon"><i class="fas fa-users"></i></section>
+                    <section>
+                        <section class="admin-kpi-label">Total de Alunos</section>
+                        <section class="admin-kpi-value"><%= totalAlunos %></section>
+                    </section>
+                </section>
+                <section class="admin-kpi">
+                    <section class="admin-kpi-icon success"><i class="fas fa-calendar-check"></i></section>
+                    <section>
+                        <section class="admin-kpi-label">Check-ins Totais</section>
+                        <section class="admin-kpi-value"><%= checkinsTotal %></section>
+                    </section>
+                </section>
+                <section class="admin-kpi">
+                    <section class="admin-kpi-icon"><i class="fas fa-file-contract"></i></section>
+                    <section>
+                        <section class="admin-kpi-label">Plano</section>
+                        <section class="admin-kpi-value" style="text-transform:capitalize"><%= contrato?.plano || '—' %></section>
+                        <% if (contrato) { %><section class="admin-kpi-sub">R$ <%= Number(contrato.valor_mensal).toLocaleString('pt-BR',{minimumFractionDigits:2}) %>/mês</section><% } %>
+                    </section>
+                </section>
+            </section>
+
+            <section class="admin-2col" style="gap:20px;align-items:start">
+                <section>
+                    <!-- Dados -->
+                    <section class="admin-card" style="margin-bottom:16px">
+                        <section class="admin-card-header"><span class="admin-card-title">Dados da Academia</span></section>
+                        <section class="admin-card-body">
+                            <table class="admin-table">
+                                <tbody>
+                                <tr><td style="color:var(--text-muted);width:140px">CNPJ</td><td><%= gym.cnpj || '—' %></td></tr>
+                                <tr><td style="color:var(--text-muted)">Endereço</td><td><%= [gym.endereco, gym.numero, gym.bairro].filter(Boolean).join(', ') || '—' %></td></tr>
+                                <tr><td style="color:var(--text-muted)">Cidade</td><td><%= [gym.cidade, gym.estado].filter(Boolean).join(' — ') || '—' %></td></tr>
+                                <tr><td style="color:var(--text-muted)">CEP</td><td><%= gym.cep || '—' %></td></tr>
+                                <tr><td style="color:var(--text-muted)">Telefone</td><td><%= gym.telefone || '—' %></td></tr>
+                                </tbody>
+                            </table>
+                        </section>
+                    </section>
+
+                    <!-- Contrato -->
+                    <% if (contrato) { %>
+                    <section class="admin-card">
+                        <section class="admin-card-header">
+                            <span class="admin-card-title">Contrato B2B</span>
+                            <span class="badge <%= contrato.ativo ? 'badge-success' : 'badge-muted' %>"><%= contrato.ativo ? 'Ativo' : 'Encerrado' %></span>
+                        </section>
+                        <section class="admin-card-body">
+                            <table class="admin-table">
+                                <tbody>
+                                <tr><td style="color:var(--text-muted);width:140px">Plano</td><td><span class="badge badge-gold" style="text-transform:capitalize"><%= contrato.plano %></span></td></tr>
+                                <tr><td style="color:var(--text-muted)">Valor Mensal</td><td><strong>R$ <%= Number(contrato.valor_mensal).toLocaleString('pt-BR',{minimumFractionDigits:2}) %></strong></td></tr>
+                                <tr><td style="color:var(--text-muted)">Máx. Alunos</td><td><%= contrato.max_alunos.toLocaleString('pt-BR') %></td></tr>
+                                <tr><td style="color:var(--text-muted)">Início</td><td><%= new Date(contrato.data_inicio).toLocaleDateString('pt-BR') %></td></tr>
+                                <% if (contrato.data_fim) { %><tr><td style="color:var(--text-muted)">Fim</td><td><%= new Date(contrato.data_fim).toLocaleDateString('pt-BR') %></td></tr><% } %>
+                                <% if (contrato.contato_responsavel) { %><tr><td style="color:var(--text-muted)">Responsável</td><td><%= contrato.contato_responsavel %></td></tr><% } %>
+                                </tbody>
+                            </table>
+                        </section>
+                    </section>
+                    <% } %>
+                </section>
+
+                <section>
+                    <!-- Gestores -->
+                    <section class="admin-card" style="margin-bottom:16px">
+                        <section class="admin-card-header"><span class="admin-card-title">Gestores</span></section>
+                        <section class="admin-card-body no-pad">
+                            <table class="admin-table">
+                                <thead><tr><th>Nome</th><th>E-mail</th><th>Role</th><th>Status</th><th>Último login</th></tr></thead>
+                                <tbody>
+                                <% if (gestores.length === 0) { %>
+                                <tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:20px">Nenhum gestor cadastrado.</td></tr>
+                                <% } %>
+                                <% gestores.forEach(g => { %>
+                                <tr>
+                                    <td class="fw-600"><%= g.nome %></td>
+                                    <td class="text-muted"><%= g.email %></td>
+                                    <td><span class="badge badge-gold" style="text-transform:capitalize"><%= g.role %></span></td>
+                                    <td><span class="badge <%= g.ativo ? 'badge-success' : 'badge-muted' %>"><%= g.ativo ? 'Ativo' : 'Inativo' %></span></td>
+                                    <td class="text-muted"><%= g.ultimo_login ? new Date(g.ultimo_login).toLocaleDateString('pt-BR') : 'Nunca' %></td>
+                                </tr>
+                                <% }) %>
+                                </tbody>
+                            </table>
+                        </section>
+                        <section class="admin-card-body" style="border-top:1px solid var(--border)">
+                            <form method="POST" action="/admin/academias/<%= gym.id %>/gestor" style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
+                                <section class="admin-form-group" style="flex:1;min-width:140px;margin-bottom:0">
+                                    <label>Nome</label>
+                                    <input type="text" name="gestor_nome" class="admin-input" placeholder="Nome do gestor" required>
+                                </section>
+                                <section class="admin-form-group" style="flex:2;min-width:180px;margin-bottom:0">
+                                    <label>E-mail</label>
+                                    <input type="email" name="gestor_email" class="admin-input" placeholder="gestor@academia.com" required>
+                                </section>
+                                <section class="admin-form-group" style="margin-bottom:0">
+                                    <label>Role</label>
+                                    <select name="gestor_role" class="admin-input admin-select-lg">
+                                        <option value="manager">Manager</option>
+                                        <option value="owner">Owner</option>
+                                    </select>
+                                </section>
+                                <button type="submit" class="btn btn-outline btn-sm" style="align-self:flex-end"><i class="fas fa-plus"></i> Adicionar</button>
+                            </form>
+                        </section>
+                    </section>
+
+                    <!-- Alunos (preview) -->
+                    <section class="admin-card">
+                        <section class="admin-card-header">
+                            <span class="admin-card-title">Alunos</span>
+                            <span class="badge badge-muted"><%= totalAlunos %> total</span>
+                        </section>
+                        <section class="admin-card-body no-pad">
+                            <table class="admin-table">
+                                <thead><tr><th>Nome</th><th>E-mail</th><th>Status</th></tr></thead>
+                                <tbody>
+                                <% if (alunos.length === 0) { %>
+                                <tr><td colspan="3" style="text-align:center;color:var(--text-muted);padding:20px">Nenhum aluno vinculado.</td></tr>
+                                <% } %>
+                                <% alunos.forEach(a => { %>
+                                <tr>
+                                    <td><%= a.nome %></td>
+                                    <td class="text-muted"><%= a.email %></td>
+                                    <td><span class="badge <%= a.status==='ativo'?'badge-success':'badge-muted' %>"><%= a.status %></span></td>
+                                </tr>
+                                <% }) %>
+                                </tbody>
+                            </table>
+                            <% if (totalAlunos > 50) { %>
+                            <section style="padding:10px 16px;border-top:1px solid var(--border);font-size:0.78rem;color:var(--text-muted)">
+                                Exibindo 50 de <%= totalAlunos %> alunos.
+                            </section>
+                            <% } %>
+                        </section>
+                    </section>
+                </section>
+            </section>
+        </main>
+    </section>
+</section>
+<script src="/js/admin.js"></script>
+</body>
+</html>

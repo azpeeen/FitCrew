@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nova Matrícula — Portal da Academia · FitCrew</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin.css">
+    <style>
+    .aluno-modo-tabs { display:flex; gap:10px; margin-bottom:18px; }
+    .aluno-modo-tabs label {
+        flex:1; text-align:center; padding:10px; border:1px solid var(--border); border-radius:7px;
+        cursor:pointer; font-size:0.85rem; color:var(--text-muted);
+    }
+    .aluno-modo-tabs input { display:none; }
+    .aluno-modo-tabs input:checked + span { color:var(--gold); font-weight:700; }
+    .aluno-modo-tabs label:has(input:checked) { border-color:var(--gold); background:var(--gold-dim); }
+    </style>
+</head>
+<body class="admin-body">
+<section class="admin-wrapper">
+    <%- include('./_sidebar') %>
+    <section class="admin-content">
+        <header class="admin-topbar">
+            <span class="admin-topbar-title">Matrículas</span>
+            <section class="admin-topbar-right">
+                <span class="admin-topbar-admin">Olá, <strong><%= gymAdmin.nome.split(' ')[0] %></strong></span>
+                <a href="/gym-admin/logout" class="btn admin-btn-logout"><i class="fas fa-sign-out-alt"></i> Sair</a>
+            </section>
+        </header>
+
+        <main class="admin-main">
+            <h1 class="admin-page-title">Nova Matrícula</h1>
+            <p class="admin-page-subtitle"><%= gymAdmin.gym_nome %></p>
+
+            <% if (erro) { %>
+            <section class="admin-toast" style="position:static;margin-bottom:20px;border-left-color:var(--error)">
+                <i class="fas fa-exclamation-circle" style="color:var(--error)"></i> <%= erro %>
+            </section>
+            <% } %>
+
+            <% if (planos.length === 0) { %>
+            <section class="admin-card" style="max-width:640px">
+                <section class="admin-card-body">
+                    Nenhum plano ativo cadastrado. <a href="/gym-admin/planos/novo">Crie um plano</a> antes de matricular um aluno.
+                </section>
+            </section>
+            <% } else { %>
+            <section class="admin-card" style="max-width:640px">
+                <section class="admin-card-body">
+                    <form method="POST" action="/gym-admin/matriculas" id="formMatricula">
+                        <section class="aluno-modo-tabs">
+                            <label>
+                                <input type="radio" name="aluno_modo" value="existente"
+                                    <%= (form.aluno_modo || 'existente') === 'existente' ? 'checked' : '' %>>
+                                <span>Aluno já cadastrado</span>
+                            </label>
+                            <label>
+                                <input type="radio" name="aluno_modo" value="novo"
+                                    <%= form.aluno_modo === 'novo' ? 'checked' : '' %>>
+                                <span>Novo aluno</span>
+                            </label>
+                        </section>
+
+                        <section id="blocoAlunoExistente">
+                            <section class="admin-form-group">
+                                <label>Buscar aluno</label>
+                                <input type="text" id="filtroAluno" class="admin-input" placeholder="Digite para filtrar...">
+                            </section>
+                            <section class="admin-form-group">
+                                <label>Aluno *</label>
+                                <select name="aluno_id" id="selectAluno" class="admin-select-lg">
+                                    <option value="">— Selecione —</option>
+                                    <% alunos.forEach(a => { %>
+                                    <option value="<%= a.id %>" data-busca="<%= (a.nome + ' ' + a.email).toLowerCase() %>"
+                                        <%= String(form.aluno_id) === String(a.id) ? 'selected' : '' %>>
+                                        <%= a.nome %> — <%= a.email %>
+                                    </option>
+                                    <% }) %>
+                                </select>
+                                <% if (alunos.length === 0) { %>
+                                <small class="text-muted">Nenhum aluno cadastrado nesta academia ainda. Use "Novo aluno".</small>
+                                <% } %>
+                            </section>
+                        </section>
+
+                        <section id="blocoAlunoNovo" style="display:none">
+                            <section class="admin-form-group">
+                                <label>Nome completo *</label>
+                                <input type="text" name="nome" class="admin-input" value="<%= form.nome || '' %>">
+                            </section>
+                            <section class="admin-form-group">
+                                <label>CPF *</label>
+                                <input type="text" name="cpf" class="admin-input" placeholder="Somente números" value="<%= form.cpf || '' %>">
+                            </section>
+                            <section class="admin-form-group">
+                                <label>E-mail *</label>
+                                <input type="email" name="email" class="admin-input" value="<%= form.email || '' %>">
+                            </section>
+                            <section style="background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:12px;margin-bottom:16px;font-size:0.8rem;color:var(--text-muted)">
+                                <i class="fas fa-info-circle" style="color:var(--gold);margin-right:6px"></i>
+                                O aluno receberá um e-mail para definir a própria senha de acesso.
+                            </section>
+                        </section>
+
+                        <section class="admin-form-group">
+                            <label>Plano *</label>
+                            <select name="plano_id" class="admin-select-lg" required>
+                                <option value="">— Selecione —</option>
+                                <% planos.forEach(p => { %>
+                                <option value="<%= p.id %>" <%= String(form.plano_id) === String(p.id) ? 'selected' : '' %>>
+                                    <%= p.nome %> — <%= p.duracao_dias %> dias — R$ <%= Number(p.preco).toFixed(2).replace('.', ',') %>
+                                </option>
+                                <% }) %>
+                            </select>
+                        </section>
+
+                        <section class="admin-form-group">
+                            <label>Data de início *</label>
+                            <input type="date" name="data_inicio" class="admin-input" required
+                                value="<%= form.data_inicio || new Date().toISOString().slice(0,10) %>">
+                        </section>
+
+                        <section style="display:flex;gap:10px">
+                            <button type="submit" class="btn btn-gold" style="flex:1;justify-content:center">
+                                <i class="fas fa-save"></i> Matricular
+                            </button>
+                            <a href="/gym-admin/matriculas" class="btn btn-outline">Cancelar</a>
+                        </section>
+                    </form>
+                </section>
+            </section>
+            <% } %>
+        </main>
+    </section>
+</section>
+
+<script>
+const radiosModo        = document.querySelectorAll('input[name="aluno_modo"]');
+const blocoExistente     = document.getElementById('blocoAlunoExistente');
+const blocoNovo          = document.getElementById('blocoAlunoNovo');
+
+function atualizarModoAluno() {
+    const selecionado = document.querySelector('input[name="aluno_modo"]:checked')?.value || 'existente';
+    blocoExistente.style.display = selecionado === 'existente' ? '' : 'none';
+    blocoNovo.style.display      = selecionado === 'novo' ? '' : 'none';
+}
+radiosModo.forEach(r => r.addEventListener('change', atualizarModoAluno));
+atualizarModoAluno();
+
+const filtroAluno = document.getElementById('filtroAluno');
+const selectAluno = document.getElementById('selectAluno');
+filtroAluno?.addEventListener('input', () => {
+    const termo = filtroAluno.value.toLowerCase().trim();
+    [...selectAluno.options].forEach(opt => {
+        if (!opt.value) return;
+        opt.hidden = termo.length > 0 && !opt.dataset.busca.includes(termo);
+    });
+});
+</script>
+</body>
+</html>

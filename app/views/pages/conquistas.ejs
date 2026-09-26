@@ -1,0 +1,83 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<%- include('../partials/seo') %>
+<link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+<link rel="stylesheet" href="/css/header.css">
+<link rel="stylesheet" href="/css/footer.css">
+<link rel="stylesheet" href="/css/area-aluno.css">
+<link rel="stylesheet" href="/css/conquistas.css">
+</head>
+<body>
+
+<%- include('../partials/header-aluno') %>
+
+<section class="aluno-dashboard">
+    <section class="sidebar-overlay" id="sidebarOverlay"></section>
+
+    <!-- SIDEBAR -->
+    <%- include('../partials/sidebar-aluno') %>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <section class="aluno-main">
+
+        <section class="conquistas-header">
+            <h1><i class="fas fa-trophy"></i> Minhas Conquistas</h1>
+            <p class="conquistas-subtitle"><%= totalDesbloqueadas %> / <%= total %> conquistadas</p>
+            <section class="conquistas-progress-bar">
+                <section class="conquistas-progress-fill" style="width: <%= total > 0 ? Math.round((totalDesbloqueadas/total)*100) : 0 %>%"></section>
+            </section>
+        </section>
+
+        <%
+          const categoriaInfo = {
+            braco:        { nome: 'Braço',        icone: '💪' },
+            perna:        { nome: 'Perna',        icone: '🦵' },
+            peito:        { nome: 'Peito',        icone: '🏋️' },
+            costas:       { nome: 'Costas',       icone: '🔙' },
+            ombro:        { nome: 'Ombro',        icone: '🏔️' },
+            core:         { nome: 'Core',         icone: '🔥' },
+            cardio:       { nome: 'Cardio',       icone: '🏃' },
+            consistencia: { nome: 'Consistência', icone: '🏆' },
+            ia:           { nome: 'IA',           icone: '🤖' },
+          };
+          const categorias = {};
+          lista.forEach(c => {
+            if (!categorias[c.categoria]) categorias[c.categoria] = [];
+            categorias[c.categoria].push(c);
+          });
+        %>
+
+        <% Object.entries(categorias).forEach(([cat, itens]) => { %>
+        <section class="conquistas-categoria">
+            <h2 class="conquistas-cat-title">
+                <%= categoriaInfo[cat]?.icone || '🏅' %> <%= categoriaInfo[cat]?.nome || cat %>
+            </h2>
+            <section class="conquistas-grid">
+                <% itens.forEach(c => { %>
+                <section class="achievement-card <%= c.desbloqueada ? 'unlocked tier-' + c.tier : 'locked' %>">
+                    <section class="achievement-icon"><%= c.desbloqueada ? c.icone : '🔒' %></section>
+                    <section class="achievement-tier tier-badge-<%= c.desbloqueada ? c.tier : 'locked' %>">
+                        <%= c.desbloqueada ? c.tier.toUpperCase() : '???' %>
+                    </section>
+                    <section class="achievement-name"><%= c.desbloqueada ? c.nome : '???' %></section>
+                    <section class="achievement-desc"><%= c.descricao %></section>
+                    <% if (c.desbloqueada && c.desbloqueada_em) { %>
+                    <section class="achievement-date">
+                        <%= new Date(c.desbloqueada_em).toLocaleDateString('pt-BR') %>
+                    </section>
+                    <% } %>
+                </section>
+                <% }); %>
+            </section>
+        </section>
+        <% }); %>
+
+    </section>
+</section>
+
+<%- include('../partials/footer') %></body>
+</html>

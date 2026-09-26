@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <%- include('../partials/seo') %>
+
+  <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/onboarding.css">
+</head>
+
+<body class="onboarding-body">
+
+<header class="onboarding-header">
+  <a href="/" class="onboarding-header-logo">
+    <img src="/images/logo.png" alt="FitCrew">
+    <span>FitCrew</span>
+  </a>
+</header>
+
+<section class="onboarding-container">
+  <section class="onboarding-card">
+
+    <section class="onboarding-progress">
+      <section class="onboarding-progress-step ativo"></section>
+      <section class="onboarding-progress-step"></section>
+      <section class="onboarding-progress-step"></section>
+      <span class="onboarding-progress-label">Passo 1 de 3</span>
+    </section>
+
+    <!-- Step 1: Username -->
+    <section class="onboarding-step" id="step-1">
+      <section class="onboarding-step-icon">👤</section>
+      <h2 class="onboarding-step-title">Escolha seu @username</h2>
+      <p class="onboarding-step-sub">
+        Seu username é como as pessoas vão te encontrar no FitCrew.
+      </p>
+
+      <section class="onboarding-input-wrap">
+        <span class="onboarding-at">@</span>
+        <input type="text" id="username-input" class="onboarding-input"
+          placeholder="seunome" maxlength="30"
+          value="<%= user.username || '' %>">
+      </section>
+      <section class="onboarding-feedback" id="username-feedback"></section>
+
+      <section class="onboarding-actions">
+        <button type="button" class="onboarding-skip" id="skip-1">Pular</button>
+        <button type="button" class="onboarding-next" id="next-1">Continuar →</button>
+      </section>
+    </section>
+
+    <!-- Step 2: Foto de perfil -->
+    <section class="onboarding-step" id="step-2" style="display:none">
+      <section class="onboarding-step-icon">📸</section>
+      <h2 class="onboarding-step-title">Adicione uma foto de perfil</h2>
+      <p class="onboarding-step-sub">
+        Perfis com foto recebem muito mais conexões.
+      </p>
+
+      <section class="onboarding-foto-wrap">
+        <img id="onboarding-foto-preview"
+          src="<%= user.profile_photo || '/images/avatar.png' %>"
+          class="onboarding-foto-preview" alt="Foto de perfil">
+        <button type="button" class="onboarding-foto-btn" id="onboarding-foto-btn">
+          <i class="fas fa-camera"></i> Escolher foto
+        </button>
+        <input type="file" id="onboarding-foto-input"
+          accept="image/jpeg,image/jpg,image/png,image/webp" hidden>
+      </section>
+
+      <section class="onboarding-actions">
+        <button type="button" class="onboarding-skip" id="skip-2">Pular</button>
+        <button type="button" class="onboarding-next" id="next-2">Continuar →</button>
+      </section>
+    </section>
+
+    <!-- Step 3: Bio + sugestões de amigos -->
+    <section class="onboarding-step" id="step-3" style="display:none">
+      <section class="onboarding-step-icon">✍️</section>
+      <h2 class="onboarding-step-title">Fale um pouco sobre você</h2>
+      <p class="onboarding-step-sub">
+        Uma bio curta ajuda outros gymrats a te conhecer.
+      </p>
+
+      <textarea id="bio-input" class="onboarding-textarea"
+        placeholder="Ex: Foco em hipertrofia, treino há 3 anos..."
+        maxlength="160"><%= user.bio || '' %></textarea>
+      <section class="onboarding-bio-count">
+        <span id="bio-count">0</span>/160
+      </section>
+
+      <section class="onboarding-sugestoes-wrap">
+        <h3 class="onboarding-sugestoes-title">Pessoas para seguir</h3>
+        <section id="onboarding-sugestoes-lista" class="onboarding-sugestoes-lista">
+          <section class="onboarding-loading">
+            <i class="fas fa-spinner fa-spin"></i>
+          </section>
+        </section>
+      </section>
+
+      <section class="onboarding-actions">
+        <button type="button" class="onboarding-skip" id="skip-3">Pular</button>
+        <button type="button" class="onboarding-finish" id="finish-btn">
+          Entrar no FitCrew 🏋️
+        </button>
+      </section>
+    </section>
+
+  </section>
+</section>
+
+<script>
+(function () {
+  let stepAtual = 1;
+  const totalSteps = 3;
+
+  function irParaStep(n) {
+    document.getElementById(`step-${stepAtual}`).style.display = 'none';
+    stepAtual = n;
+    document.getElementById(`step-${stepAtual}`).style.display = 'block';
+    atualizarProgresso();
+
+    if (stepAtual === 3) carregarSugestoes();
+  }
+
+  function atualizarProgresso() {
+    document.querySelectorAll('.onboarding-progress-step').forEach((el, i) => {
+      el.classList.toggle('ativo', i < stepAtual);
+    });
+    const label = document.querySelector('.onboarding-progress-label');
+    if (label) label.textContent = `Passo ${stepAtual} de ${totalSteps}`;
+  }
+
+  // ── Step 1: Username ──────────────────────────────────────────────────
+  const usernameInput = document.getElementById('username-input');
+  const usernameFeedback = document.getElementById('username-feedback');
+  let usernameTimer;
+  let usernameValido = false;
+
+  usernameInput?.addEventListener('input', () => {
+    const val = usernameInput.value.trim().toLowerCase();
+    clearTimeout(usernameTimer);
+
+    if (!val) {
+      usernameFeedback.textContent = '';
+      usernameFeedback.className = 'onboarding-feedback';
+      usernameValido = false;
+      return;
+    }
+
+    if (!/^[a-z0-9_]{3,30}$/.test(val)) {
+      usernameFeedback.textContent = 'Use 3-30 caracteres: letras, números e _';
+      usernameFeedback.className = 'onboarding-feedback erro';
+      usernameValido = false;
+      return;
+    }
+
+    usernameFeedback.textContent = 'Verificando...';
+    usernameFeedback.className = 'onboarding-feedback check';
+
+    usernameTimer = setTimeout(async () => {
+      try {
+        const r = await fetch(`/api/perfil/check-username?u=${encodeURIComponent(val)}`);
+        const d = await r.json();
+        if (d.disponivel) {
+          usernameFeedback.textContent = `✓ @${val} está disponível`;
+          usernameFeedback.className = 'onboarding-feedback ok';
+          usernameValido = true;
+        } else {
+          usernameFeedback.textContent = `✗ @${val} já está em uso`;
+          usernameFeedback.className = 'onboarding-feedback erro';
+          usernameValido = false;
+        }
+      } catch (_) {
+        usernameFeedback.textContent = '';
+        usernameValido = false;
+      }
+    }, 400);
+  });
+
+  document.getElementById('next-1')?.addEventListener('click', async () => {
+    const val = usernameInput?.value.trim().toLowerCase();
+    if (val && usernameValido) {
+      try {
+        await fetch('/api/perfil/username', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: val }),
+        });
+      } catch (_) {}
+    }
+    irParaStep(2);
+  });
+
+  document.getElementById('skip-1')?.addEventListener('click', () => irParaStep(2));
+
+  // ── Step 2: Foto ──────────────────────────────────────────────────────
+  const fotoInput   = document.getElementById('onboarding-foto-input');
+  const fotoPreview = document.getElementById('onboarding-foto-preview');
+  const fotoBtn     = document.getElementById('onboarding-foto-btn');
+  let fotoSelecionada = null;
+
+  fotoBtn?.addEventListener('click', () => fotoInput?.click());
+
+  fotoInput?.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    fotoSelecionada = file;
+    const url = URL.createObjectURL(file);
+    if (fotoPreview) fotoPreview.src = url;
+  });
+
+  document.getElementById('next-2')?.addEventListener('click', async () => {
+    if (fotoSelecionada) {
+      try {
+        const form = new FormData();
+        form.append('photo', fotoSelecionada);
+        await fetch('/api/student/profile-photo', { method: 'POST', body: form });
+      } catch (_) {}
+    }
+    irParaStep(3);
+  });
+
+  document.getElementById('skip-2')?.addEventListener('click', () => irParaStep(3));
+
+  // ── Step 3: Bio + sugestões ───────────────────────────────────────────
+  const bioInput = document.getElementById('bio-input');
+  const bioCount = document.getElementById('bio-count');
+
+  bioInput?.addEventListener('input', () => {
+    if (bioCount) bioCount.textContent = bioInput.value.length;
+  });
+
+  if (bioInput && bioCount) bioCount.textContent = bioInput.value.length;
+
+  async function carregarSugestoes() {
+    const lista = document.getElementById('onboarding-sugestoes-lista');
+    if (!lista) return;
+    try {
+      const r = await fetch('/api/feed/sugestoes');
+      const d = await r.json();
+      if (!d.sugestoes?.length) {
+        lista.innerHTML = '<section class="onboarding-loading" style="font-size:0.82rem">Nenhuma sugestão no momento</section>';
+        return;
+      }
+      lista.innerHTML = d.sugestoes.slice(0, 4).map(u => `
+        <section class="onboarding-sugestao-card">
+          <img src="${u.foto_perfil || '/images/avatar.png'}"
+               class="onboarding-sugestao-avatar" alt="${u.nome}">
+          <section class="onboarding-sugestao-info">
+            <section class="onboarding-sugestao-nome">${u.nome}</section>
+            ${u.username ? `<section class="onboarding-sugestao-username">@${u.username}</section>` : ''}
+          </section>
+          <button type="button" class="onboarding-sugestao-btn" data-user-id="${u.id}">
+            Seguir
+          </button>
+        </section>
+      `).join('');
+    } catch (_) {
+      const lista = document.getElementById('onboarding-sugestoes-lista');
+      if (lista) lista.innerHTML = '';
+    }
+  }
+
+  document.getElementById('onboarding-sugestoes-lista')
+    ?.addEventListener('click', async (e) => {
+      const btn = e.target.closest('.onboarding-sugestao-btn');
+      if (!btn || btn.classList.contains('enviado')) return;
+      const userId = btn.dataset.userId;
+      try {
+        await fetch(`/api/amizades/solicitar/${userId}`, { method: 'POST' });
+      } catch (_) {}
+      btn.textContent = 'Enviado';
+      btn.classList.add('enviado');
+      btn.disabled = true;
+    });
+
+  document.getElementById('finish-btn')?.addEventListener('click', async () => {
+    const bio = bioInput?.value.trim();
+    if (bio) {
+      try {
+        await fetch('/api/perfil/bio', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ bio }),
+        });
+      } catch (_) {}
+    }
+
+    try {
+      await fetch('/onboarding/finalizar', { method: 'POST' });
+    } catch (_) {}
+
+    window.location.href = '/feed';
+  });
+
+  document.getElementById('skip-3')?.addEventListener('click', async () => {
+    try { await fetch('/onboarding/finalizar', { method: 'POST' }); } catch (_) {}
+    window.location.href = '/feed';
+  });
+
+  atualizarProgresso();
+})();
+</script>
+</body>
+</html>

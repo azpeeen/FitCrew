@@ -1,0 +1,93 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurações — FitCrew Admin</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body class="admin-body">
+<section class="admin-wrapper">
+    <%- include('../partials/admin-sidebar') %>
+    <section class="admin-content">
+        <%- include('../partials/admin-topbar') %>
+        <main class="admin-main">
+            <h1 class="admin-page-title">Configurações</h1>
+            <p class="admin-page-subtitle">Configurações gerais do sistema FitCrew</p>
+
+            <section class="admin-2col">
+                <!-- Configurações gerais -->
+                <section class="admin-card">
+                    <section class="admin-card-header"><span class="admin-card-title"><i class="fas fa-cog text-gold"></i> Configurações Gerais</span></section>
+                    <section class="admin-card-body">
+                        <form id="form-config">
+                            <section class="admin-form-group">
+                                <label>Nome do Site</label>
+                                <input type="text" name="siteName" class="admin-input" value="<%= adminConfig.siteName %>">
+                            </section>
+                            <section class="admin-form-group">
+                                <label>Horas para alertar ticket sem resposta</label>
+                                <input type="number" name="notifThresholdHours" class="admin-input" value="<%= adminConfig.notifThresholdHours %>" min="1">
+                            </section>
+                            <section class="admin-form-group">
+                                <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+                                    <input type="checkbox" name="maintenance" <%= adminConfig.maintenance ? 'checked' : '' %> style="width:16px;height:16px;accent-color:var(--gold)">
+                                    <span>Modo Manutenção</span>
+                                    <span class="badge badge-warning">Exibe banner aos usuários</span>
+                                </label>
+                            </section>
+                            <button type="submit" class="btn btn-gold"><i class="fas fa-save"></i> Salvar Configurações</button>
+                        </form>
+                    </section>
+                </section>
+
+                <!-- Alterar senha -->
+                <section class="admin-card">
+                    <section class="admin-card-header"><span class="admin-card-title"><i class="fas fa-lock text-gold"></i> Alterar Senha do Admin</span></section>
+                    <section class="admin-card-body">
+                        <form id="form-senha-admin">
+                            <section class="admin-form-group">
+                                <label>Senha Atual</label>
+                                <input type="password" name="senhaAtual" class="admin-input" required placeholder="••••••••">
+                            </section>
+                            <section class="admin-form-group">
+                                <label>Nova Senha</label>
+                                <input type="password" name="novaSenha" class="admin-input" required placeholder="••••••••" minlength="6">
+                            </section>
+                            <button type="submit" class="btn btn-gold"><i class="fas fa-key"></i> Alterar Senha</button>
+                        </form>
+                    </section>
+                </section>
+            </section>
+
+            <!-- Info do sistema -->
+            <section class="admin-card" style="margin-top:20px">
+                <section class="admin-card-header"><span class="admin-card-title"><i class="fas fa-server text-gold"></i> Informações do Sistema</span></section>
+                <section class="admin-card-body">
+                    <section class="admin-3col">
+                        <section>
+                            <section class="text-muted" style="font-size:.75rem;margin-bottom:4px">VERSÃO</section>
+                            <section class="fw-600">v<%= adminConfig.version %></section>
+                        </section>
+                        <section>
+                            <section class="text-muted" style="font-size:.75rem;margin-bottom:4px">STATUS</section>
+                            <span class="badge badge-success"><i class="fas fa-circle" style="font-size:.5rem"></i> Online</span>
+                        </section>
+                        <section>
+                            <section class="text-muted" style="font-size:.75rem;margin-bottom:4px">MODO</section>
+                            <span class="badge <%= adminConfig.maintenance ? 'badge-warning' : 'badge-success' %>">
+                                <%= adminConfig.maintenance ? 'Manutenção' : 'Produção' %>
+                            </span>
+                        </section>
+                    </section>
+                </section>
+            </section>
+        </main>
+    </section>
+</section>
+<script src="/js/admin.js"></script>
+</body>
+</html>

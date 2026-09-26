@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <%- include('../partials/seo') %>
+
+  <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+  <link rel="stylesheet" href="/css/forms.css">
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+</head>
+
+<body class="auth-page auth-login">
+  <section class="wrapper">
+    <form id="esqueciSenhaForm" class="auth-form">
+      <section class="auth-header">
+        <p class="auth-kicker">Recuperar acesso</p>
+        <h1>Esqueci minha senha</h1>
+        <p class="auth-subtitle">Digite seu email cadastrado e enviaremos um link para redefinir sua senha.</p>
+      </section>
+
+      <span class="success-message"></span>
+
+      <section class="input-box">
+        <input type="email" id="email" name="email" placeholder="Seu e-mail cadastrado" autocomplete="email">
+        <i class='bx bx-envelope'></i>
+        <span class="error-message" id="email-error"></span>
+      </section>
+
+      <button type="submit" class="btn">Enviar link de recuperação</button>
+
+      <section class="register-link">
+        <p><a href="/login">← Voltar ao login</a></p>
+      </section>
+    </form>
+
+    <aside class="auth-brand-panel">
+      <a href="/" class="brand-link" aria-label="Voltar para a página inicial">
+        <img src="/images/logo-form.png" class="logo" alt="Logo FitCrew">
+      </a>
+
+      <section class="brand-copy">
+        <span>GYMBROS</span>
+        <h2>Acontece com todo mundo.</h2>
+        <p>Em poucos passos você recupera o acesso e volta a treinar.</p>
+      </section>
+    </aside>
+  </section>
+
+  <script src="/js/forms.js" type="module"></script>
+</body>
+</html>

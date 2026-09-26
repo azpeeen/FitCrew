@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — Portal da Academia · FitCrew</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body class="admin-body">
+<section class="admin-wrapper">
+    <%- include('./_sidebar') %>
+    <section class="admin-content">
+        <header class="admin-topbar">
+            <span class="admin-topbar-title">Dashboard</span>
+            <section class="admin-topbar-right">
+                <span class="admin-topbar-admin">Olá, <strong><%= gymAdmin.nome.split(' ')[0] %></strong></span>
+                <a href="/gym-admin/logout" class="btn admin-btn-logout"><i class="fas fa-sign-out-alt"></i> Sair</a>
+            </section>
+        </header>
+
+        <main class="admin-main">
+            <h1 class="admin-page-title">Dashboard</h1>
+            <p class="admin-page-subtitle">Visão geral de <%= gymAdmin.gym_nome %></p>
+
+            <section class="admin-kpi-grid">
+                <section class="admin-kpi">
+                    <section class="admin-kpi-icon"><i class="fas fa-users"></i></section>
+                    <section>
+                        <section class="admin-kpi-label">Alunos Ativos</section>
+                        <section class="admin-kpi-value"><%= totalAlunos %></section>
+                        <section class="admin-kpi-sub">matriculados</section>
+                    </section>
+                </section>
+                <section class="admin-kpi">
+                    <section class="admin-kpi-icon success"><i class="fas fa-calendar-check"></i></section>
+                    <section>
+                        <section class="admin-kpi-label">Check-ins Hoje</section>
+                        <section class="admin-kpi-value"><%= checkinsHoje %></section>
+                        <section class="admin-kpi-sub"><%= checkinsSemana %> na semana</section>
+                    </section>
+                </section>
+                <section class="admin-kpi">
+                    <section class="admin-kpi-icon"><i class="fas fa-running"></i></section>
+                    <section>
+                        <section class="admin-kpi-label">Check-ins no Mês</section>
+                        <section class="admin-kpi-value"><%= checkinsMes %></section>
+                        <section class="admin-kpi-sub">mês corrente</section>
+                    </section>
+                </section>
+                <section class="admin-kpi">
+                    <section class="admin-kpi-icon error"><i class="fas fa-exclamation-triangle"></i></section>
+                    <section>
+                        <section class="admin-kpi-label">Alunos em Risco</section>
+                        <section class="admin-kpi-value"><%= emRisco %></section>
+                        <section class="admin-kpi-sub">sem check-in há 14+ dias</section>
+                    </section>
+                </section>
+            </section>
+
+            <section class="admin-2col" style="margin-bottom:24px">
+                <section class="admin-card">
+                    <section class="admin-card-header">
+                        <span class="admin-card-title">Últimos Check-ins</span>
+                        <a href="/gym-admin/checkins" class="btn btn-outline btn-sm">Ver todos</a>
+                    </section>
+                    <section class="admin-card-body no-pad">
+                        <% if (ultimosCheckins.length === 0) { %>
+                        <section class="admin-empty" style="padding:32px 20px;text-align:center;color:var(--text-muted)">
+                            <i class="fas fa-calendar-times" style="font-size:1.8rem;opacity:.2;display:block;margin-bottom:8px"></i>
+                            Nenhum check-in registrado ainda.
+                        </section>
+                        <% } else { %>
+                        <table class="admin-table">
+                            <thead><tr><th>Aluno</th><th>Data</th><th>Hora</th></tr></thead>
+                            <tbody>
+                            <% ultimosCheckins.forEach(c => { %>
+                            <tr>
+                                <td class="fw-600"><%= c.nome %></td>
+                                <td class="text-muted"><%= new Date(c.data).toLocaleDateString('pt-BR') %></td>
+                                <td class="text-muted"><%= c.hora ? String(c.hora).slice(0,5) : '—' %></td>
+                            </tr>
+                            <% }) %>
+                            </tbody>
+                        </table>
+                        <% } %>
+                    </section>
+                </section>
+
+                <section class="admin-card">
+                    <section class="admin-card-header">
+                        <span class="admin-card-title">Contrato</span>
+                        <% if (contrato) { %><span class="badge badge-success"><i class="fas fa-check"></i> Ativo</span><% } %>
+                    </section>
+                    <section class="admin-card-body">
+                        <% if (!contrato) { %>
+                        <section style="text-align:center;color:var(--text-muted);padding:20px 0">Nenhum contrato ativo.</section>
+                        <% } else { %>
+                        <section style="display:flex;flex-direction:column;gap:14px">
+                            <section>
+                                <section style="font-size:0.72rem;color:var(--text-muted);margin-bottom:2px">Plano</section>
+                                <section style="font-weight:700;text-transform:capitalize"><span class="badge badge-gold"><%= contrato.plano %></span></section>
+                            </section>
+                            <section>
+                                <section style="font-size:0.72rem;color:var(--text-muted);margin-bottom:2px">Valor Mensal</section>
+                                <section style="font-size:1.4rem;font-weight:800">R$ <%= Number(contrato.valor_mensal).toLocaleString('pt-BR',{minimumFractionDigits:2}) %></section>
+                            </section>
+                            <section style="display:flex;gap:24px">
+                                <section>
+                                    <section style="font-size:0.72rem;color:var(--text-muted);margin-bottom:2px">Máx. Alunos</section>
+                                    <section style="font-weight:600"><%= contrato.max_alunos.toLocaleString('pt-BR') %></section>
+                                </section>
+                                <section>
+                                    <section style="font-size:0.72rem;color:var(--text-muted);margin-bottom:2px">Início</section>
+                                    <section style="font-weight:600"><%= new Date(contrato.data_inicio).toLocaleDateString('pt-BR') %></section>
+                                </section>
+                            </section>
+                            <% if (contrato.contato_responsavel) { %>
+                            <section>
+                                <section style="font-size:0.72rem;color:var(--text-muted);margin-bottom:2px">Responsável</section>
+                                <section><%= contrato.contato_responsavel %></section>
+                            </section>
+                            <% } %>
+                        </section>
+                        <% } %>
+                    </section>
+                </section>
+            </section>
+
+            <section class="admin-card">
+                <section class="admin-card-header"><span class="admin-card-title">Ações Rápidas</span></section>
+                <section class="admin-card-body" style="display:flex;gap:10px;flex-wrap:wrap">
+                    <a href="/gym-admin/alunos" class="btn btn-outline"><i class="fas fa-users"></i> Ver Alunos</a>
+                    <a href="/gym-admin/checkins" class="btn btn-outline"><i class="fas fa-calendar-check"></i> Check-ins de Hoje</a>
+                    <a href="/gym-admin/relatorios" class="btn btn-outline"><i class="fas fa-chart-bar"></i> Relatórios</a>
+                    <a href="/gym-admin/notificacao" class="btn btn-gold"><i class="fas fa-bell"></i> Enviar Notificação</a>
+                </section>
+            </section>
+        </main>
+    </section>
+</section>
+</body>
+</html>

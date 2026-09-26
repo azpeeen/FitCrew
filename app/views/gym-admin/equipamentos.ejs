@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Equipamentos — Portal da Academia · FitCrew</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body class="admin-body">
+<section class="admin-wrapper">
+    <%- include('./_sidebar') %>
+    <section class="admin-content">
+        <header class="admin-topbar">
+            <span class="admin-topbar-title">Equipamentos</span>
+            <section class="admin-topbar-right">
+                <span class="admin-topbar-admin">Olá, <strong><%= gymAdmin.nome.split(' ')[0] %></strong></span>
+                <a href="/gym-admin/logout" class="btn admin-btn-logout"><i class="fas fa-sign-out-alt"></i> Sair</a>
+            </section>
+        </header>
+
+        <main class="admin-main">
+            <section class="admin-toolbar">
+                <section>
+                    <h1 class="admin-page-title">Equipamentos</h1>
+                    <p class="admin-page-subtitle">QR Codes dos equipamentos de <%= gymAdmin.gym_nome %></p>
+                </section>
+                <a href="/gym-admin/equipamentos/novo" class="btn btn-gold" style="margin-left:auto">
+                    <i class="fas fa-plus"></i> Novo Equipamento
+                </a>
+            </section>
+
+            <section class="admin-card">
+                <section class="admin-card-body no-pad">
+                    <section class="admin-table-wrap">
+                        <% if (equipamentos.length === 0) { %>
+                        <section style="text-align:center;padding:40px;color:var(--text-muted)">
+                            <i class="fas fa-dumbbell" style="font-size:2rem;opacity:.2;display:block;margin-bottom:10px"></i>
+                            Nenhum equipamento cadastrado ainda.
+                        </section>
+                        <% } else { %>
+                        <table class="admin-table">
+                            <thead>
+                                <tr><th>Nome</th><th>Exercício vinculado</th><th>Grupo</th><th>Scans</th><th>Status</th><th></th></tr>
+                            </thead>
+                            <tbody>
+                            <% equipamentos.forEach(eq => { %>
+                            <tr>
+                                <td class="fw-600"><%= eq.nome %></td>
+                                <td class="text-muted"><%= eq.exercicio_nome_pt || eq.exercicio_nome || '—' %></td>
+                                <td><span class="badge badge-gold" style="text-transform:capitalize"><%= eq.grupo_muscular %></span></td>
+                                <td><span class="badge badge-muted"><%= eq.total_scans %></span></td>
+                                <td>
+                                    <span class="badge <%= eq.ativo ? 'badge-success' : 'badge-muted' %>"><%= eq.ativo ? 'ativo' : 'inativo' %></span>
+                                </td>
+                                <td>
+                                    <section style="display:flex;gap:6px;flex-wrap:wrap">
+                                        <a href="/gym-admin/equipamentos/<%= eq.id %>/qr" class="btn btn-outline btn-sm">
+                                            <i class="fas fa-qrcode"></i> QR
+                                        </a>
+                                        <a href="/gym-admin/equipamentos/<%= eq.id %>/editar" class="btn btn-outline btn-sm">Editar</a>
+                                        <form method="POST" action="/gym-admin/equipamentos/<%= eq.id %>/toggle" style="display:contents">
+                                            <button type="submit" class="btn btn-outline btn-sm">
+                                                <%= eq.ativo ? 'Desativar' : 'Ativar' %>
+                                            </button>
+                                        </form>
+                                    </section>
+                                </td>
+                            </tr>
+                            <% }) %>
+                            </tbody>
+                        </table>
+                        <% } %>
+                    </section>
+                </section>
+            </section>
+        </main>
+    </section>
+</section>
+</body>
+</html>

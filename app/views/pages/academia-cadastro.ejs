@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastrar sua Academia — FitCrew</title>
+    <meta name="description" content="Traga sua academia para o FitCrew. Cadastre-se e tenha acesso ao portal de gestão com check-ins, relatórios e notificações.">
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin.css">
+    <style>
+    .cad-bg { min-height:100vh; background:#0a0a0a; display:flex; flex-direction:column; }
+    .cad-header { padding:20px 32px; border-bottom:1px solid #1a1a1a; display:flex; align-items:center; justify-content:space-between; }
+    .cad-header-logo { display:flex; align-items:center; gap:10px; font-size:1.1rem; font-weight:700; color:#C98B1D; }
+    .cad-header-logo img { width:32px; height:32px; border-radius:8px; }
+    .cad-wrap { max-width:700px; margin:0 auto; padding:48px 24px; width:100%; }
+    .cad-hero { text-align:center; margin-bottom:40px; }
+    .cad-hero h1 { font-size:2rem; font-weight:800; margin-bottom:8px; }
+    .cad-hero p { color:#888; font-size:0.95rem; max-width:480px; margin:0 auto; }
+    .cad-benefits { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:40px; }
+    .cad-benefit { background:#141414; border:1px solid #222; border-radius:10px; padding:16px; text-align:center; }
+    .cad-benefit i { font-size:1.4rem; color:#C98B1D; margin-bottom:8px; display:block; }
+    .cad-benefit span { font-size:0.78rem; color:#888; }
+    @media(max-width:600px){.cad-benefits{grid-template-columns:1fr}.cad-hero h1{font-size:1.5rem}}
+    .already-link { text-align:center; margin-top:20px; font-size:0.82rem; color:#555; }
+    .already-link a { color:#888; }
+    .already-link a:hover { color:#C98B1D; }
+    </style>
+</head>
+<body class="cad-bg">
+    <header class="cad-header">
+        <section class="cad-header-logo">
+            <img src="/images/logo.png" alt="FitCrew">
+            FitCrew
+        </section>
+        <a href="/" class="btn btn-outline btn-sm"><i class="fas fa-arrow-left"></i> Voltar ao site</a>
+    </header>
+
+    <section class="cad-wrap">
+        <section class="cad-hero">
+            <h1>Cadastre sua <span class="text-gold">Academia</span></h1>
+            <p>Junte-se ao FitCrew e ofereça uma experiência fitness completa para seus alunos.</p>
+        </section>
+
+        <section class="cad-benefits">
+            <section class="cad-benefit">
+                <i class="fas fa-chart-line"></i>
+                <section style="font-weight:600;margin-bottom:4px">Dashboard</section>
+                <span>Métricas de frequência em tempo real</span>
+            </section>
+            <section class="cad-benefit">
+                <i class="fas fa-bell"></i>
+                <section style="font-weight:600;margin-bottom:4px">Notificações</section>
+                <span>Comunique seus alunos diretamente</span>
+            </section>
+            <section class="cad-benefit">
+                <i class="fas fa-users"></i>
+                <section style="font-weight:600;margin-bottom:4px">Gestão</section>
+                <span>Relatórios de retenção e churn</span>
+            </section>
+        </section>
+
+        <% if (erro) { %>
+        <section class="admin-toast" style="position:static;margin-bottom:20px;border-left-color:var(--error)">
+            <i class="fas fa-exclamation-circle" style="color:var(--error)"></i> <%= erro %>
+        </section>
+        <% } %>
+
+        <section class="admin-card">
+            <section class="admin-card-header"><span class="admin-card-title">Dados da Academia e Responsável</span></section>
+            <section class="admin-card-body">
+                <form method="POST" action="/academias/cadastro">
+                    <section style="font-size:0.78rem;color:var(--text-muted);margin-bottom:20px;display:flex;align-items:center;gap:8px">
+                        <i class="fas fa-info-circle" style="color:var(--gold)"></i>
+                        Após o cadastro, nossa equipe analisará os dados e ativará seu portal em até 24h.
+                    </section>
+
+                    <section style="font-weight:600;font-size:0.78rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);margin-bottom:12px">Academia</section>
+
+                    <section class="admin-2col">
+                        <section class="admin-form-group">
+                            <label>Nome da Academia *</label>
+                            <input type="text" name="gym_nome" class="admin-input" placeholder="Smart Fit Centro" required>
+                        </section>
+                        <section class="admin-form-group">
+                            <label>CNPJ *</label>
+                            <input type="text" name="cnpj" class="admin-input" placeholder="00.000.000/0001-00" required>
+                        </section>
+                    </section>
+                    <section class="admin-form-group">
+                        <label>Endereço</label>
+                        <input type="text" name="endereco" class="admin-input" placeholder="Rua das Flores, 123 — Centro">
+                    </section>
+                    <section class="admin-2col">
+                        <section class="admin-form-group">
+                            <label>Cidade</label>
+                            <input type="text" name="cidade" class="admin-input" placeholder="São Paulo">
+                        </section>
+                        <section class="admin-form-group">
+                            <label>Estado</label>
+                            <input type="text" name="estado" class="admin-input" placeholder="SP" maxlength="2">
+                        </section>
+                    </section>
+
+                    <section style="height:1px;background:var(--border);margin:20px 0"></section>
+
+                    <section style="font-weight:600;font-size:0.78rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);margin-bottom:12px">Responsável pelo Portal</section>
+
+                    <section class="admin-2col">
+                        <section class="admin-form-group">
+                            <label>Nome *</label>
+                            <input type="text" name="gestor_nome" class="admin-input" placeholder="Seu nome completo" required>
+                        </section>
+                        <section class="admin-form-group">
+                            <label>E-mail *</label>
+                            <input type="email" name="gestor_email" class="admin-input" placeholder="voce@suaacademia.com" required>
+                        </section>
+                    </section>
+
+                    <button type="submit" class="btn btn-gold w-100" style="justify-content:center;margin-top:8px">
+                        <i class="fas fa-paper-plane"></i> Enviar Cadastro
+                    </button>
+                </form>
+            </section>
+        </section>
+
+        <section class="already-link">
+            Já tem uma academia ativa? <a href="/gym-admin/login">Acesse o portal</a>
+        </section>
+    </section>
+</body>
+</html>
